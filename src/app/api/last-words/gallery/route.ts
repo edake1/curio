@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
     const filter = searchParams.get('filter');  // addressedTo value or null for all
     const sort   = searchParams.get('sort') ?? 'top'; // 'top' | 'recent'
     const page   = parseInt(searchParams.get('page') ?? '0');
-    const limit  = 20;
+    const limit  = 5;
 
     const where = filter && filter !== 'all' ? { addressedTo: filter } : {};
     const orderBy = sort === 'recent'

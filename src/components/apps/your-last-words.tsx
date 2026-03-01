@@ -87,6 +87,22 @@ const ADDR_DISPLAY: Record<string, string> = {
 };
 
 // ─────────────────────────────────────────────────────────────────
+// PERSISTENT SESSION ID (localStorage — survives tab close)
+// ─────────────────────────────────────────────────────────────────
+
+const LW_SESSION_KEY = 'curio-lw-session';
+
+function getLWSessionId(): string {
+  if (typeof window === 'undefined') return '';
+  let id = localStorage.getItem(LW_SESSION_KEY);
+  if (!id) {
+    id = 'lw_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem(LW_SESSION_KEY, id);
+  }
+  return id;
+}
+
+// ─────────────────────────────────────────────────────────────────
 // UPVOTE TRACKING (localStorage)
 // ─────────────────────────────────────────────────────────────────
 
@@ -195,15 +211,10 @@ function LWDivider() {
 
 function FamousLastWords() {
   const [idx, setIdx] = useState(() => Math.floor(Math.random() * FAMOUS.length));
-  const [visible, setVisible] = useState(true);
 
   useEffect(() => {
     const id = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIdx(i => (i + 1) % FAMOUS.length);
-        setVisible(true);
-      }, 600);
+      setIdx(i => (i + 1) % FAMOUS.length);
     }, 9000);
     return () => clearInterval(id);
   }, []);
@@ -215,10 +226,18 @@ function FamousLastWords() {
       <p className="text-xs font-semibold tracking-[0.22em] uppercase text-center" style={{ color: MUTED }}>
         ✦ &nbsp; Famous Last Words &nbsp; ✦
       </p>
-      <AnimatePresence mode="wait">
-        {visible && (
-          <motion.div key={idx} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.5 }} className="space-y-3 text-center">
+      {/* Fixed-height container so the card never resizes during crossfade */}
+      <div style={{ position: 'relative', minHeight: '150px' }}>
+        <AnimatePresence mode="sync">
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.55, ease: 'easeInOut' }}
+            style={{ position: 'absolute', inset: 0 }}
+            className="flex flex-col items-center justify-center gap-3 text-center px-1"
+          >
             <p className="text-base sm:text-lg leading-relaxed" style={{ color: IVORY, fontStyle: 'italic', lineHeight: 1.85 }}>
               &ldquo;{entry.quote}&rdquo;
             </p>
@@ -227,8 +246,8 @@ function FamousLastWords() {
               <p className="text-xs" style={{ color: FAINT }}>{entry.context}</p>
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
+      </div>
       <p className="text-center text-[10px]" style={{ color: FAINT }}>
         {idx + 1} / {FAMOUS.length} &nbsp;·&nbsp; cycles every 9 seconds
       </p>
@@ -267,10 +286,11 @@ function WritingSection({ onSubmitted }: { onSubmitted: (entry: GalleryEntry) =>
     setPhase('submitting');
     setError('');
     try {
+      const sessionId = getLWSessionId();
       const res  = await fetch('/api/last-words/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.trim(), addressedTo }),
+        body: JSON.stringify({ text: text.trim(), addressedTo, sessionId }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed');
@@ -314,53 +334,57 @@ function WritingSection({ onSubmitted }: { onSubmitted: (entry: GalleryEntry) =>
 
   return (
     <div className="space-y-4">
-      {/* Addressee chooser */}
-      <div className="space-y-2">
-        <p className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: MUTED }}>
-          Addressed to — optional
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {ADDRESSEES.map(a => {
-            const active = addressedTo === a.id;
-            return (
-              <button key={a.id} onClick={() => setAddressedTo(active ? null : a.id)}
-                className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
-                style={{
-                  background: active ? 'rgba(200,149,108,0.14)' : 'transparent',
-                  color: active ? AMBER : MUTED,
-                  border: `1px solid ${active ? AMBER_BRD : 'rgba(200,149,108,0.12)'}`,
-                }}>
-                {a.label}
-              </button>
-            );
-          })}
-        </div>
-      </div>
+      {phase !== 'reflected' && (
+        <>
+          {/* Addressee chooser */}
+          <div className="space-y-2">
+            <p className="text-xs font-semibold tracking-[0.18em] uppercase" style={{ color: MUTED }}>
+              Addressed to — optional
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {ADDRESSEES.map(a => {
+                const active = addressedTo === a.id;
+                return (
+                  <button key={a.id} onClick={() => setAddressedTo(active ? null : a.id)}
+                    className="px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+                    style={{
+                      background: active ? 'rgba(200,149,108,0.14)' : 'transparent',
+                      color: active ? AMBER : MUTED,
+                      border: `1px solid ${active ? AMBER_BRD : 'rgba(200,149,108,0.12)'}`,
+                    }}>
+                    {a.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Textarea */}
-      <div className="relative">
-        <textarea
-          value={text}
-          onChange={e => setText(e.target.value.slice(0, charLimit))}
-          onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit(); }}
-          disabled={phase !== 'writing'}
-          placeholder={placeholder}
-          rows={4}
-          className="w-full resize-none rounded-2xl px-5 py-4 text-sm leading-relaxed outline-none transition-all lw-textarea"
-          style={{
-            background: AMBER_DIM,
-            color: IVORY,
-            border: `1px solid ${AMBER_BRD}`,
-            fontStyle: text ? 'normal' : 'italic',
-          }}
-        />
-        <span className="absolute bottom-3 right-4 text-[10px] tabular-nums" style={{ color: FAINT }}>
-          {text.length}/{charLimit}
-        </span>
-      </div>
+          {/* Textarea */}
+          <div className="relative">
+            <textarea
+              value={text}
+              onChange={e => setText(e.target.value.slice(0, charLimit))}
+              onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit(); }}
+              disabled={phase !== 'writing'}
+              placeholder={placeholder}
+              rows={4}
+              className="w-full resize-none rounded-2xl px-5 py-4 text-sm leading-relaxed outline-none transition-all lw-textarea"
+              style={{
+                background: AMBER_DIM,
+                color: IVORY,
+                border: `1px solid ${AMBER_BRD}`,
+                fontStyle: text ? 'normal' : 'italic',
+              }}
+            />
+            <span className="absolute bottom-3 right-4 text-[10px] tabular-nums" style={{ color: FAINT }}>
+              {text.length}/{charLimit}
+            </span>
+          </div>
 
-      {error && (
-        <p className="text-xs" style={{ color: 'rgba(239,68,68,0.65)' }}>{error}</p>
+          {error && (
+            <p className="text-xs" style={{ color: 'rgba(239,68,68,0.65)' }}>{error}</p>
+          )}
+        </>
       )}
 
       {/* Submit — only while writing */}
@@ -506,7 +530,7 @@ function TheMemorial({ refreshTick }: { refreshTick: number }) {
       const fetched: GalleryEntry[] = data.entries ?? [];
       setTotal(data.total ?? 0);
       setEntries(prev => reset ? fetched : [...prev, ...fetched]);
-      setHasMore((p + 1) * (data.limit ?? 20) < (data.total ?? 0));
+      setHasMore((p + 1) * (data.limit ?? 5) < (data.total ?? 0));
       setPage(p);
     } finally { setLoading(false); }
   }, []);
@@ -630,13 +654,18 @@ function TheMemorial({ refreshTick }: { refreshTick: number }) {
           </AnimatePresence>
 
           {hasMore && (
-            <button
-              onClick={() => load(filter, sort, page + 1, false)}
-              disabled={loading}
-              className="w-full py-2.5 text-xs rounded-xl lw-btn-ghost font-medium disabled:opacity-40"
-            >
-              {loading ? 'Loading…' : 'Load more'}
-            </button>
+            <div className="space-y-1.5 pt-1">
+              <button
+                onClick={() => load(filter, sort, page + 1, false)}
+                disabled={loading}
+                className="w-full py-2.5 text-xs rounded-xl lw-btn-ghost font-medium disabled:opacity-40"
+              >
+                {loading ? 'Loading…' : `Show more words`}
+              </button>
+              <p className="text-center text-[10px]" style={{ color: FAINT }}>
+                showing {entries.length} of {total.toLocaleString()}
+              </p>
+            </div>
           )}
         </div>
       )}

@@ -108,9 +108,11 @@ model LastWords {
   id          String   @id @default(cuid())
   text        String
   addressedTo String?  // "world" | "someone-i-love" | "myself" | "my-children" | "a-stranger"
+  sessionId   String?  // one submission per session
   upvotes     Int      @default(0)
   createdAt   DateTime @default(now())
 
+  @@index([sessionId])
   @@index([addressedTo])
   @@index([createdAt])
   @@index([upvotes])
