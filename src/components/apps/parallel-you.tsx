@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Minus, Plus, ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import {
   LIFE_EXPECTANCY, COUNTRY_STATS, DEFAULT_COUNTRY_STATS,
   DEFAULT_COUNTRY, DEFAULT_BIRTH_YEAR, BIRTH_YEAR_MIN, BIRTH_YEAR_MAX,
@@ -180,6 +180,8 @@ function InsightCard({ icon, headline, story, accent }: {
 // ── Main ──────────────────────────────────────────────────────────
 export function ParallelYouApp() {
   const [birthYear,       setBirthYear]       = useState(DEFAULT_BIRTH_YEAR);
+  const [rawYear,         setRawYear]         = useState(String(DEFAULT_BIRTH_YEAR));
+  const [yearFocused,     setYearFocused]     = useState(false);
   const [yourCountry,     setYourCountry]     = useState(DEFAULT_COUNTRY);
   const [parallelCountry, setParallelCountry] = useState('Japan');
 
@@ -268,17 +270,40 @@ export function ParallelYouApp() {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-1.5">Born in</p>
-          <div className="flex items-center gap-2">
-            <button onClick={() => setBirthYear(y => Math.max(BIRTH_YEAR_MIN, y - 1))}
-              className="w-7 h-7 rounded-full flex items-center justify-center border dark:bg-white/[0.04] bg-black/[0.05] dark:border-white/[0.09] border-black/[0.1] hover:scale-110 active:scale-95 transition-transform">
-              <Minus className="w-3 h-3 dark:text-zinc-400 text-zinc-600" />
-            </button>
-            <span className="text-2xl font-bold tabular-nums dark:text-white text-zinc-900 w-16 text-center">{birthYear}</span>
-            <button onClick={() => setBirthYear(y => Math.min(BIRTH_YEAR_MAX, y + 1))}
-              className="w-7 h-7 rounded-full flex items-center justify-center border dark:bg-white/[0.04] bg-black/[0.05] dark:border-white/[0.09] border-black/[0.1] hover:scale-110 active:scale-95 transition-transform">
-              <Plus className="w-3 h-3 dark:text-zinc-400 text-zinc-600" />
-            </button>
-          </div>
+          <motion.label
+            animate={{
+              boxShadow: yearFocused
+                ? `0 0 0 1.5px ${YOU_ACCENT}55, 0 0 18px ${YOU_ACCENT}22`
+                : '0 0 0 1px rgba(255,255,255,0)',
+            }}
+            transition={{ type: 'spring', stiffness: 320, damping: 28 }}
+            className="inline-flex items-center gap-2 pl-3 pr-4 py-2 rounded-2xl cursor-text
+              dark:bg-white/[0.05] bg-black/[0.04]
+              border dark:border-white/[0.08] border-black/[0.08]"
+          >
+            <span className="text-base select-none">🗓️</span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={yearFocused ? rawYear : String(birthYear)}
+              onFocus={() => { setYearFocused(true); setRawYear(String(birthYear)); }}
+              onBlur={() => {
+                setYearFocused(false);
+                const v = parseInt(rawYear, 10);
+                if (!isNaN(v) && v >= BIRTH_YEAR_MIN && v <= BIRTH_YEAR_MAX) setBirthYear(v);
+                else setRawYear(String(birthYear));
+              }}
+              onChange={e => setRawYear(e.target.value.replace(/\D/g, '').slice(0, 4))}
+              onKeyDown={e => {
+                if (e.key === 'Enter') (e.target as HTMLInputElement).blur();
+                if (e.key === 'ArrowUp') { e.preventDefault(); const next = Math.min(BIRTH_YEAR_MAX, birthYear + 1); setBirthYear(next); setRawYear(String(next)); }
+                if (e.key === 'ArrowDown') { e.preventDefault(); const next = Math.max(BIRTH_YEAR_MIN, birthYear - 1); setBirthYear(next); setRawYear(String(next)); }
+              }}
+              className="text-[1.85rem] font-bold tabular-nums bg-transparent outline-none w-[4.8rem] transition-colors duration-200 dark:text-white text-zinc-900
+                [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              style={{ color: yearFocused ? YOU_ACCENT : undefined }}
+            />
+          </motion.label>
         </div>
         <div className="text-right">
           <p className="text-[18px] font-bold dark:text-white text-zinc-900">{you.age} <span className="text-[12px] font-normal dark:text-zinc-500 text-zinc-400">yrs old</span></p>

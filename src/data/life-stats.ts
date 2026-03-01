@@ -26,11 +26,18 @@ export interface LifeStat {
 }
 
 export const LIFE_STATS: LifeStat[] = [
-  { key: 'heartbeats', label: 'Heartbeats',  emoji: '💓', color: 'text-rose-400',   rate: 72,  unit: 'perMinute' },
-  { key: 'breaths',    label: 'Breaths',     emoji: '🌬️', color: 'text-sky-400',    rate: 16,  unit: 'perMinute' },
-  { key: 'blinks',     label: 'Blinks',      emoji: '👁️', color: 'text-violet-400', rate: 15,  unit: 'perMinute' },
-  { key: 'dreams',     label: 'Dreams',      emoji: '💭', color: 'text-indigo-400',  rate: 0.1, unit: 'perHour'   },
-  { key: 'laughs',     label: 'Laughs',      emoji: '😂', color: 'text-amber-400',   rate: 15,  unit: 'perDay'    },
+  // Physiological — per minute
+  { key: 'heartbeats', label: 'Heartbeats',    emoji: '💓', color: 'text-rose-400',    rate: 72,     unit: 'perMinute' },
+  { key: 'breaths',    label: 'Breaths',       emoji: '🫁', color: 'text-sky-400',     rate: 16,     unit: 'perMinute' },
+  { key: 'blinks',     label: 'Blinks',        emoji: '👁️', color: 'text-violet-400',  rate: 15,     unit: 'perMinute' },
+  // Sleep/dreams — per hour
+  { key: 'dreams',     label: 'Dreams',        emoji: '💭', color: 'text-indigo-400',  rate: 0.1,    unit: 'perHour'   },
+  // Daily
+  { key: 'laughs',     label: 'Laughs',        emoji: '😂', color: 'text-amber-400',   rate: 15,     unit: 'perDay'    },
+  { key: 'steps',      label: 'Steps Walked',  emoji: '👟', color: 'text-emerald-400', rate: 8_000,  unit: 'perDay'    },
+  { key: 'words',      label: 'Words Spoken',  emoji: '💬', color: 'text-yellow-400',  rate: 16_000, unit: 'perDay'    },
+  { key: 'sleep',      label: 'Hrs Slept',     emoji: '🌙', color: 'text-blue-400',    rate: 8,      unit: 'perDay'    },
+  { key: 'meals',      label: 'Meals Eaten',   emoji: '🍽️', color: 'text-orange-300',  rate: 3,      unit: 'perDay'    },
 ];
 
 /** Compute a life stat total given elapsed milliseconds */
