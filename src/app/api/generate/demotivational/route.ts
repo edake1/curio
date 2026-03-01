@@ -51,7 +51,7 @@ async function generateWithAI(category: string, intensity: string, recentQuotes:
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       messages: [
         {
           role: 'system',

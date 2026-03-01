@@ -14,7 +14,7 @@ import { AntiMotivationalApp } from '@/components/apps/anti-motivational';
 import { WhatYoullSeeApp } from '@/components/apps/what-youll-see';
 import { LifeCalendarApp } from '@/components/apps/life-calendar';
 import { PickOneDeleteApp } from '@/components/apps/pick-one-delete';
-import { DontMoveApp } from '@/components/apps/dont-move';
+import { SoundOfYourBirthApp } from '@/components/apps/sound-of-your-birth';
 import { WhileHereApp } from '@/components/apps/while-here';
 
 // Client-side hydration helper
@@ -71,7 +71,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'what-youll-see':   { accent: '#6366f1', tint: 'rgba(99,102,241,0.07)',   label: 'Future'       },
   'life-calendar':    { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)',    label: 'Mortality'    },
   'pick-one-delete':  { accent: '#ef4444', tint: 'rgba(239,68,68,0.07)',    label: 'Values'       },
-  'dont-move':        { accent: '#d946ef', tint: 'rgba(217,70,239,0.07)',   label: 'Challenge'    },
+  'sound-of-your-birth': { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)', label: 'Nostalgia'    },
   'while-here':       { accent: '#0ea5e9', tint: 'rgba(14,165,233,0.07)',   label: 'Mindfulness'  },
 };
 
@@ -228,7 +228,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'what-youll-see': return <WhatYoullSeeApp />;
       case 'life-calendar': return <LifeCalendarApp />;
       case 'pick-one-delete': return <PickOneDeleteApp />;
-      case 'dont-move': return <DontMoveApp />;
+      case 'sound-of-your-birth': return <SoundOfYourBirthApp />;
       case 'while-here': return <WhileHereApp />;
       default: return null;
     }

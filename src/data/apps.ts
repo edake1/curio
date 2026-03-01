@@ -11,7 +11,7 @@ import {
   Target,
   TrendingUp,
   X,
-  Hand,
+  Music,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -90,12 +90,12 @@ export const APPS: AppDefinition[] = [
     description: 'What would you erase forever?',
   },
   {
-    id: 'dont-move',
-    name: 'Don\'t Move',
-    tagline: 'Stay still. Chaos ensues.',
-    icon: Hand,
-    color: 'from-fuchsia-500 to-purple-600',
-    description: 'A test of patience and nerve.',
+    id: 'sound-of-your-birth',
+    name: 'Sound of Your Birth',
+    tagline: 'The world the day you arrived.',
+    icon: Music,
+    color: 'from-rose-500 to-orange-500',
+    description: 'The #1 song, top film, and prices from your birth year.',
   },
   {
     id: 'while-here',
