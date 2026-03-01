@@ -55,20 +55,21 @@ async function generateWithAI(category: string, intensity: string, recentQuotes:
       messages: [
         {
           role: 'system',
-          content: `You write anti-motivational quotes. You twist motivational clichés until they break.
+          content: `You write anti-motivational one-liners. You twist motivational clichés until they break.
 
 ${instruction}
 
 Structural approach: ${angle}
 
 Rules:
+- The quote is ONE sentence only, strictly under 18 words. Punch, don't sprawl.
 - NEVER use metaphors about light, darkness, sparks, flames, or shadows.
-- The quote should feel like it could have been said sincerely before you read it again.
-- The subtext (max 10 words) is the moment the reader realizes what was just said.
-- Be specific and concrete — avoid abstract vagueness.
+- The quote could have been said sincerely — until you re-read it.
+- Be specific and concrete. No vague abstractions.
+- The subtext (max 7 words) is the gut-punch that lands after the quote.
 ${avoidBlock}
 Return ONLY valid JSON, nothing else:
-{"quote": "The main quote (1–2 sentences)", "subtext": "The twist (max 10 words)"}`
+{"quote": "One punchy sentence, max 18 words", "subtext": "The twist, max 7 words"}`
         },
         {
           role: 'user',
@@ -76,7 +77,7 @@ Return ONLY valid JSON, nothing else:
         }
       ],
       temperature: Math.min(temp, 2),
-      max_tokens: 140,
+      max_tokens: 90,
     });
 
     const text = completion.choices[0]?.message?.content || '';

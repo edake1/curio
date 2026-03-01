@@ -191,30 +191,62 @@ export function AntiMotivationalApp() {
     finally { setExporting(false); }
   };
 
-  const iconBtn = "w-8 h-8 rounded-full flex items-center justify-center border transition-all hover:scale-110 active:scale-95 disabled:opacity-40";
-  const iconBtnStyle = { background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.09)' };
+  const iconBtn = "w-8 h-8 rounded-full flex items-center justify-center border transition-all hover:scale-110 active:scale-95 disabled:opacity-40 dark:bg-white/[0.04] bg-black/[0.06] dark:border-white/[0.09] border-black/10";
 
   return (
     <div className="py-2 sm:py-4 max-w-2xl mx-auto space-y-5">
 
-      {/* ── Cruelty selector ───────────────────────────── */}
-      <div className="flex items-center gap-3">
-        <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-semibold shrink-0 w-14">Cruelty</span>
-        <div className="flex gap-1.5">
-          {CRUELTY.map(c => (
-            <button key={c.id}
-              onClick={() => { setCruelty(c.id); fetchPoster(category, c.id); }}
-              className="flex flex-col items-center px-3.5 py-1.5 rounded-lg text-[11px] font-semibold transition-all duration-200 border"
-              style={{
-                background:  cruelty === c.id ? `${c.color}20` : 'transparent',
-                borderColor: cruelty === c.id ? `${c.color}55` : 'rgba(255,255,255,0.07)',
-                color:       cruelty === c.id ? c.color : 'rgba(255,255,255,0.32)',
-                boxShadow:   cruelty === c.id ? `0 0 14px ${c.color}28` : 'none',
-              }}>
-              <span>{c.label}</span>
-              <span className="text-[9px] font-normal mt-0.5 opacity-70">{c.desc}</span>
-            </button>
-          ))}
+      {/* ── Cruelty segmented control ───────────────────── */}
+      <div className="space-y-1.5">
+        <span className="text-[10px] uppercase tracking-widest dark:text-zinc-500 text-zinc-500 font-semibold">Cruelty</span>
+
+        {/* Segmented pill track */}
+        <div className="relative flex rounded-xl p-1 gap-0.5 dark:bg-white/[0.04] bg-black/[0.05] dark:border-white/[0.07] border-black/[0.08] border">
+          {CRUELTY.map(c => {
+            const active = cruelty === c.id;
+            return (
+              <button key={c.id}
+                onClick={() => { setCruelty(c.id); fetchPoster(category, c.id); }}
+                className="relative flex-1 flex flex-col items-center py-2.5 rounded-[9px] z-10 transition-transform active:scale-[0.96] select-none"
+              >
+                {/* Sliding glow pill — layout-animated by Framer Motion */}
+                {active && (
+                  <motion.div layoutId="cruelty-pill"
+                    className="absolute inset-0 rounded-[9px] pointer-events-none"
+                    style={{
+                      background: `linear-gradient(160deg, ${c.color}28 0%, ${c.color}14 100%)`,
+                      border: `1px solid ${c.color}50`,
+                      boxShadow: `0 0 22px ${c.color}30, 0 2px 8px ${c.color}18, inset 0 1px 0 ${c.color}30`,
+                    }}
+                    transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+                  />
+                )}
+
+                {/* Shimmer top line — only on active */}
+                {active && (
+                  <motion.div layoutId="cruelty-shine"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 h-px rounded-full pointer-events-none"
+                    style={{ width: '60%', background: `linear-gradient(to right, transparent, ${c.color}80, transparent)` }}
+                    transition={{ type: 'spring', stiffness: 340, damping: 30 }}
+                  />
+                )}
+
+                <motion.span
+                  animate={{ color: active ? c.color : undefined }}
+                  transition={{ duration: 0.18 }}
+                  className={`text-[11px] font-semibold leading-none mb-0.5 ${active ? '' : 'dark:text-zinc-500 text-zinc-400'}`}>
+                  {c.label}
+                </motion.span>
+                <motion.span
+                  animate={{ opacity: active ? 0.7 : 0.35 }}
+                  transition={{ duration: 0.18 }}
+                  style={active ? { color: c.color } : undefined}
+                  className={`text-[9px] leading-none ${active ? '' : 'dark:text-zinc-600 text-zinc-400'}`}>
+                  {c.desc}
+                </motion.span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -223,12 +255,11 @@ export function AntiMotivationalApp() {
         {CATEGORIES.map(cat => (
           <button key={cat.id}
             onClick={() => { setCategory(cat.id); fetchPoster(cat.id, cruelty); }}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all duration-150 border"
-            style={{
-              background:  category === cat.id ? 'rgba(255,255,255,0.1)' : 'transparent',
-              borderColor: category === cat.id ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.06)',
-              color:       category === cat.id ? 'white' : 'rgba(255,255,255,0.38)',
-            }}>
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-medium transition-all duration-150 border ${
+              category === cat.id
+                ? 'dark:bg-white/10 bg-black/[0.07] dark:border-white/[0.22] border-black/20 dark:text-white text-zinc-900'
+                : 'bg-transparent dark:border-white/[0.06] border-black/[0.08] dark:text-white/[0.38] text-zinc-500 hover:text-zinc-700 dark:hover:text-white/60'
+            }`}>
             <span>{cat.emoji}</span>{cat.label}
           </button>
         ))}
@@ -307,24 +338,24 @@ export function AntiMotivationalApp() {
             <motion.div className="mt-3.5 flex items-center justify-between px-0.5"
               initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05 }}>
               <div className="flex items-center gap-1.5">
-                <button onClick={saveToHistory} title="Save" className={iconBtn} style={iconBtnStyle}>
-                  <Bookmark className={`w-3.5 h-3.5 transition-colors ${saved ? 'fill-amber-400 stroke-amber-400' : 'text-zinc-500'}`} />
+                <button onClick={saveToHistory} title="Save" className={iconBtn}>
+                  <Bookmark className={`w-3.5 h-3.5 transition-colors ${saved ? 'fill-amber-400 stroke-amber-400' : 'dark:text-zinc-400 text-zinc-500'}`} />
                 </button>
-                <button onClick={copyQuote} title="Copy" className={iconBtn} style={iconBtnStyle}>
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 text-zinc-500" />}
+                <button onClick={copyQuote} title="Copy" className={iconBtn}>
+                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5 dark:text-zinc-400 text-zinc-500" />}
                 </button>
                 {/* Mobile: one share button that opens native sheet. Desktop: download + share separately. */}
                 {mobile ? (
-                  <button onClick={shareCard} disabled={exporting} title="Share image" className={iconBtn} style={iconBtnStyle}>
-                    {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500" /> : <Share2 className="w-3.5 h-3.5 text-zinc-500" />}
+                  <button onClick={shareCard} disabled={exporting} title="Share image" className={iconBtn}>
+                    {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin dark:text-zinc-400 text-zinc-500" /> : <Share2 className="w-3.5 h-3.5 dark:text-zinc-400 text-zinc-500" />}
                   </button>
                 ) : (
                   <>
-                    <button onClick={downloadCard} disabled={exporting} title="Download PNG" className={iconBtn} style={iconBtnStyle}>
-                      {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-500" /> : <Download className="w-3.5 h-3.5 text-zinc-500" />}
+                    <button onClick={downloadCard} disabled={exporting} title="Download PNG" className={iconBtn}>
+                      {exporting ? <Loader2 className="w-3.5 h-3.5 animate-spin dark:text-zinc-400 text-zinc-500" /> : <Download className="w-3.5 h-3.5 dark:text-zinc-400 text-zinc-500" />}
                     </button>
-                    <button onClick={shareCard} disabled={exporting} title="Share" className={iconBtn} style={iconBtnStyle}>
-                      <Share2 className="w-3.5 h-3.5 text-zinc-500" />
+                    <button onClick={shareCard} disabled={exporting} title="Share" className={iconBtn}>
+                      <Share2 className="w-3.5 h-3.5 dark:text-zinc-400 text-zinc-500" />
                     </button>
                   </>
                 )}
@@ -344,8 +375,8 @@ export function AntiMotivationalApp() {
       {/* ── Ambient dispatches — fills whitespace ───────── */}
       {!loading && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.4 }}
-          className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.05)' }}>
-          <div className="px-4 py-2 flex items-center justify-between" style={{ background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+          className="rounded-xl overflow-hidden dark:border-white/[0.05] border-black/[0.07] border">
+          <div className="px-4 py-2 flex items-center justify-between dark:bg-white/[0.02] bg-black/[0.03] dark:border-b-white/[0.04] border-b-black/[0.06] border-b">
             <span className="text-[10px] uppercase tracking-[0.18em] font-semibold text-zinc-600">From the archives</span>
             {doseCount > 0 && (
               <span className="text-[10px] text-zinc-700">{doseCount} dose{doseCount !== 1 ? 's' : ''} this session</span>
@@ -354,10 +385,10 @@ export function AntiMotivationalApp() {
           <AnimatePresence mode="wait">
             <motion.div key={ambientIdx} initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.5 }} className="px-5 py-4">
-              <p className="text-[13px] text-zinc-500 leading-relaxed italic">
+              <p className="text-[13px] dark:text-zinc-500 text-zinc-600 leading-relaxed italic">
                 &ldquo;{AMBIENT[ambientIdx].quote}&rdquo;
               </p>
-              <p className="text-[11px] text-zinc-700 mt-1.5">— {AMBIENT[ambientIdx].subtext}</p>
+              <p className="text-[11px] dark:text-zinc-600 text-zinc-500 mt-1.5">— {AMBIENT[ambientIdx].subtext}</p>
             </motion.div>
           </AnimatePresence>
         </motion.div>
@@ -367,9 +398,9 @@ export function AntiMotivationalApp() {
       {history.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="flex items-center justify-between mb-2.5">
-            <span className="text-[10px] uppercase tracking-widest text-zinc-600 font-semibold">Saved</span>
+            <span className="text-[10px] uppercase tracking-widest dark:text-zinc-600 text-zinc-500 font-semibold">Saved</span>
             <button onClick={clearHistory}
-              className="text-[10px] text-zinc-700 hover:text-zinc-400 transition-colors flex items-center gap-1">
+              className="text-[10px] dark:text-zinc-600 text-zinc-500 dark:hover:text-zinc-400 hover:text-zinc-700 transition-colors flex items-center gap-1">
               <Trash2 className="w-3 h-3" /> Clear all
             </button>
           </div>
@@ -380,17 +411,17 @@ export function AntiMotivationalApp() {
                 <motion.div key={h.id} layout
                   initial={{ opacity: 0, x: -8 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 8 }}
                   className="group relative rounded-xl px-4 py-3 overflow-hidden"
-                  style={{ background: `${h.accent}07`, border: `1px solid ${h.accent}15` }}>
-                  <div className="absolute top-0 left-0 w-[3px] h-full rounded-l-xl" style={{ background: h.accent, opacity: 0.45 }} />
-                  <p className="text-[12.5px] font-medium text-white/75 leading-snug mb-1 pl-2">{h.quote}</p>
-                  <p className="text-[11px] italic pl-2 mb-1.5" style={{ color: h.accent, opacity: 0.8 }}>— {h.subtext}</p>
+                  style={{ background: `${h.accent}10`, border: `1px solid ${h.accent}28` }}>
+                  <div className="absolute top-0 left-0 w-[3px] h-full rounded-l-xl" style={{ background: h.accent, opacity: 0.55 }} />
+                  <p className="text-[12.5px] font-medium dark:text-white/75 text-zinc-800 leading-snug mb-1 pl-2">{h.quote}</p>
+                  <p className="text-[11px] italic pl-2 mb-1.5" style={{ color: h.accent }}>— {h.subtext}</p>
                   <div className="flex items-center justify-between pl-2">
                     <div className="flex gap-1.5">
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full text-zinc-600 bg-white/[0.05]">{cat?.emoji} {cat?.label}</span>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full text-zinc-600 bg-white/[0.05] capitalize">{h.cruelty}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full dark:text-zinc-500 text-zinc-600 dark:bg-white/[0.05] bg-black/[0.06]">{cat?.emoji} {cat?.label}</span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full dark:text-zinc-500 text-zinc-600 dark:bg-white/[0.05] bg-black/[0.06] capitalize">{h.cruelty}</span>
                     </div>
                     <button onClick={() => removeFromHistory(h.id)}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 text-zinc-600 hover:text-zinc-400">
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 dark:text-zinc-600 text-zinc-400 dark:hover:text-zinc-400 hover:text-zinc-600">
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
