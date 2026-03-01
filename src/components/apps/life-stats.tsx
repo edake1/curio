@@ -47,41 +47,62 @@ function getNextMilestone(totalDays: number): { label: string; daysLeft: number 
   return null;
 }
 
-// ── Life progress bar ─────────────────────────────────────────────
-function LifeProgressBar({ pct }: { pct: number }) {
-  const clamped = Math.min(1, Math.max(0, pct));
-  const pctDisplay = (clamped * 100).toFixed(1);
+// ── Mana bar (life remaining) ────────────────────────────────────
+function ManaBar({ pct }: { pct: number }) {
+  const clamped  = Math.min(1, Math.max(0, pct));
+  const remaining = 1 - clamped;
+  const manaDisplay = (remaining * 100).toFixed(1);
+  // Colour shifts: high mana = indigo, low = fading violet
+  const barColor = remaining > 0.4
+    ? 'linear-gradient(90deg, #6366f1, #818cf8)'
+    : remaining > 0.2
+    ? 'linear-gradient(90deg, #7c3aed, #a78bfa)'
+    : 'linear-gradient(90deg, #7f1d1d, #ef4444)';
+  const glowColor = remaining > 0.4 ? 'rgba(99,102,241,0.6)' : 'rgba(239,68,68,0.5)';
   return (
-    <div className="rounded-2xl border dark:border-white/[0.07] border-black/[0.09] p-4 sm:p-5
-      dark:bg-white/[0.02] bg-black/[0.02]">
+    <div
+      className="rounded-2xl border p-4 sm:p-5"
+      style={{
+        borderColor: remaining > 0.4 ? 'rgba(99,102,241,0.2)' : 'rgba(239,68,68,0.2)',
+        background: remaining > 0.4
+          ? 'linear-gradient(135deg, rgba(99,102,241,0.06) 0%, transparent 55%)'
+          : 'linear-gradient(135deg, rgba(239,68,68,0.06) 0%, transparent 55%)',
+      }}
+    >
       <div className="flex justify-between items-baseline mb-3">
-        <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500">
-          Life used
+        <div className="flex items-center gap-2">
+          <span className="text-base">🔮</span>
+          <p className="text-[10px] uppercase tracking-widest font-semibold"
+            style={{ color: remaining > 0.4 ? '#818cf8' : '#f87171' }}>
+            Mana
+          </p>
+        </div>
+        <p className="text-[13px] font-bold"
+          style={{ color: remaining > 0.4 ? '#818cf8' : '#f87171' }}>
+          {manaDisplay}%
         </p>
-        <p className="text-[13px] font-bold" style={{ color: ACCENT }}>{pctDisplay}%</p>
       </div>
-      {/* Track */}
-      <div className="relative h-2 rounded-full dark:bg-white/[0.06] bg-black/[0.07] overflow-visible">
-        {/* Fill */}
+      {/* Track — shows remaining (right to empty) */}
+      <div className="relative h-2.5 rounded-full dark:bg-white/[0.06] bg-black/[0.07] overflow-visible">
         <motion.div
           className="absolute inset-y-0 left-0 rounded-full"
-          style={{ background: `linear-gradient(90deg, #f59e0b, #fb923c)` }}
+          style={{ background: barColor }}
           initial={{ width: 0 }}
-          animate={{ width: `${clamped * 100}%` }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          animate={{ width: `${remaining * 100}%` }}
+          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
         />
-        {/* Glowing cursor dot */}
+        {/* Glowing cursor */}
         <motion.div
-          className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-amber-400"
-          style={{ background: '#fff', boxShadow: '0 0 10px 3px rgba(251,191,36,0.55)' }}
+          className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full"
+          style={{ background: '#fff', boxShadow: `0 0 10px 3px ${glowColor}`, border: `2px solid ${remaining > 0.4 ? '#818cf8' : '#ef4444'}` }}
           initial={{ left: 0 }}
-          animate={{ left: `calc(${clamped * 100}% - 7px)` }}
-          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+          animate={{ left: `calc(${remaining * 100}% - 7px)` }}
+          transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>
       <div className="flex justify-between mt-2">
-        <p className="text-[10px] dark:text-zinc-600 text-zinc-400">Born</p>
-        <p className="text-[10px] dark:text-zinc-600 text-zinc-400">~{LIFE_EXP_YEARS} yr expectancy</p>
+        <p className="text-[10px] dark:text-zinc-600 text-zinc-400">Full at birth</p>
+        <p className="text-[10px] dark:text-zinc-600 text-zinc-400">Depletes at ~{LIFE_EXP_YEARS}</p>
       </div>
     </div>
   );
@@ -231,24 +252,32 @@ export function LifeStatsApp() {
         </div>
       </div>
 
-      {/* ── Life progress bar ─────────────────────────── */}
-      <LifeProgressBar pct={pctLived} />
+      {/* ── Mana bar ──────────────────────────────────── */}
+      <ManaBar pct={pctLived} />
 
       {/* ── Hero: alive for ───────────────────────────── */}
       <div
         className="rounded-2xl border dark:border-white/[0.07] border-black/[0.09] p-5 sm:p-6"
         style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 55%)' }}
       >
-        <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-3">
-          You&apos;ve been alive for
-        </p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500">
+            You&apos;ve been alive for
+          </p>
+          {/* Level badge */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full border border-amber-500/30"
+            style={{ background: 'rgba(245,158,11,0.1)' }}>
+            <span className="text-[10px]">⚔️</span>
+            <span className="text-[11px] font-black tracking-wide text-amber-400">LVL {years}</span>
+          </div>
+        </div>
         <div className="flex items-center gap-6">
-          {/* Days — hero number */}
+          {/* XP (days) — hero number */}
           <div className="flex-shrink-0">
             <p className="text-[3.5rem] sm:text-[4.5rem] font-black tabular-nums leading-none text-amber-400">
               {totalDays.toLocaleString()}
             </p>
-            <p className="text-[13px] dark:text-zinc-500 text-zinc-400 mt-1 font-medium">days</p>
+            <p className="text-[13px] dark:text-zinc-500 text-zinc-400 mt-1 font-medium">XP &nbsp;<span className="text-[11px] opacity-60">(days)</span></p>
           </div>
 
           {/* Divider */}
@@ -287,15 +316,15 @@ export function LifeStatsApp() {
               animate={{ scale: [1, 1.35, 1.15, 1] }}
               transition={{ duration: 60 / 72, repeat: Infinity, times: [0, 0.14, 0.28, 1], ease: 'easeOut' }}
             >
-              💔
+              ❤️
             </motion.span>
-            <p className="text-[10px] uppercase tracking-widest font-semibold text-rose-400/70">Beats left</p>
+            <p className="text-[10px] uppercase tracking-widest font-semibold text-rose-400/70">HP Remaining</p>
           </div>
           <p className="text-[1.4rem] font-black tabular-nums text-rose-400 leading-none">
             {beatsRemaining.toLocaleString()}
           </p>
           <p className="text-[10px] dark:text-zinc-500 text-zinc-400 leading-snug mt-0.5">
-            estimated heartbeats remaining in your life
+            estimated heartbeats left in your life
           </p>
         </div>
 
@@ -306,14 +335,14 @@ export function LifeStatsApp() {
             style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.07) 0%, transparent 60%)' }}
           >
             <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-xl leading-none">🎯</span>
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-amber-400/70">Next milestone</p>
+              <span className="text-xl leading-none">�</span>
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-amber-400/70">Next Achievement</p>
             </div>
             <p className="text-[1.4rem] font-black tabular-nums text-amber-400 leading-none">
               {milestone.daysLeft.toLocaleString()}
             </p>
             <p className="text-[10px] dark:text-zinc-500 text-zinc-400 leading-snug mt-0.5">
-              days until {milestone.label}
+              XP until {milestone.label}
             </p>
           </div>
         )}
@@ -322,7 +351,7 @@ export function LifeStatsApp() {
       {/* ── Right now in your body ────────────────────── */}
       <div>
         <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-2.5">
-          Right now in your body
+          ⚡ Active abilities
         </p>
         <div className="flex gap-2 sm:gap-3">
           <HeartbeatCard sessionBeats={sessionBeats} />
@@ -340,7 +369,7 @@ export function LifeStatsApp() {
       {/* ── Lifetime stats ────────────────────────────── */}
       <div>
         <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-2.5">
-          In your lifetime, your body has…
+          📜 Lifetime records
         </p>
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           {lifetimeCards.map((stat, i) => (
