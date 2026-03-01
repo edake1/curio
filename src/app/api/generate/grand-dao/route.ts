@@ -30,10 +30,16 @@ export async function POST(request: Request) {
         `Be profound, slightly unsettling, and ultimately illuminating. No platitudes.`;
     } else if (type === 'quote') {
       systemPrompt =
-        'You craft original cultivation philosophy quotes in the style of ISSTH, Reverend Insanity, and Lord of Mysteries. Your quotes are striking, paradoxical, and feel ancient.';
+        'You craft original cultivation philosophy quotes in the style of ISSTH, Reverend Insanity, and Lord of Mysteries. Your quotes are striking, paradoxical, and feel ancient. You also attribute them naturally to real cultivation novel characters.';
       userPrompt =
         'Generate one original, profound cultivation-novel style quote about the nature of power, mortality, the Dao, time, or identity. ' +
-        '1 to 3 sentences. Avoid clichés. No attribution needed. Do not use quotation marks.';
+        '1 to 2 sentences. Avoid clichés. Do not use quotation marks around the quote.\n' +
+        'Then on the next line, attribute it to ONE of these characters (pick the most fitting): ' +
+        'Meng Hao (ISSTH), Fang Yuan (Reverend Insanity), Klein Moretti (Lord of Mysteries), ' +
+        'Chu Feng (Martial God Asura), Bai Xiaochun (A Will Eternal), Xiao Yan (Battle Through the Heavens), ' +
+        'Patriarch Reliance (ISSTH), or Yao Chen (Battle Through the Heavens). ' +
+        'Write the attribution naturally, e.g. "Meng Hao, upon reaching the peak of Immortal Ascension" ' +
+        'or "Fang Yuan, 500 years after his first reincarnation". No extra commentary.';
     } else {
       return NextResponse.json({ error: 'Unknown type' }, { status: 400 });
     }

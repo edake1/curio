@@ -94,3 +94,11 @@ model VisitorSession {
   lastVisit    DateTime @updatedAt
   visitCount   Int      @default(1)
 }
+
+// Grand Dao — debate vote tallies (keyed by debate slug)
+model DaoDebate {
+  id        String   @id
+  votesA    Int      @default(0)
+  votesB    Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
