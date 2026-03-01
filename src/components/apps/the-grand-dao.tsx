@@ -19,7 +19,7 @@ const FAINT       = 'rgba(201,162,39,0.28)';
 // ─────────────────────────────────────────────────────────────────
 
 const REALMS = [
-  'Mortal',
+  'Body Tempering',
   'Qi Condensation',
   'Foundation Establishment',
   'Core Formation',
@@ -239,6 +239,25 @@ function pickRandom<T>(arr: T[], exclude?: T): T {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
+// Shuffled-deck iterator — cycles through all items before repeating
+function makeDeck<T>(arr: T[]): { next: (exclude?: T) => T } {
+  let deck: T[] = [];
+  const reshuffle = (exclude?: T) => {
+    deck = [...arr].sort(() => Math.random() - 0.5);
+    if (exclude !== undefined && deck[0] === exclude && deck.length > 1) {
+      // avoid immediate repeat across reshuffles
+      const swap = Math.floor(Math.random() * (deck.length - 1)) + 1;
+      [deck[0], deck[swap]] = [deck[swap], deck[0]];
+    }
+  };
+  return {
+    next(exclude?: T) {
+      if (deck.length === 0) reshuffle(exclude);
+      return deck.pop()!;
+    },
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────
 // DEBATES — 8 MC philosophical clashes, rotate by day of year
 // ─────────────────────────────────────────────────────────────────
@@ -365,22 +384,40 @@ function BreakthroughToast({ realm, onDismiss }: { realm: string; onDismiss: () 
 // DAO CODEX — 30s rotation, AI invoke, audio, save
 // ─────────────────────────────────────────────────────────────────
 
+// One shared deck instance per mount — persists across interval ticks
+const vaultDeck = makeDeck(VAULT);
+
 function DaoCodex({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
-  const [quote,   setQuote]   = useState<{ text: string; attr: string }>(() => pickRandom(VAULT));
-  const [isAi,    setIsAi]    = useState(false);
+  const deckRef              = useRef(vaultDeck);
+  const [quote,   setQuote]  = useState<{ text: string; attr: string }>(() => deckRef.current.next());
+  const [isAi,    setIsAi]   = useState(false);
   const [loading, setLoading] = useState(false);
-  const [key,     setKey]     = useState(0);
+  const [key,     setKey]    = useState(0);
+  const [deckPos, setDeckPos] = useState(1); // how many vault quotes shown this cycle
 
   // 30-second auto-rotation (vault only, not AI quotes)
+  // Uses shuffled deck — no repeated quote until all 32 are seen
   useEffect(() => {
     const id = setInterval(() => {
-      setQuote(prev => { if (isAi) return prev; const next = pickRandom(VAULT, prev); setKey(k => k + 1); return next; });
+      if (isAi) return;
+      setQuote(() => {
+        const next = deckRef.current.next();
+        setDeckPos(p => p < VAULT.length ? p + 1 : 1);
+        setKey(k => k + 1);
+        return next;
+      });
     }, 30_000);
     return () => clearInterval(id);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAi]);
 
-  const shuffle = () => { setQuote(prev => pickRandom(VAULT, prev)); setIsAi(false); setKey(k => k + 1); };
+  const shuffle = () => {
+    const next = deckRef.current.next(quote);
+    setQuote(next);
+    setDeckPos(p => p < VAULT.length ? p + 1 : 1);
+    setIsAi(false);
+    setKey(k => k + 1);
+  };
 
   const invokeAi = useCallback(async () => {
     setLoading(true);
@@ -423,7 +460,9 @@ function DaoCodex({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
         <CopyBtn content={quote.text} attr={quote.attr} />
         <SaveBtn item={{ type: 'quote', label: 'Codex', content: quote.text, sub: quote.attr }} onSaved={onHistoryUpdate} />
       </div>
-      <p className="text-center text-[10px]" style={{ color: FAINT }}>cycles every 30 seconds · 32 vault entries</p>
+      <p className="text-center text-[10px]" style={{ color: FAINT }}>
+        cycles every 30s · {deckPos} / {VAULT.length} this pass · AI invoke for fresh wisdom
+      </p>
     </div>
   );
 }
