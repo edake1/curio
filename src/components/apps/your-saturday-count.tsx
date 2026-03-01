@@ -228,12 +228,14 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
                 border: isMilestone
                   ? `2px solid ${isLived || isCurrent ? '#ffffff' : 'rgba(245,158,11,0.55)'}`
                   : isLived || isCurrent ? 'none' : '1px solid rgba(128,128,128,0.18)',
-                boxShadow: isCurrent
+                boxShadow: isHovered
+                  ? '0 0 0 2px #fff, 0 0 0 5px rgba(245,158,11,0.8)'
+                  : isCurrent && hasNote
+                  ? '0 0 0 2px rgba(245,158,11,0.9), 0 0 6px 3px rgba(255,255,255,0.4)'
+                  : isCurrent
                   ? '0 0 6px 2px rgba(255,255,255,0.5)'
-                  : isHovered
-                  ? '0 0 0 2px rgba(245,158,11,0.7)'
                   : hasNote && isLived
-                  ? '0 0 0 1.5px rgba(255,255,255,0.4)'
+                  ? '0 0 0 2px rgba(255,255,255,0.6)'
                   : undefined,
                 transform: isHovered ? 'scale(1.4)' : undefined,
                 transition: 'transform 0.1s ease, box-shadow 0.1s ease',
@@ -383,7 +385,7 @@ export function YourSaturdayCountApp() {
       setIntentions(prev => { const n = { ...prev }; delete n[key]; return n; });
     }
     setIntentionSaved(true);
-    setTimeout(() => setIntentionSaved(false), 2000);
+    setTimeout(() => setIntentionSaved(false), 3500);
   }, [intentionDraft]);
 
   const daysInMonth =
@@ -595,7 +597,7 @@ export function YourSaturdayCountApp() {
                   <input
                     type="text"
                     value={intentionDraft}
-                    onChange={e => setIntentionDraft(e.target.value)}
+                    onChange={e => { setIntentionDraft(e.target.value); setIntentionSaved(false); }}
                     onKeyDown={e => e.key === 'Enter' && handleSaveIntention()}
                     placeholder="What will you do with this Saturday?"
                     maxLength={120}
@@ -618,9 +620,32 @@ export function YourSaturdayCountApp() {
                     {intentionSaved ? 'Saved ✓' : 'Save'}
                   </button>
                 </div>
-                <p className="text-xs text-center" style={{ color: 'var(--curio-text-muted)', opacity: 0.6 }}>
-                  Hover past dots to see what you wrote.
-                </p>
+                {/* Post-save confirmation */}
+                {intentionSaved && intentionDraft.trim() && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs text-center"
+                    style={{ color: '#22c55e' }}
+                  >
+                    Locked in: &ldquo;{intentionDraft.trim()}&rdquo; — hover this Saturday&apos;s dot to see it.
+                  </motion.p>
+                )}
+                {intentionSaved && !intentionDraft.trim() && (
+                  <motion.p
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs text-center"
+                    style={{ color: 'var(--curio-text-muted)' }}
+                  >
+                    Note cleared.
+                  </motion.p>
+                )}
+                {!intentionSaved && (
+                  <p className="text-xs text-center" style={{ color: 'var(--curio-text-muted)', opacity: 0.5 }}>
+                    Hover past dots to see what you wrote.
+                  </p>
+                )}
               </div>
 
               {/* Curio watermark */}
