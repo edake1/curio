@@ -6,6 +6,7 @@ import {
   Globe,
   Calendar,
   CalendarDays,
+  Feather,
   Frown,
   Eye,
   Clock,
@@ -122,5 +123,13 @@ export const APPS: AppDefinition[] = [
     icon: Flame,
     color: 'from-amber-700 to-yellow-500',
     description: 'Discover your Dao Name and hear what the cosmos says about your path.',
+  },
+  {
+    id: 'your-last-words',
+    name: 'Your Last Words',
+    tagline: 'Practice what you\'d leave behind.',
+    icon: Feather,
+    color: 'from-amber-800 to-orange-900',
+    description: 'Write your last words. A mirror and the unsaid will be returned to you.',
   },
 ];

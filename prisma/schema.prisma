@@ -102,3 +102,16 @@ model DaoDebate {
   votesB    Int      @default(0)
   updatedAt DateTime @updatedAt
 }
+
+// Your Last Words — anonymous public submissions + upvotes
+model LastWords {
+  id          String   @id @default(cuid())
+  text        String
+  addressedTo String?  // "world" | "someone-i-love" | "myself" | "my-children" | "a-stranger"
+  upvotes     Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([addressedTo])
+  @@index([createdAt])
+  @@index([upvotes])
+}
