@@ -155,12 +155,19 @@ function Chip({ label, value, emoji }: { label: string; value: string; emoji: st
 }
 
 // ── Main ─────────────────────────────────────────────────────────
+// true on iOS/Android, false on desktop — determines share vs download
+function isTouchDevice() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0;
+}
+
 export function SoundOfYourBirthApp() {
   const [month,  setMonth]  = useState('');
   const [day,    setDay]    = useState('');
   const [year,   setYear]   = useState('');
   const [shown,  setShown]  = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const cardRef = useRef<HTMLDivElement>(null);
 
   const yearNum  = parseInt(year,  10);
@@ -185,12 +192,12 @@ export function SoundOfYourBirthApp() {
   const handleSave = useCallback(async () => {
     if (!cardRef.current) return;
     setSaving(true);
+    setSaveError('');
     try {
       const dataUrl = await toPng(cardRef.current, { pixelRatio: 3, cacheBust: true });
 
-      // Try Web Share API (iOS Safari, Android Chrome) — gives native share sheet
-      // and "Save to Photos" option on mobile
-      if (typeof navigator !== 'undefined' && navigator.share) {
+      // Mobile (iOS/Android): use Web Share API → native share sheet with "Save to Photos"
+      if (isTouchDevice() && typeof navigator !== 'undefined' && navigator.share) {
         try {
           const res  = await fetch(dataUrl);
           const blob = await res.blob();
@@ -199,18 +206,23 @@ export function SoundOfYourBirthApp() {
             await navigator.share({ files: [file], title: `The world in ${yearNum}` });
             return;
           }
-        } catch {
-          // Share cancelled or unsupported — fall through to download
+        } catch (e) {
+          // AbortError = user dismissed share sheet — that's fine, don't download
+          if ((e as Error)?.name === 'AbortError') return;
+          // Other error — fall through to download as backup
         }
       }
 
-      // Desktop / unsupported fallback: trigger download
+      // Desktop (and mobile share fallback): trigger direct download
       const link = document.createElement('a');
       link.download = `sound-of-your-birth-${yearNum}.png`;
       link.href = dataUrl;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     } catch (e) {
-      console.error('Failed to save card:', e);
+      console.error('Failed to generate card:', e);
+      setSaveError('Could not generate image. Try again.');
     } finally {
       setSaving(false);
     }
@@ -413,10 +425,13 @@ export function SoundOfYourBirthApp() {
                     <polyline points="16 6 12 2 8 6" />
                     <line x1="12" y1="2" x2="12" y2="15" />
                   </svg>
-                  Share this card
+                  Share / Save card
                 </>
               )}
             </motion.button>
+            {saveError && (
+              <p className="mt-2 text-center text-xs text-red-400">{saveError}</p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
