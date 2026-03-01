@@ -1,0 +1,96 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Moral Dilemma - Complex ethical questions
+model Dilemma {
+  id          String   @id @default(cuid())
+  question    String   // The full question/scenario
+  optionA     String   // First choice
+  optionB     String   // Second choice
+  argumentA   String?  // Best case for option A (shown post-vote)
+  argumentB   String?  // Best case for option B (shown post-vote)
+  category    String   // "ethics", "family", "relationships", "career", etc.
+  difficulty  String   @default("medium") // easy, medium, hard
+  isDaily     Boolean  @default(false) // Is this today's featured dilemma?
+  dailyDate   DateTime? // When it was featured as daily
+  votesA      Int      @default(0)
+  votesB      Int      @default(0)
+  totalVotes  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  votes       Vote[]
+}
+
+// Individual votes
+model Vote {
+  id         String   @id @default(cuid())
+  dilemmaId  String
+  choice     String   // "A" or "B"
+  sessionId  String   // Anonymous session identifier
+  createdAt  DateTime @default(now())
+
+  dilemma    Dilemma  @relation(fields: [dilemmaId], references: [id], onDelete: Cascade)
+
+  @@index([dilemmaId])
+  @@index([sessionId])
+}
+
+// Delete choices for "Pick One to Delete" app
+model DeleteChoice {
+  id          String   @id @default(cuid())
+  optionA     String   // First thing to potentially delete
+  optionB     String   // Second thing
+  description String?  // Context/description
+  category    String   // "technology", "concepts", "habits", "existence"
+  votesA      Int      @default(0)
+  votesB      Int      @default(0)
+  totalVotes  Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deleteVotes DeleteVote[]
+}
+
+// Votes for delete choices
+model DeleteVote {
+  id              String   @id @default(cuid())
+  deleteChoiceId  String
+  choice          String   // "A" or "B"
+  sessionId       String
+  createdAt       DateTime @default(now())
+
+  deleteChoice    DeleteChoice @relation(fields: [deleteChoiceId], references: [id], onDelete: Cascade)
+
+  @@index([deleteChoiceId])
+  @@index([sessionId])
+}
+
+// Global site statistics
+model SiteStats {
+  id                String   @id @default("default")
+  totalDilemmaVotes Int      @default(0)
+  totalDeleteVotes  Int      @default(0)
+  totalVisitors     Int      @default(0)
+  lastUpdated       DateTime @updatedAt
+}
+
+// Visitor sessions for tracking
+model VisitorSession {
+  id           String   @id @default(cuid())
+  sessionId    String   @unique
+  firstVisit   DateTime @default(now())
+  lastVisit    DateTime @updatedAt
+  visitCount   Int      @default(1)
+}
