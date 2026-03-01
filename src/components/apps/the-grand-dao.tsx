@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, forwardRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
 
@@ -154,91 +154,6 @@ async function copyToClipboard(text: string, attr?: string): Promise<boolean> {
 // DOWNLOAD CARD — renders an off-screen div and captures as PNG
 // ─────────────────────────────────────────────────────────────────
 
-async function downloadDaoCard(
-  content: string,
-  attr: string | undefined,
-  typeLabel: string,
-  filename: string,
-) {
-  const el = document.createElement('div');
-  el.style.cssText = [
-    'position:fixed', 'left:-9999px', 'top:0', 'pointer-events:none',
-    'width:760px', 'padding:72px 80px 64px',
-    'font-family:Georgia,\"Times New Roman\",serif',
-    'background:#0d0b04',
-    'border-radius:20px',
-  ].join(';');
-
-  el.innerHTML = `
-    <div style="
-      border:1px solid rgba(201,162,39,0.25);
-      border-radius:16px;
-      padding:52px 56px 48px;
-      background:rgba(201,162,39,0.05);
-      position:relative;
-    ">
-      <p style="
-        font-size:11px;
-        letter-spacing:0.22em;
-        text-transform:uppercase;
-        color:rgba(201,162,39,0.5);
-        margin:0 0 28px;
-        text-align:center;
-        font-family:system-ui,sans-serif;
-      ">❧ &nbsp; ${typeLabel} &nbsp; ❧</p>
-      <p style="
-        font-size:22px;
-        line-height:1.75;
-        color:rgba(255,245,210,0.9);
-        margin:0 0 24px;
-        font-style:italic;
-        text-align:center;
-      ">&ldquo;${content}&rdquo;</p>
-      ${attr ? `<p style="
-        font-size:12px;
-        letter-spacing:0.12em;
-        color:rgba(201,162,39,0.45);
-        text-align:center;
-        margin:0 0 40px;
-        font-family:system-ui,sans-serif;
-      ">— ${attr}</p>` : '<div style="margin-bottom:40px"></div>'}
-      <div style="
-        height:1px;
-        background:linear-gradient(to right,transparent,rgba(201,162,39,0.2),transparent);
-        margin-bottom:24px;
-      "></div>
-      <p style="
-        font-size:11px;
-        letter-spacing:0.16em;
-        color:rgba(201,162,39,0.3);
-        text-align:center;
-        font-family:system-ui,sans-serif;
-        text-transform:uppercase;
-      ">The Grand Dao · curio.app</p>
-    </div>
-  `;
-
-  document.body.appendChild(el);
-  try {
-    const url  = await toPng(el, { pixelRatio: 2, cacheBust: true });
-    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent);
-    if (isMobile && navigator.canShare) {
-      const blob = await (await fetch(url)).blob();
-      const file = new File([blob], `${filename}.png`, { type: 'image/png' });
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'The Grand Dao' });
-        return;
-      }
-    }
-    const link = document.createElement('a');
-    link.download = `${filename}.png`;
-    link.href = url;
-    link.click();
-  } finally {
-    document.body.removeChild(el);
-  }
-}
-
 // ─────────────────────────────────────────────────────────────────
 // INLINE ACTION BUTTONS
 // ─────────────────────────────────────────────────────────────────
@@ -285,22 +200,105 @@ function SaveBtn({ item, onSaved, small }: { item: Omit<SavedItem, 'id' | 'saved
   );
 }
 
-function DownloadBtn({
-  content, attr, typeLabel, filename, small,
-}: {
-  content: string; attr?: string; typeLabel: string; filename: string; small?: boolean;
+// Proven pattern: always-in-DOM off-screen card captured by toPng via ref
+const DaoExportCard = forwardRef<HTMLDivElement, {
+  typeLabel: string;
+  headline?: string;   // for Dao Name (large title treatment)
+  content: string;
+  attr?: string;
+}>(({ typeLabel, headline, content, attr }, ref) => (
+  <div style={{ position: 'fixed', left: '-9999px', top: 0, pointerEvents: 'none', zIndex: -1 }}>
+    <div ref={ref} style={{
+      width: '800px',
+      padding: '64px 72px 56px',
+      background: '#0d0b04',
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      position: 'relative',
+    }}>
+      <div style={{
+        border: '1px solid rgba(201,162,39,0.22)',
+        borderRadius: '16px',
+        padding: '52px 56px 48px',
+        background: 'rgba(201,162,39,0.05)',
+      }}>
+        <p style={{
+          fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase',
+          color: 'rgba(201,162,39,0.5)', margin: '0 0 28px', textAlign: 'center',
+        }}>❧ &nbsp; {typeLabel} &nbsp; ❧</p>
+
+        {headline ? (
+          <>
+            <p style={{
+              fontSize: '38px', fontWeight: 700, letterSpacing: '-0.01em',
+              color: '#c9a227', textAlign: 'center', margin: '0 0 20px',
+              textShadow: '0 0 40px rgba(201,162,39,0.35)',
+            }}>{headline}</p>
+            {content && (
+              <p style={{
+                fontSize: '16px', fontStyle: 'italic', lineHeight: 1.75,
+                color: 'rgba(255,245,210,0.85)', textAlign: 'center', margin: '0 0 36px',
+              }}>{content}</p>
+            )}
+          </>
+        ) : (
+          <p style={{
+            fontSize: '22px', fontStyle: 'italic', lineHeight: 1.8,
+            color: 'rgba(255,245,210,0.9)', textAlign: 'center', margin: '0 0 28px',
+          }}>&ldquo;{content}&rdquo;</p>
+        )}
+
+        {attr && (
+          <p style={{
+            fontSize: '12px', letterSpacing: '0.1em',
+            color: 'rgba(201,162,39,0.45)', textAlign: 'center', margin: '0 0 40px',
+          }}>&mdash; {attr}</p>
+        )}
+
+        <div style={{
+          height: '1px', margin: '0 0 24px',
+          background: 'linear-gradient(to right, transparent, rgba(201,162,39,0.2), transparent)',
+        }} />
+        <p style={{
+          fontSize: '11px', letterSpacing: '0.14em', textTransform: 'uppercase',
+          color: 'rgba(201,162,39,0.28)', textAlign: 'center',
+        }}>The Grand Dao &middot; curio</p>
+      </div>
+    </div>
+  </div>
+));
+DaoExportCard.displayName = 'DaoExportCard';
+
+function DownloadBtn({ cardRef, filename, small }: {
+  cardRef: React.RefObject<HTMLDivElement>;
+  filename: string;
+  small?: boolean;
 }) {
   const [exporting, setExporting] = useState(false);
   const sz = small ? 'px-2 py-1 text-[10px]' : 'px-2.5 py-1.5 text-xs';
+  const download = async () => {
+    if (!cardRef.current || exporting) return;
+    setExporting(true);
+    try {
+      const url = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true });
+      const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+      if (isMobile && navigator.canShare) {
+        const blob = await (await fetch(url)).blob();
+        const file = new File([blob], `${filename}.png`, { type: 'image/png' });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'The Grand Dao' });
+          return;
+        }
+      }
+      const link = document.createElement('a');
+      link.download = `${filename}.png`;
+      link.href = url;
+      link.click();
+    } catch (e) { console.error('Export failed', e); }
+    finally { setExporting(false); }
+  };
   return (
     <button
-      onClick={async () => {
-        if (exporting) return;
-        setExporting(true);
-        try { await downloadDaoCard(content, attr, typeLabel, filename); }
-        catch (e) { console.error('Export failed', e); }
-        finally { setExporting(false); }
-      }}
+      onClick={download}
       title="Download as image"
       className={`dao-icon-btn ${sz} rounded-lg font-medium`}
       style={{ opacity: exporting ? 0.5 : 1 }}
@@ -504,6 +502,7 @@ const vaultDeck = makeDeck(VAULT);
 
 function DaoCodex({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
   const deckRef              = useRef(vaultDeck);
+  const exportRef            = useRef<HTMLDivElement>(null);
   const [quote,   setQuote]  = useState<{ text: string; attr: string }>(() => deckRef.current.next());
   const [isAi,    setIsAi]   = useState(false);
   const [loading, setLoading] = useState(false);
@@ -572,11 +571,14 @@ function DaoCodex({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
           {loading ? 'Summoning…' : 'Invoke AI Wisdom'}
         </button>
         <AudioBtn text={`${quote.text}. Spoken by ${quote.attr}.`} />
-        <CopyBtn content={quote.text} attr={quote.attr} />          <DownloadBtn content={quote.text} attr={quote.attr} typeLabel="The Codex" filename="dao-codex" />        <SaveBtn item={{ type: 'quote', label: 'Codex', content: quote.text, sub: quote.attr }} onSaved={onHistoryUpdate} />
+        <CopyBtn content={quote.text} attr={quote.attr} />
+        <DownloadBtn cardRef={exportRef} filename="dao-codex" />
+        <SaveBtn item={{ type: 'quote', label: 'Codex', content: quote.text, sub: quote.attr }} onSaved={onHistoryUpdate} />
       </div>
       <p className="text-center text-[10px]" style={{ color: FAINT }}>
         cycles every 30s · {deckPos} / {VAULT.length} this pass · AI invoke for fresh wisdom
       </p>
+      <DaoExportCard ref={exportRef} typeLabel="The Codex" content={quote.text} attr={quote.attr} />
     </div>
   );
 }
@@ -690,6 +692,7 @@ function DaoNameSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
   const [result,  setResult]  = useState<{ title: string; explanation: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
+  const exportRef             = useRef<HTMLDivElement>(null);
 
   const reveal = useCallback(async () => {
     if (!name.trim() || loading) return;
@@ -738,7 +741,7 @@ function DaoNameSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
             <div className="flex gap-1.5 justify-center flex-wrap">
               <AudioBtn text={`${result.title}. ${result.explanation}`} />
               <CopyBtn content={`${result.title}. ${result.explanation}`} attr={`Dao Name of ${name}`} />
-              <DownloadBtn content={result.title} attr={result.explanation || `Dao Name of ${name}`} typeLabel="Your Dao Name" filename="dao-name" />
+              <DownloadBtn cardRef={exportRef} filename="dao-name" />
               <SaveBtn item={{ type: 'dao-name', label: name, content: result.title, sub: result.explanation }} onSaved={onHistoryUpdate} />
             </div>
             <div className="text-center">
@@ -752,6 +755,13 @@ function DaoNameSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
           </motion.p>
         )}
       </AnimatePresence>
+      <DaoExportCard
+        ref={exportRef}
+        typeLabel="Your Dao Name"
+        headline={result?.title ?? ''}
+        content={result?.explanation ?? ''}
+        attr={name ? `Dao Name of ${name}` : undefined}
+      />
     </div>
   );
 }
@@ -767,6 +777,7 @@ function DaoPathSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
   const [verdict, setVerdict] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState('');
+  const exportRef             = useRef<HTMLDivElement>(null);
 
   const hear = useCallback(async () => {
     if (!trait.trim() || loading) return;
@@ -820,7 +831,7 @@ function DaoPathSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
             <div className="flex gap-1.5 justify-center flex-wrap">
               <AudioBtn text={verdict} />
               <CopyBtn content={verdict} attr={`On the nature of ${trait}`} />
-              <DownloadBtn content={verdict} attr={`On the nature of ${trait}`} typeLabel="Your Path" filename="dao-path" />
+              <DownloadBtn cardRef={exportRef} filename="dao-path" />
               <SaveBtn item={{ type: 'verdict', label: trait, content: verdict }} onSaved={onHistoryUpdate} />
             </div>
             <div className="text-center">
@@ -834,6 +845,12 @@ function DaoPathSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
           </motion.p>
         )}
       </AnimatePresence>
+      <DaoExportCard
+        ref={exportRef}
+        typeLabel="Your Path"
+        content={verdict ?? ''}
+        attr={trait ? `On the nature of ${trait}` : undefined}
+      />
     </div>
   );
 }
