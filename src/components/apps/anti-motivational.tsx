@@ -196,54 +196,57 @@ export function AntiMotivationalApp() {
   return (
     <div className="py-2 sm:py-4 max-w-2xl mx-auto space-y-5">
 
-      {/* ── Cruelty segmented control ───────────────────── */}
+      {/* ── Despairmeter ────────────────────────────────── */}
       <div className="space-y-1.5">
-        <span className="text-[10px] uppercase tracking-widest dark:text-zinc-500 text-zinc-500 font-semibold">Cruelty</span>
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] dark:opacity-50 opacity-40">☁︎</span>
+          <span className="text-[10px] uppercase tracking-widest dark:text-zinc-500 text-zinc-500 font-semibold">Despairmeter</span>
+        </div>
 
-        {/* Segmented pill track */}
-        <div className="relative flex rounded-xl p-1 gap-0.5 dark:bg-white/[0.04] bg-black/[0.05] dark:border-white/[0.07] border-black/[0.08] border">
-          {CRUELTY.map(c => {
-            const active = cruelty === c.id;
+        {/* Rising-bar intensity cards */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {CRUELTY.map((c, i) => {
+            const active   = cruelty === c.id;
+            const fillPct  = (i + 1) / CRUELTY.length * 100; // 25 / 50 / 75 / 100
             return (
               <button key={c.id}
                 onClick={() => { setCruelty(c.id); fetchPoster(category, c.id); }}
-                className="relative flex-1 flex flex-col items-center py-2.5 rounded-[9px] z-10 transition-transform active:scale-[0.96] select-none"
-              >
-                {/* Sliding glow pill — layout-animated by Framer Motion */}
-                {active && (
-                  <motion.div layoutId="cruelty-pill"
-                    className="absolute inset-0 rounded-[9px] pointer-events-none"
-                    style={{
-                      background: `linear-gradient(160deg, ${c.color}28 0%, ${c.color}14 100%)`,
-                      border: `1px solid ${c.color}50`,
-                      boxShadow: `0 0 22px ${c.color}30, 0 2px 8px ${c.color}18, inset 0 1px 0 ${c.color}30`,
-                    }}
-                    transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-                  />
-                )}
+                className="relative overflow-hidden rounded-xl h-[68px] flex flex-col items-center justify-end pb-2.5 border-transparent border transition-all duration-200 active:scale-[0.96] select-none"
+                style={active ? {
+                  border:     `1px solid ${c.color}55`,
+                  boxShadow:  `0 0 24px ${c.color}22, inset 0 0 1px ${c.color}40`,
+                } : {}}>
 
-                {/* Shimmer top line — only on active */}
-                {active && (
-                  <motion.div layoutId="cruelty-shine"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 h-px rounded-full pointer-events-none"
-                    style={{ width: '60%', background: `linear-gradient(to right, transparent, ${c.color}80, transparent)` }}
-                    transition={{ type: 'spring', stiffness: 340, damping: 30 }}
-                  />
-                )}
+                {/* Inactive border fallback via Tailwind */}
+                {!active && <span className="absolute inset-0 rounded-xl dark:border-white/[0.08] border-black/[0.1] border pointer-events-none" />}
 
+                {/* Rising fill */}
+                <motion.div
+                  animate={{ height: `${fillPct}%` }}
+                  transition={{ type: 'spring', stiffness: 240, damping: 28 }}
+                  style={{ background: active ? `${c.color}22` : 'rgba(120,120,140,0.08)' }}
+                  className="absolute bottom-0 inset-x-0 rounded-b-xl"
+                >
+                  {/* Top-edge glow on fill */}
+                  <div className="absolute top-0 inset-x-0 h-px"
+                    style={{ background: active
+                      ? `linear-gradient(to right, transparent, ${c.color}70, transparent)`
+                      : `linear-gradient(to right, transparent, rgba(160,160,180,0.2), transparent)` }} />
+                </motion.div>
+
+                {/* Label */}
                 <motion.span
                   animate={{ color: active ? c.color : undefined }}
-                  transition={{ duration: 0.18 }}
-                  className={`text-[11px] font-semibold leading-none mb-0.5 ${active ? '' : 'dark:text-zinc-500 text-zinc-400'}`}>
+                  transition={{ duration: 0.2 }}
+                  className={`relative z-10 text-[11px] font-bold leading-none mb-0.5 ${active ? '' : 'dark:text-zinc-400 text-zinc-500'}`}>
                   {c.label}
                 </motion.span>
-                <motion.span
-                  animate={{ opacity: active ? 0.7 : 0.35 }}
-                  transition={{ duration: 0.18 }}
-                  style={active ? { color: c.color } : undefined}
-                  className={`text-[9px] leading-none ${active ? '' : 'dark:text-zinc-600 text-zinc-400'}`}>
+
+                {/* Desc */}
+                <span className={`relative z-10 text-[9px] leading-none font-medium transition-colors ${active ? '' : 'dark:text-zinc-600 text-zinc-400'}`}
+                  style={active ? { color: c.color, opacity: 0.7 } : {}}>
                   {c.desc}
-                </motion.span>
+                </span>
               </button>
             );
           })}
