@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { toPng } from 'html-to-image';
 
 // ─────────────────────────────────────────────────────────────────
 // THE GRAND DAO — cultivation wisdom, Dao Names, debates, verdicts
@@ -150,6 +151,95 @@ async function copyToClipboard(text: string, attr?: string): Promise<boolean> {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// DOWNLOAD CARD — renders an off-screen div and captures as PNG
+// ─────────────────────────────────────────────────────────────────
+
+async function downloadDaoCard(
+  content: string,
+  attr: string | undefined,
+  typeLabel: string,
+  filename: string,
+) {
+  const el = document.createElement('div');
+  el.style.cssText = [
+    'position:fixed', 'left:-9999px', 'top:0', 'pointer-events:none',
+    'width:760px', 'padding:72px 80px 64px',
+    'font-family:Georgia,\"Times New Roman\",serif',
+    'background:#0d0b04',
+    'border-radius:20px',
+  ].join(';');
+
+  el.innerHTML = `
+    <div style="
+      border:1px solid rgba(201,162,39,0.25);
+      border-radius:16px;
+      padding:52px 56px 48px;
+      background:rgba(201,162,39,0.05);
+      position:relative;
+    ">
+      <p style="
+        font-size:11px;
+        letter-spacing:0.22em;
+        text-transform:uppercase;
+        color:rgba(201,162,39,0.5);
+        margin:0 0 28px;
+        text-align:center;
+        font-family:system-ui,sans-serif;
+      ">❧ &nbsp; ${typeLabel} &nbsp; ❧</p>
+      <p style="
+        font-size:22px;
+        line-height:1.75;
+        color:rgba(255,245,210,0.9);
+        margin:0 0 24px;
+        font-style:italic;
+        text-align:center;
+      ">&ldquo;${content}&rdquo;</p>
+      ${attr ? `<p style="
+        font-size:12px;
+        letter-spacing:0.12em;
+        color:rgba(201,162,39,0.45);
+        text-align:center;
+        margin:0 0 40px;
+        font-family:system-ui,sans-serif;
+      ">— ${attr}</p>` : '<div style="margin-bottom:40px"></div>'}
+      <div style="
+        height:1px;
+        background:linear-gradient(to right,transparent,rgba(201,162,39,0.2),transparent);
+        margin-bottom:24px;
+      "></div>
+      <p style="
+        font-size:11px;
+        letter-spacing:0.16em;
+        color:rgba(201,162,39,0.3);
+        text-align:center;
+        font-family:system-ui,sans-serif;
+        text-transform:uppercase;
+      ">The Grand Dao · curio.app</p>
+    </div>
+  `;
+
+  document.body.appendChild(el);
+  try {
+    const url  = await toPng(el, { pixelRatio: 2, cacheBust: true });
+    const isMobile = typeof navigator !== 'undefined' && /iPhone|iPad|Android/i.test(navigator.userAgent);
+    if (isMobile && navigator.canShare) {
+      const blob = await (await fetch(url)).blob();
+      const file = new File([blob], `${filename}.png`, { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'The Grand Dao' });
+        return;
+      }
+    }
+    const link = document.createElement('a');
+    link.download = `${filename}.png`;
+    link.href = url;
+    link.click();
+  } finally {
+    document.body.removeChild(el);
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
 // INLINE ACTION BUTTONS
 // ─────────────────────────────────────────────────────────────────
 
@@ -191,6 +281,31 @@ function SaveBtn({ item, onSaved, small }: { item: Omit<SavedItem, 'id' | 'saved
       style={{ color: saved ? GOLD : undefined }}
     >
       {saved ? '✦ saved' : '✦'}
+    </button>
+  );
+}
+
+function DownloadBtn({
+  content, attr, typeLabel, filename, small,
+}: {
+  content: string; attr?: string; typeLabel: string; filename: string; small?: boolean;
+}) {
+  const [exporting, setExporting] = useState(false);
+  const sz = small ? 'px-2 py-1 text-[10px]' : 'px-2.5 py-1.5 text-xs';
+  return (
+    <button
+      onClick={async () => {
+        if (exporting) return;
+        setExporting(true);
+        try { await downloadDaoCard(content, attr, typeLabel, filename); }
+        catch (e) { console.error('Export failed', e); }
+        finally { setExporting(false); }
+      }}
+      title="Download as image"
+      className={`dao-icon-btn ${sz} rounded-lg font-medium`}
+      style={{ opacity: exporting ? 0.5 : 1 }}
+    >
+      {exporting ? '◌' : '↓'}
     </button>
   );
 }
@@ -457,8 +572,7 @@ function DaoCodex({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
           {loading ? 'Summoning…' : 'Invoke AI Wisdom'}
         </button>
         <AudioBtn text={`${quote.text}. Spoken by ${quote.attr}.`} />
-        <CopyBtn content={quote.text} attr={quote.attr} />
-        <SaveBtn item={{ type: 'quote', label: 'Codex', content: quote.text, sub: quote.attr }} onSaved={onHistoryUpdate} />
+        <CopyBtn content={quote.text} attr={quote.attr} />          <DownloadBtn content={quote.text} attr={quote.attr} typeLabel="The Codex" filename="dao-codex" />        <SaveBtn item={{ type: 'quote', label: 'Codex', content: quote.text, sub: quote.attr }} onSaved={onHistoryUpdate} />
       </div>
       <p className="text-center text-[10px]" style={{ color: FAINT }}>
         cycles every 30s · {deckPos} / {VAULT.length} this pass · AI invoke for fresh wisdom
@@ -624,6 +738,7 @@ function DaoNameSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
             <div className="flex gap-1.5 justify-center flex-wrap">
               <AudioBtn text={`${result.title}. ${result.explanation}`} />
               <CopyBtn content={`${result.title}. ${result.explanation}`} attr={`Dao Name of ${name}`} />
+              <DownloadBtn content={result.title} attr={result.explanation || `Dao Name of ${name}`} typeLabel="Your Dao Name" filename="dao-name" />
               <SaveBtn item={{ type: 'dao-name', label: name, content: result.title, sub: result.explanation }} onSaved={onHistoryUpdate} />
             </div>
             <div className="text-center">
@@ -705,6 +820,7 @@ function DaoPathSection({ onHistoryUpdate }: { onHistoryUpdate: () => void }) {
             <div className="flex gap-1.5 justify-center flex-wrap">
               <AudioBtn text={verdict} />
               <CopyBtn content={verdict} attr={`On the nature of ${trait}`} />
+              <DownloadBtn content={verdict} attr={`On the nature of ${trait}`} typeLabel="Your Path" filename="dao-path" />
               <SaveBtn item={{ type: 'verdict', label: trait, content: verdict }} onSaved={onHistoryUpdate} />
             </div>
             <div className="text-center">
