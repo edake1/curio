@@ -185,12 +185,15 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
       <div
         style={{ display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: '2px' }}
         onMouseMove={(e) => {
-          if (!tooltipRef.current) return;
-          const x = e.clientX;
-          const y = e.clientY;
-          const maxLeft = window.innerWidth - 224;
-          tooltipRef.current.style.top = `${y + 16}px`;
-          tooltipRef.current.style.left = `${Math.min(x + 12, maxLeft)}px`;
+          // Tooltip position — direct DOM write, no re-render
+          if (tooltipRef.current) {
+            tooltipRef.current.style.top = `${e.clientY + 16}px`;
+            tooltipRef.current.style.left = `${Math.min(e.clientX + 12, window.innerWidth - 224)}px`;
+          }
+          // Hover detection — runs at mouse-move frequency so no dots are skipped
+          const el = (e.target as HTMLElement).closest<HTMLElement>('[data-idx]');
+          const idx = el ? Number(el.dataset.idx) : null;
+          setHoveredIdx(prev => prev === idx ? prev : idx);
         }}
         onMouseLeave={() => { setHoveredIdx(null); }}
       >
@@ -204,8 +207,8 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
           return (
             <div
               key={i}
+              data-idx={i}
               className={isCurrent && !isHovered ? 'sat-current-dot' : undefined}
-              onMouseEnter={() => setHoveredIdx(i)}
               style={{
                 aspectRatio: '1',
                 borderRadius: '50%',
