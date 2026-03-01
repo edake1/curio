@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
 
@@ -131,32 +131,44 @@ function getThisSaturday(): Date {
   return d;
 }
 
+/** localStorage key for a given Saturday date */
+function toDateKey(d: Date) {
+  return `curio-sat-${d.toISOString().slice(0, 10)}`;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // DOT GRID — milestones marked with a ring
 // ─────────────────────────────────────────────────────────────────
 
-function SaturdayGrid({ result }: { result: SaturdayResult }) {
+function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentions: Record<string, string> }) {
   const COLS = 52;
   const { all, lived, currentIdx, milestones } = result;
-  const milestoneSet = new Set(milestones.map(m => m.n - 1)); // 0-indexed
+  const milestoneSet = new Set(milestones.map(m => m.n - 1));
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   const padded = all.length % COLS === 0
     ? all.length
     : all.length + (COLS - (all.length % COLS));
 
+  const hoveredDate = hoveredIdx !== null && hoveredIdx < all.length ? all[hoveredIdx] : null;
+  const hoveredNote = hoveredDate ? intentions[toDateKey(hoveredDate)] : undefined;
+  const isMilestoneHovered = hoveredIdx !== null && milestoneSet.has(hoveredIdx);
+
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
         <p className="text-xs" style={{ color: 'var(--curio-text-muted)' }}>
-          Each dot = one Saturday · ringed = milestone (500, 1 000, …) · each row = one year
+          Each dot = one Saturday · ringed = milestone · each row = one year
         </p>
       </div>
-      <div className="flex flex-wrap items-center gap-3 mb-3">
+
+      {/* Legend */}
+      <div className="flex flex-wrap items-center gap-3 mb-2">
         {[
-          { bg: 'rgba(245,158,11,0.75)', border: 'none',                                  label: 'Lived'         },
-          { bg: '#ffffff',               border: '2px solid #f59e0b',                     label: 'This Saturday' },
-          { bg: 'rgba(128,128,128,0.13)', border: '1px solid rgba(128,128,128,0.25)',     label: 'Ahead'         },
-          { bg: 'rgba(245,158,11,0.75)', border: '2px solid #ffffff',                     label: 'Milestone'     },
+          { bg: 'rgba(245,158,11,0.85)', border: 'none',                              label: 'Lived'         },
+          { bg: '#ffffff',               border: 'none',                              label: 'This Saturday' },
+          { bg: 'rgba(128,128,128,0.18)', border: '1px solid rgba(128,128,128,0.3)', label: 'Ahead'         },
+          { bg: 'rgba(245,158,11,0.85)', border: '2px solid #ffffff',                label: 'Milestone'     },
         ].map(({ bg, border, label }) => (
           <span key={label} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--curio-text-muted)' }}>
             <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: bg, border }} />
@@ -164,26 +176,69 @@ function SaturdayGrid({ result }: { result: SaturdayResult }) {
           </span>
         ))}
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: '2px' }}>
+
+      {/* Hover info bar */}
+      <div
+        className="rounded-lg px-3 mb-2 flex items-start gap-2 min-h-[32px]"
+        style={{ background: hoveredDate ? 'var(--curio-surface)' : 'transparent', transition: 'background 0.15s' }}
+      >
+        {hoveredDate ? (
+          <div className="py-1.5 text-xs leading-snug" style={{ color: 'var(--curio-text-secondary)' }}>
+            <span className="font-semibold" style={{ color: 'var(--curio-text)' }}>
+              Saturday #{(hoveredIdx! + 1).toLocaleString()}
+            </span>
+            {' · '}{formatShort(hoveredDate)}
+            {isMilestoneHovered && (
+              <span className="ml-1.5 font-semibold" style={{ color: '#f59e0b' }}>milestone</span>
+            )}
+            {hoveredNote && (
+              <span className="block mt-0.5 italic" style={{ color: 'var(--curio-text-muted)' }}>
+                &ldquo;{hoveredNote}&rdquo;
+              </span>
+            )}
+          </div>
+        ) : (
+          <span className="py-1.5 text-xs" style={{ color: 'var(--curio-text-muted)', opacity: 0.5 }}>
+            Hover any dot to see its date
+          </span>
+        )}
+      </div>
+
+      {/* Grid */}
+      <div
+        style={{ display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: '2px' }}
+        onMouseLeave={() => setHoveredIdx(null)}
+      >
         {Array.from({ length: padded }, (_, i) => {
           if (i >= all.length) return <div key={`pad-${i}`} style={{ aspectRatio: '1' }} />;
           const isLived = i < lived;
           const isCurrent = i === currentIdx;
           const isMilestone = milestoneSet.has(i);
+          const isHovered = hoveredIdx === i;
+          const hasNote = i < all.length && !!intentions[toDateKey(all[i])];
           return (
             <div
               key={i}
-              title={`${formatShort(all[i])}${isMilestone ? ` — Saturday #${i + 1}` : ''}`}
+              onMouseEnter={() => setHoveredIdx(i)}
               style={{
                 aspectRatio: '1',
                 borderRadius: '50%',
-                // Current = white pop; lived = amber; ahead = gray
-                background: isCurrent ? '#ffffff' : isLived ? 'rgba(245,158,11,0.75)' : 'rgba(128,128,128,0.13)',
-                // Milestone ring: white on lived/current (contrast), amber on ahead (visible against gray)
+                cursor: 'default',
+                background: isCurrent ? '#ffffff' : isLived ? 'rgba(245,158,11,0.85)' : 'rgba(128,128,128,0.13)',
                 border: isMilestone
                   ? `2px solid ${isLived || isCurrent ? '#ffffff' : 'rgba(245,158,11,0.55)'}`
                   : isLived || isCurrent ? 'none' : '1px solid rgba(128,128,128,0.18)',
-                boxShadow: isCurrent ? '0 0 6px 2px rgba(255,255,255,0.5)' : undefined,
+                boxShadow: isCurrent
+                  ? '0 0 6px 2px rgba(255,255,255,0.5)'
+                  : isHovered
+                  ? '0 0 0 2px rgba(245,158,11,0.7)'
+                  : hasNote && isLived
+                  ? '0 0 0 1.5px rgba(255,255,255,0.4)'
+                  : undefined,
+                transform: isHovered ? 'scale(1.4)' : undefined,
+                transition: 'transform 0.1s ease, box-shadow 0.1s ease',
+                position: 'relative',
+                zIndex: isHovered ? 10 : undefined,
               }}
             />
           );
@@ -296,8 +351,40 @@ export function YourSaturdayCountApp() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [intentions, setIntentions] = useState<Record<string, string>>({});
+  const [intentionDraft, setIntentionDraft] = useState('');
+  const [intentionSaved, setIntentionSaved] = useState(false);
 
   const cardRef = useRef<HTMLDivElement>(null);
+
+  // Load all saved intentions from localStorage on mount
+  useEffect(() => {
+    const loaded: Record<string, string> = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('curio-sat-')) {
+        const v = localStorage.getItem(k);
+        if (v) loaded[k] = v;
+      }
+    }
+    setIntentions(loaded);
+    // Pre-fill draft with any saved note for this Saturday
+    const thisKey = toDateKey(getThisSaturday());
+    setIntentionDraft(localStorage.getItem(thisKey) ?? '');
+  }, []);
+
+  const handleSaveIntention = useCallback(() => {
+    const key = toDateKey(getThisSaturday());
+    if (intentionDraft.trim()) {
+      localStorage.setItem(key, intentionDraft.trim());
+      setIntentions(prev => ({ ...prev, [key]: intentionDraft.trim() }));
+    } else {
+      localStorage.removeItem(key);
+      setIntentions(prev => { const n = { ...prev }; delete n[key]; return n; });
+    }
+    setIntentionSaved(true);
+    setTimeout(() => setIntentionSaved(false), 2000);
+  }, [intentionDraft]);
 
   const daysInMonth =
     month !== '' && year !== ''
@@ -486,20 +573,53 @@ export function YourSaturdayCountApp() {
               <DecadeBreakdown result={result} />
 
               {/* Dot grid */}
-              <SaturdayGrid result={result} />
+              <SaturdayGrid result={result} intentions={intentions} />
 
-              {/* This Saturday prompt */}
-              <div className="rounded-xl py-4 px-4 text-center space-y-1" style={{ background: 'var(--curio-surface)' }}>
-                <p className="text-sm font-semibold" style={{ color: 'var(--curio-text)' }}>
-                  This Saturday —{' '}
-                  <span style={{ color: '#f59e0b' }}>{formatShort(thisSaturday)}</span>
-                </p>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--curio-text-muted)' }}>
-                  {result.nextMilestone && result.nextMilestone.weeksAway <= 4
-                    ? `Saturday #${result.nextMilestone.n.toLocaleString()} is coming up. Make it one you remember.`
-                    : result.remaining < 500
-                    ? 'Every Saturday from here counts more than the last. Spend it well.'
-                    : "Not every Saturday needs to be epic. But it's worth noticing that you have one."}
+              {/* This Saturday — intention capture */}
+              <div className="rounded-xl py-4 px-4 space-y-3" style={{ background: 'var(--curio-surface)' }}>
+                <div className="text-center space-y-0.5">
+                  <p className="text-sm font-semibold" style={{ color: 'var(--curio-text)' }}>
+                    This Saturday —{' '}
+                    <span style={{ color: '#f59e0b' }}>{formatShort(thisSaturday)}</span>
+                  </p>
+                  <p className="text-xs" style={{ color: 'var(--curio-text-muted)' }}>
+                    {result.nextMilestone && result.nextMilestone.weeksAway <= 4
+                      ? `Saturday #${result.nextMilestone.n.toLocaleString()} is coming up. Make it one you remember.`
+                      : result.remaining < 500
+                      ? 'Every Saturday from here counts more than the last. Spend it well.'
+                      : "Not every Saturday needs to be epic. But it's worth deciding what you'll do with it."}
+                  </p>
+                </div>
+                {/* Intention input */}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={intentionDraft}
+                    onChange={e => setIntentionDraft(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleSaveIntention()}
+                    placeholder="What will you do with this Saturday?"
+                    maxLength={120}
+                    className="flex-1 rounded-lg px-3 py-2 text-xs outline-none"
+                    style={{
+                      background: 'var(--curio-input)',
+                      color: 'var(--curio-text)',
+                      border: '1px solid var(--curio-border)',
+                    }}
+                  />
+                  <button
+                    onClick={handleSaveIntention}
+                    className="px-3 py-2 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                    style={{
+                      background: intentionSaved ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
+                      color: intentionSaved ? '#22c55e' : '#f59e0b',
+                      border: `1px solid ${intentionSaved ? 'rgba(34,197,94,0.3)' : 'rgba(245,158,11,0.3)'}`,
+                    }}
+                  >
+                    {intentionSaved ? 'Saved ✓' : 'Save'}
+                  </button>
+                </div>
+                <p className="text-xs text-center" style={{ color: 'var(--curio-text-muted)', opacity: 0.6 }}>
+                  Hover past dots to see what you wrote.
                 </p>
               </div>
 
