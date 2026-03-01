@@ -13,6 +13,7 @@ import {
   TrendingUp,
   X,
   Music,
+  Flame,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -113,5 +114,13 @@ export const APPS: AppDefinition[] = [
     icon: Clock,
     color: 'from-sky-500 to-cyan-600',
     description: 'Real-time global statistics.',
+  },
+  {
+    id: 'the-grand-dao',
+    name: 'The Grand Dao',
+    tagline: 'Ancient cultivation wisdom. Your secret name.',
+    icon: Flame,
+    color: 'from-amber-700 to-yellow-500',
+    description: 'Discover your Dao Name and hear what the cosmos says about your path.',
   },
 ];

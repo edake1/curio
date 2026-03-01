@@ -17,6 +17,7 @@ import { PickOneDeleteApp } from '@/components/apps/pick-one-delete';
 import { SoundOfYourBirthApp } from '@/components/apps/sound-of-your-birth';
 import { YourSaturdayCountApp } from '@/components/apps/your-saturday-count';
 import { WhileHereApp } from '@/components/apps/while-here';
+import { TheGrandDaoApp } from '@/components/apps/the-grand-dao';
 
 // Client-side hydration helper
 const emptySubscribe = () => () => {};
@@ -75,6 +76,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'sound-of-your-birth': { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)', label: 'Nostalgia'    },
   'your-saturday-count': { accent: '#f59e0b', tint: 'rgba(245,158,11,0.07)', label: 'Time'       },
   'while-here':       { accent: '#0ea5e9', tint: 'rgba(14,165,233,0.07)',   label: 'Mindfulness'  },
+  'the-grand-dao':    { accent: '#c9a227', tint: 'rgba(201,162,39,0.07)',   label: 'Cultivation'  },
 };
 
 function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
@@ -233,6 +235,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'sound-of-your-birth': return <SoundOfYourBirthApp />;
       case 'your-saturday-count': return <YourSaturdayCountApp />;
       case 'while-here': return <WhileHereApp />;
+      case 'the-grand-dao': return <TheGrandDaoApp />;
       default: return null;
     }
   };
