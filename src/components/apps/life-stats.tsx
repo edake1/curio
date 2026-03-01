@@ -239,30 +239,37 @@ export function LifeStatsApp() {
         className="rounded-2xl border dark:border-white/[0.07] border-black/[0.09] p-5 sm:p-6"
         style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, transparent 55%)' }}
       >
-        <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-2">
+        <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-3">
           You&apos;ve been alive for
         </p>
-        {/* Days — hero number */}
-        <p className="text-[3.5rem] sm:text-[4.5rem] font-black tabular-nums leading-none text-amber-400">
-          {totalDays.toLocaleString()}
-        </p>
-        <p className="text-[13px] dark:text-zinc-500 text-zinc-400 mt-1 font-medium">days</p>
+        <div className="flex items-center gap-6">
+          {/* Days — hero number */}
+          <div className="flex-shrink-0">
+            <p className="text-[3.5rem] sm:text-[4.5rem] font-black tabular-nums leading-none text-amber-400">
+              {totalDays.toLocaleString()}
+            </p>
+            <p className="text-[13px] dark:text-zinc-500 text-zinc-400 mt-1 font-medium">days</p>
+          </div>
 
-        {/* Sub-row: years / hours / minutes / seconds */}
-        <div className="flex flex-wrap gap-x-6 gap-y-2 mt-4 pt-4 border-t dark:border-white/[0.06] border-black/[0.06]">
-          {[
-            { label: 'Years',   val: years,   color: 'text-orange-400' },
-            { label: 'Hours',   val: hours,   color: 'text-violet-400' },
-            { label: 'Minutes', val: minutes, color: 'text-sky-400' },
-            { label: 'Seconds', val: seconds, color: 'text-emerald-400' },
-          ].map(({ label, val, color }) => (
-            <div key={label}>
-              <p className="text-[10px] dark:text-zinc-500 text-zinc-400 mb-0.5">{label}</p>
-              <p className={`text-[1.5rem] font-bold tabular-nums leading-none ${color}`}>
-                {val.toLocaleString()}
-              </p>
-            </div>
-          ))}
+          {/* Divider */}
+          <div className="w-px self-stretch dark:bg-white/[0.06] bg-black/[0.06]" />
+
+          {/* Sub-stats grid — fills remaining space */}
+          <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-3">
+            {[
+              { label: 'Years',   val: years,   color: 'text-orange-400' },
+              { label: 'Hours',   val: hours,   color: 'text-violet-400' },
+              { label: 'Minutes', val: minutes, color: 'text-sky-400' },
+              { label: 'Seconds', val: seconds, color: 'text-emerald-400' },
+            ].map(({ label, val, color }) => (
+              <div key={label}>
+                <p className="text-[10px] dark:text-zinc-500 text-zinc-400 mb-0.5">{label}</p>
+                <p className={`text-[1.2rem] font-bold tabular-nums leading-none ${color}`}>
+                  {val.toLocaleString()}
+                </p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
