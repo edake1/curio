@@ -79,12 +79,14 @@ function computeSaturdays(birthday: Date): SaturdayResult {
     cur.setDate(cur.getDate() + 7);
   }
 
+  // currentIdx = next upcoming Saturday (>= today);
+  // on a non-Saturday today IS in the future, so the white dot = the incoming one.
   let currentIdx = -1;
-  for (let i = all.length - 1; i >= 0; i--) {
-    if (all[i] <= today) { currentIdx = i; break; }
+  for (let i = 0; i < all.length; i++) {
+    if (all[i] >= today) { currentIdx = i; break; }
   }
 
-  const lived = Math.max(0, currentIdx + 1);
+  const lived = Math.max(0, currentIdx); // all[0..currentIdx-1] are past
   const remaining = all.length - lived;
   const currentSat = currentIdx >= 0 ? all[currentIdx] : null;
 
@@ -145,6 +147,8 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
   const { all, lived, currentIdx, milestones } = result;
   const milestoneSet = new Set(milestones.map(m => m.n - 1));
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  // Tooltip position is updated via DOM ref so it never triggers a React re-render.
+  const tooltipRef = useRef<HTMLDivElement>(null);
 
   const padded = all.length % COLS === 0
     ? all.length
@@ -177,37 +181,18 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
         ))}
       </div>
 
-      {/* Hover info bar */}
-      <div
-        className="rounded-lg px-3 mb-2 flex items-start gap-2 min-h-[32px]"
-        style={{ background: hoveredDate ? 'var(--curio-surface)' : 'transparent', transition: 'background 0.15s' }}
-      >
-        {hoveredDate ? (
-          <div className="py-1.5 text-xs leading-snug" style={{ color: 'var(--curio-text-secondary)' }}>
-            <span className="font-semibold" style={{ color: 'var(--curio-text)' }}>
-              Saturday #{(hoveredIdx! + 1).toLocaleString()}
-            </span>
-            {' · '}{formatShort(hoveredDate)}
-            {isMilestoneHovered && (
-              <span className="ml-1.5 font-semibold" style={{ color: '#f59e0b' }}>milestone</span>
-            )}
-            {hoveredNote && (
-              <span className="block mt-0.5 italic" style={{ color: 'var(--curio-text-muted)' }}>
-                &ldquo;{hoveredNote}&rdquo;
-              </span>
-            )}
-          </div>
-        ) : (
-          <span className="py-1.5 text-xs" style={{ color: 'var(--curio-text-muted)', opacity: 0.5 }}>
-            Hover any dot to see its date
-          </span>
-        )}
-      </div>
-
       {/* Grid */}
       <div
         style={{ display: 'grid', gridTemplateColumns: `repeat(${COLS}, 1fr)`, gap: '2px' }}
-        onMouseLeave={() => setHoveredIdx(null)}
+        onMouseMove={(e) => {
+          if (!tooltipRef.current) return;
+          const x = e.clientX;
+          const y = e.clientY;
+          const maxLeft = window.innerWidth - 224;
+          tooltipRef.current.style.top = `${y + 16}px`;
+          tooltipRef.current.style.left = `${Math.min(x + 12, maxLeft)}px`;
+        }}
+        onMouseLeave={() => { setHoveredIdx(null); }}
       >
         {Array.from({ length: padded }, (_, i) => {
           if (i >= all.length) return <div key={`pad-${i}`} style={{ aspectRatio: '1' }} />;
@@ -219,6 +204,7 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
           return (
             <div
               key={i}
+              className={isCurrent && !isHovered ? 'sat-current-dot' : undefined}
               onMouseEnter={() => setHoveredIdx(i)}
               style={{
                 aspectRatio: '1',
@@ -229,11 +215,9 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
                   ? `2px solid ${isLived || isCurrent ? '#ffffff' : 'rgba(245,158,11,0.55)'}`
                   : isLived || isCurrent ? 'none' : '1px solid rgba(128,128,128,0.18)',
                 boxShadow: isHovered
-                  ? '0 0 0 2px #fff, 0 0 0 5px rgba(245,158,11,0.8)'
+                  ? '0 0 0 2.5px #38bdf8, 0 0 0 8px rgba(56,189,248,0.5)'
                   : isCurrent && hasNote
                   ? '0 0 0 2px rgba(245,158,11,0.9), 0 0 6px 3px rgba(255,255,255,0.4)'
-                  : isCurrent
-                  ? '0 0 6px 2px rgba(255,255,255,0.5)'
                   : hasNote && isLived
                   ? '0 0 0 2px rgba(255,255,255,0.6)'
                   : undefined,
@@ -245,6 +229,46 @@ function SaturdayGrid({ result, intentions }: { result: SaturdayResult; intentio
             />
           );
         })}
+      </div>
+
+      {/* Floating cursor tooltip — always in DOM, hidden when not hovering.
+          Position is written directly to style by onMouseMove (no React state ⟹ no re-render). */}
+      <div
+        ref={tooltipRef}
+        style={{
+          display: hoveredDate ? 'block' : 'none',
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          zIndex: 9999,
+          pointerEvents: 'none',
+          background: 'rgba(10,12,18,0.96)',
+          border: '1px solid rgba(56,189,248,0.35)',
+          borderRadius: 10,
+          padding: '8px 12px',
+          maxWidth: 210,
+          backdropFilter: 'blur(10px)',
+          boxShadow: '0 4px 24px rgba(0,0,0,0.5), 0 0 0 1px rgba(56,189,248,0.1)',
+        }}
+      >
+        {hoveredDate && (
+          <>
+            <div style={{ fontSize: 12, fontWeight: 600, color: '#f0f0f0', lineHeight: 1.4 }}>
+              Saturday #{(hoveredIdx! + 1).toLocaleString()}
+              <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.55)', marginLeft: 4 }}>
+                · {formatShort(hoveredDate)}
+              </span>
+            </div>
+            {isMilestoneHovered && (
+              <div style={{ fontSize: 11, color: '#f59e0b', marginTop: 3, fontWeight: 500 }}>★ Milestone Saturday</div>
+            )}
+            {hoveredNote && (
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 3, fontStyle: 'italic', lineHeight: 1.4 }}>
+                &ldquo;{hoveredNote}&rdquo;
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -446,6 +470,48 @@ export function YourSaturdayCountApp() {
 
   return (
     <div className="max-w-2xl mx-auto py-4 px-1 space-y-8">
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes satPulse {
+          0%, 100% { box-shadow: 0 0 4px 1px rgba(255,255,255,0.3); }
+          50%       { box-shadow: 0 0 14px 7px rgba(255,255,255,0.85); }
+        }
+        .sat-current-dot { animation: satPulse 2.8s ease-in-out infinite; }
+
+        @keyframes satShimmer {
+          0%   { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+        .sat-cta-btn {
+          background: linear-gradient(135deg, #f59e0b 0%, #ef4444 40%, #f97316 70%, #f59e0b 100%);
+          background-size: 300% auto;
+          animation: satShimmer 4s linear infinite;
+          transition: filter 0.2s ease, box-shadow 0.2s ease;
+        }
+        .sat-cta-btn:hover:not(:disabled) {
+          filter: brightness(1.18);
+          box-shadow: 0 0 18px rgba(245,158,11,0.55), 0 0 36px rgba(239,68,68,0.25);
+        }
+        .sat-cta-btn:disabled { animation: none; opacity: 0.4; }
+
+        @keyframes satSavePulse {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+          50%       { box-shadow: 0 0 8px 3px rgba(245,158,11,0.45); }
+        }
+        .sat-save-btn {
+          transition: filter 0.2s ease, box-shadow 0.2s ease;
+        }
+        .sat-save-btn:hover:not(:disabled) {
+          filter: brightness(1.12);
+          box-shadow: 0 0 12px rgba(245,158,11,0.45);
+          animation: satSavePulse 1.6s ease-in-out infinite;
+        }
+        .sat-intention-input:focus {
+          outline: none;
+          border-color: rgba(245,158,11,0.6) !important;
+          box-shadow: 0 0 0 3px rgba(245,158,11,0.12), 0 0 10px rgba(245,158,11,0.1);
+          transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+      ` }} />
 
       {/* Header */}
       <div className="text-center space-y-2">
@@ -511,11 +577,8 @@ export function YourSaturdayCountApp() {
         <button
           onClick={handleSubmit}
           disabled={month === '' || day === '' || year === '' || loading}
-          className="w-full py-3 rounded-xl text-sm font-semibold tracking-wide transition-all active:scale-[0.98] disabled:opacity-40"
-          style={{
-            background: 'linear-gradient(135deg, #f59e0b 0%, #ef4444 100%)',
-            color: '#fff',
-          }}
+          className="sat-cta-btn w-full py-3 rounded-xl text-sm font-semibold tracking-wide active:scale-[0.98]"
+          style={{ color: '#fff' }}
         >
           {loading ? 'Counting…' : 'Show me my Saturdays →'}
         </button>
@@ -601,7 +664,7 @@ export function YourSaturdayCountApp() {
                     onKeyDown={e => e.key === 'Enter' && handleSaveIntention()}
                     placeholder="What will you do with this Saturday?"
                     maxLength={120}
-                    className="flex-1 rounded-lg px-3 py-2 text-xs outline-none"
+                    className="sat-intention-input flex-1 rounded-lg px-3 py-2 text-xs"
                     style={{
                       background: 'var(--curio-input)',
                       color: 'var(--curio-text)',
@@ -610,7 +673,7 @@ export function YourSaturdayCountApp() {
                   />
                   <button
                     onClick={handleSaveIntention}
-                    className="px-3 py-2 rounded-lg text-xs font-semibold transition-all active:scale-95"
+                    className="sat-save-btn px-3 py-2 rounded-lg text-xs font-semibold active:scale-95"
                     style={{
                       background: intentionSaved ? 'rgba(34,197,94,0.15)' : 'rgba(245,158,11,0.15)',
                       color: intentionSaved ? '#22c55e' : '#f59e0b',
