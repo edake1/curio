@@ -502,9 +502,11 @@ function TheMemorial({ refreshTick }: { refreshTick: number }) {
       const q = new URLSearchParams({ filter: f, sort: s, page: String(p) });
       const res  = await fetch(`/api/last-words/gallery?${q}`);
       const data = await res.json();
-      setTotal(data.total);
-      setEntries(prev => reset ? data.entries : [...prev, ...data.entries]);
-      setHasMore((p + 1) * data.limit < data.total);
+      if (!res.ok) return;
+      const fetched: GalleryEntry[] = data.entries ?? [];
+      setTotal(data.total ?? 0);
+      setEntries(prev => reset ? fetched : [...prev, ...fetched]);
+      setHasMore((p + 1) * (data.limit ?? 20) < (data.total ?? 0));
       setPage(p);
     } finally { setLoading(false); }
   }, []);
