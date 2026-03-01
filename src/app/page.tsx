@@ -15,6 +15,7 @@ import { WhatYoullSeeApp } from '@/components/apps/what-youll-see';
 import { LifeCalendarApp } from '@/components/apps/life-calendar';
 import { PickOneDeleteApp } from '@/components/apps/pick-one-delete';
 import { SoundOfYourBirthApp } from '@/components/apps/sound-of-your-birth';
+import { YourSaturdayCountApp } from '@/components/apps/your-saturday-count';
 import { WhileHereApp } from '@/components/apps/while-here';
 
 // Client-side hydration helper
@@ -72,6 +73,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'life-calendar':    { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)',    label: 'Mortality'    },
   'pick-one-delete':  { accent: '#ef4444', tint: 'rgba(239,68,68,0.07)',    label: 'Values'       },
   'sound-of-your-birth': { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)', label: 'Nostalgia'    },
+  'your-saturday-count': { accent: '#f59e0b', tint: 'rgba(245,158,11,0.07)', label: 'Mortality'    },
   'while-here':       { accent: '#0ea5e9', tint: 'rgba(14,165,233,0.07)',   label: 'Mindfulness'  },
 };
 
@@ -229,6 +231,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'life-calendar': return <LifeCalendarApp />;
       case 'pick-one-delete': return <PickOneDeleteApp />;
       case 'sound-of-your-birth': return <SoundOfYourBirthApp />;
+      case 'your-saturday-count': return <YourSaturdayCountApp />;
       case 'while-here': return <WhileHereApp />;
       default: return null;
     }

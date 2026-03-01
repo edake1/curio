@@ -5,6 +5,7 @@ import {
   Sparkles,
   Globe,
   Calendar,
+  CalendarDays,
   Frown,
   Eye,
   Clock,
@@ -96,6 +97,14 @@ export const APPS: AppDefinition[] = [
     icon: Music,
     color: 'from-rose-500 to-orange-500',
     description: 'The #1 song, top film, and prices from your birth year.',
+  },
+  {
+    id: 'your-saturday-count',
+    name: 'Your Saturday Count',
+    tagline: 'A lifetime is ~4,160 Saturdays. Count yours.',
+    icon: CalendarDays,
+    color: 'from-amber-500 to-orange-500',
+    description: 'How many Saturdays have you lived? How many remain?',
   },
   {
     id: 'while-here',
