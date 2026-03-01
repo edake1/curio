@@ -153,13 +153,13 @@ function SaturdayGrid({ result }: { result: SaturdayResult }) {
       </div>
       <div className="flex flex-wrap items-center gap-3 mb-3">
         {[
-          { bg: 'rgba(245,158,11,0.75)', border: 'none', label: 'Lived' },
-          { bg: '#f59e0b', shadow: '0 0 5px 2px rgba(245,158,11,0.65)', label: 'This Saturday' },
-          { bg: 'rgba(128,128,128,0.13)', border: '1px solid rgba(128,128,128,0.25)', label: 'Ahead' },
-          { bg: 'transparent', border: '2px solid #f59e0b', label: 'Milestone' },
-        ].map(({ bg, border, shadow, label }) => (
+          { bg: 'rgba(245,158,11,0.75)', border: 'none',                                  label: 'Lived'         },
+          { bg: '#ffffff',               border: '2px solid #f59e0b',                     label: 'This Saturday' },
+          { bg: 'rgba(128,128,128,0.13)', border: '1px solid rgba(128,128,128,0.25)',     label: 'Ahead'         },
+          { bg: 'rgba(245,158,11,0.75)', border: '2px solid #ffffff',                     label: 'Milestone'     },
+        ].map(({ bg, border, label }) => (
           <span key={label} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--curio-text-muted)' }}>
-            <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: bg, border, boxShadow: shadow }} />
+            <span style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', background: bg, border }} />
             {label}
           </span>
         ))}
@@ -177,11 +177,13 @@ function SaturdayGrid({ result }: { result: SaturdayResult }) {
               style={{
                 aspectRatio: '1',
                 borderRadius: '50%',
-                background: isCurrent ? '#f59e0b' : isLived ? 'rgba(245,158,11,0.75)' : 'rgba(128,128,128,0.13)',
+                // Current = white pop; lived = amber; ahead = gray
+                background: isCurrent ? '#ffffff' : isLived ? 'rgba(245,158,11,0.75)' : 'rgba(128,128,128,0.13)',
+                // Milestone ring: white on lived/current (contrast), amber on ahead (visible against gray)
                 border: isMilestone
-                  ? `2px solid ${isLived || isCurrent ? '#f59e0b' : 'rgba(245,158,11,0.4)'}`
+                  ? `2px solid ${isLived || isCurrent ? '#ffffff' : 'rgba(245,158,11,0.55)'}`
                   : isLived || isCurrent ? 'none' : '1px solid rgba(128,128,128,0.18)',
-                boxShadow: isCurrent ? '0 0 5px 2px rgba(245,158,11,0.65)' : undefined,
+                boxShadow: isCurrent ? '0 0 6px 2px rgba(255,255,255,0.5)' : undefined,
               }}
             />
           );
