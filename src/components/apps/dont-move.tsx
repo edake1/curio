@@ -135,7 +135,7 @@ export function DontMoveApp() {
   const [shakeArena, setShakeArena] = useState(false);
   const [shameMsg, setShameMsg] = useState('');
   const [predators, setPredators] = useState<Predator[]>([]);
-  const [cursorPos, setCursorPos] = useState({ x: ARENA_W / 2, y: ARENA_H / 2 });
+  const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(null);
   const [nearestDist, setNearestDist] = useState(999);
   const [diffLabel, setDiffLabel] = useState('Calm');
   const [lostPos, setLostPos] = useState({ x: 0, y: 0 });
@@ -147,7 +147,7 @@ export function DontMoveApp() {
   const multRef       = useRef(1);
   const lastPosRef    = useRef({ x: -1, y: -1 });
   const predatorsRef  = useRef<Predator[]>([]);
-  const cursorRef     = useRef({ x: ARENA_W / 2, y: ARENA_H / 2 });
+  const cursorRef     = useRef<{ x: number; y: number } | null>(null);
   const threshRef     = useRef(INITIAL_THRESHOLD);
   const tickRef       = useRef<ReturnType<typeof setInterval> | null>(null);
   const spawnRef      = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -210,6 +210,8 @@ export function DontMoveApp() {
     setMultiplier(1);
     setNearestDist(999);
     setDiffLabel('Calm');
+    setCursorPos(null);
+    cursorRef.current = null;
     setGameState('playing');
 
     // Physics tick
@@ -234,10 +236,13 @@ export function DontMoveApp() {
       // Update predators
       let minDist  = 999;
       const newPs  = ps.map(p => {
-        const dx = target.x - p.x;
-        const dy = target.y - p.y;
+        // If cursor hasn't entered arena yet, predators wander slowly toward center
+        const tx = target ? target.x : ARENA_W / 2 + (Math.random() - 0.5) * 200;
+        const ty = target ? target.y : ARENA_H / 2 + (Math.random() - 0.5) * 200;
+        const dx = tx - p.x;
+        const dy = ty - p.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < minDist) minDist = dist;
+        if (target && dist < minDist) minDist = dist;
 
         // Orbit offset — adds a swirling approach
         const orbitR      = Math.max(0, dist * 0.15);
@@ -257,8 +262,8 @@ export function DontMoveApp() {
         const nvx       = (p.vx + ax) * friction;
         const nvy       = (p.vy + ay) * friction;
 
-        // Near-miss: passed within 26px
-        if (dist < 26 && !nearMissRef.current.has(p.id)) {
+        // Near-miss: passed within 26px (only counts when cursor is in arena)
+        if (target && dist < 26 && !nearMissRef.current.has(p.id)) {
           nearMissRef.current.add(p.id);
           multRef.current = parseFloat((multRef.current + 0.5).toFixed(1));
           setMultiplier(multRef.current);
@@ -296,6 +301,7 @@ export function DontMoveApp() {
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
     setCursorPos({ x, y });
+    cursorRef.current = { x, y };
 
     if (lastPosRef.current.x === -1) { lastPosRef.current = { x, y }; return; }
     const dist = Math.sqrt((x - lastPosRef.current.x) ** 2 + (y - lastPosRef.current.y) ** 2);
@@ -319,6 +325,7 @@ export function DontMoveApp() {
     const x = e.touches[0].clientX - rect.left;
     const y = e.touches[0].clientY - rect.top;
     setCursorPos({ x, y });
+    cursorRef.current = { x, y };
     if (lastPosRef.current.x === -1) { lastPosRef.current = { x, y }; return; }
     const dist = Math.sqrt((x - lastPosRef.current.x) ** 2 + (y - lastPosRef.current.y) ** 2);
     lastPosRef.current = { x, y };
@@ -332,8 +339,8 @@ export function DontMoveApp() {
   }, []);
 
   // ── Vignette intensity based on nearest predator ───────────────
-  const vignetteIntensity = Math.max(0, Math.min(1, 1 - nearestDist / 140));
-  const criticalZone      = nearestDist < 40;
+  const vignetteIntensity = cursorPos ? Math.max(0, Math.min(1, 1 - nearestDist / 140)) : 0;
+  const criticalZone      = !!cursorPos && nearestDist < 40;
 
   // ── Shapes for lost state scatter ─────────────────────────────
   const finalPredators = predators;
@@ -372,7 +379,7 @@ export function DontMoveApp() {
       >
         {/* Vignette overlay — intensifies as predators close in */}
         <div
-          className="absolute inset-0 pointer-events-none z-20 rounded-2xl transition-opacity duration-100"
+          className="absolute inset-0 pointer-events-none z-[5] rounded-2xl transition-opacity duration-100"
           style={{
             background: `radial-gradient(ellipse at center, transparent 30%, rgba(220,38,38,${(vignetteIntensity * 0.55).toFixed(2)}) 100%)`,
           }}
@@ -382,7 +389,7 @@ export function DontMoveApp() {
         <motion.div
           animate={criticalZone ? { opacity: [0.4, 1, 0.4] } : { opacity: 0 }}
           transition={{ duration: 0.35, repeat: Infinity }}
-          className="absolute inset-0 pointer-events-none z-20 rounded-2xl"
+          className="absolute inset-0 pointer-events-none z-[6] rounded-2xl"
           style={{ border: '2px solid rgba(239,68,68,0.8)', boxShadow: 'inset 0 0 30px rgba(239,68,68,0.25)' }}
         />
 
@@ -393,7 +400,7 @@ export function DontMoveApp() {
               key="nerve"
               initial={{ opacity: 0.5 }} animate={{ opacity: 0 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
-              className="absolute inset-0 pointer-events-none z-30 rounded-2xl"
+              className="absolute inset-0 pointer-events-none z-[25] rounded-2xl"
               style={{ background: 'rgba(168,85,247,0.18)' }}
             />
           )}
@@ -403,22 +410,32 @@ export function DontMoveApp() {
           {/* ── READY ── */}
           {gameState === 'ready' && (
             <motion.div key="ready" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-              className="absolute inset-0 flex flex-col items-center justify-center gap-5 px-6 z-10"
+              className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 z-10"
             >
               <motion.div
                 animate={{ scale: [1, 1.07, 1] }} transition={{ duration: 2.2, repeat: Infinity }}
-                className="w-20 h-20 rounded-full border border-fuchsia-500/30 flex items-center justify-center"
+                className="w-16 h-16 rounded-full border border-fuchsia-500/30 flex items-center justify-center"
                 style={{ background: 'radial-gradient(circle, rgba(217,70,239,0.15), transparent)' }}
               >
-                <span className="text-3xl">🤫</span>
+                <span className="text-2xl">🤫</span>
               </motion.div>
-              <p className="text-zinc-500 text-sm text-center max-w-xs">
-                Predators will hunt your cursor. Stay perfectly still while they swarm. Near-misses build your multiplier.
-              </p>
+              <div className="flex flex-col gap-2 text-left max-w-xs w-full">
+                {([
+                  ['1', 'Move your cursor into this arena to set your start position.'],
+                  ['2', 'Then physically freeze your mouse. Any movement kills you.'],
+                  ['3', 'Predators hunt you. They\'re a distraction — don\'t flinch.'],
+                  ['4', 'Near-misses build a score multiplier. No movement = high score.'],
+                ] as [string, string][]).map(([n, text]) => (
+                  <div key={n} className="flex gap-3 items-start">
+                    <span className="text-[11px] font-black text-fuchsia-500 w-4 mt-0.5 shrink-0">{n}</span>
+                    <span className="text-zinc-400 text-[12px] leading-snug">{text}</span>
+                  </div>
+                ))}
+              </div>
               <Button
                 onClick={startCountdown}
                 size="lg"
-                className="bg-gradient-to-r from-fuchsia-600 to-violet-600 min-h-[48px] px-10 shadow-lg shadow-fuchsia-500/25"
+                className="bg-gradient-to-r from-fuchsia-600 to-violet-600 min-h-[48px] px-10 shadow-lg shadow-fuchsia-500/25 mt-1"
               >
                 Start Game
               </Button>
@@ -449,14 +466,16 @@ export function DontMoveApp() {
           {/* ── PLAYING ── */}
           {gameState === 'playing' && (
             <motion.div key="playing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0">
-              {/* Predators */}
-              {predators.map(p => (
-                <PredatorShape key={p.id} p={p} critical={nearestDist < 40} />
-              ))}
+              {/* Predators — inset-0 container at z-10, above vignette (z-5) */}
+              <div className="absolute inset-0 z-10 pointer-events-none">
+                {predators.map(p => (
+                  <PredatorShape key={p.id} p={p} critical={criticalZone} />
+                ))}
+              </div>
 
-              {/* Cursor reticle */}
-              <div
-                className="absolute pointer-events-none z-10 transition-colors duration-100"
+              {/* Cursor reticle — only when cursor has entered arena */}
+              {cursorPos && <div
+                className="absolute pointer-events-none z-20 transition-colors duration-100"
                 style={{
                   left: cursorPos.x - 10,
                   top:  cursorPos.y - 10,
@@ -479,10 +498,10 @@ export function DontMoveApp() {
                   <line x1="1" y1="10" x2="5" y2="10" stroke={criticalZone ? '#ef4444' : 'rgba(255,255,255,0.4)'} strokeWidth="1" />
                   <line x1="15" y1="10" x2="19" y2="10" stroke={criticalZone ? '#ef4444' : 'rgba(255,255,255,0.4)'} strokeWidth="1" />
                 </svg>
-              </div>
+              </div>}
 
               {/* HUD */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center z-20 pointer-events-none">
+              <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none">
                 {/* Multiplier badge */}
                 <AnimatePresence>
                   {multiplier > 1 && (
@@ -520,8 +539,8 @@ export function DontMoveApp() {
                   {currentTaunt}
                 </motion.p>
 
-                {/* Difficulty badge */}
-                <div className="absolute top-3 right-3">
+                {/* Difficulty badge + threshold */}
+                <div className="absolute top-3 right-3 flex flex-col items-end gap-1">
                   <span
                     className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                     style={{
@@ -531,6 +550,10 @@ export function DontMoveApp() {
                     }}
                   >
                     {diffLabel}
+                  </span>
+                  <span className="text-[9px] font-mono tabular-nums"
+                    style={{ color: diffLabel === 'Critical' ? '#f87171' : 'rgba(255,255,255,0.22)' }}>
+                    ≤ {diffLabel === 'Critical' ? 2 : diffLabel === 'Shaking' ? 4 : diffLabel === 'Stirring' ? 6 : 8}px allowed
                   </span>
                 </div>
 
@@ -608,11 +631,12 @@ export function DontMoveApp() {
       </motion.div>
 
       {/* Legend */}
-      {gameState === 'playing' && (
+      {(gameState === 'playing' || gameState === 'lost') && (
         <div className="flex flex-wrap justify-center gap-x-5 gap-y-1 mt-3 text-[10px] text-zinc-600">
-          <span>Near-miss within 26px → <span className="text-violet-400">+×0.5 nerve</span></span>
-          <span>Leave arena → instant death</span>
+          <span><span className="text-zinc-500">Any mouse movement</span> → death</span>
+          <span>Near-miss &lt;26px → <span className="text-violet-400">+×0.5 nerve</span></span>
           <span>New hunter every {SPAWN_INTERVAL}s</span>
+          <span>Leaving arena → instant death</span>
         </div>
       )}
     </div>
