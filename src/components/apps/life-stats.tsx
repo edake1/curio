@@ -32,6 +32,61 @@ const STAT_CONTEXT: Record<string, (n: number) => string> = {
 
 const ACCENT = '#f59e0b';
 
+// Life expectancy baseline (global average)
+const LIFE_EXP_YEARS        = 73;
+const LIFE_EXP_MS           = LIFE_EXP_YEARS * 365.25 * MS_PER_DAY;
+const TOTAL_LIFETIME_BEATS  = Math.round(LIFE_EXP_YEARS * 365.25 * 24 * 60 * 72); // ~2.76B
+
+// Round-number milestones to count toward
+const DAY_MILESTONES  = [5_000, 10_000, 15_000, 20_000, 25_000, 30_000];
+
+function getNextMilestone(totalDays: number): { label: string; daysLeft: number } | null {
+  for (const m of DAY_MILESTONES) {
+    if (totalDays < m) return { label: `${m.toLocaleString()} days alive`, daysLeft: m - totalDays };
+  }
+  return null;
+}
+
+// ── Life progress bar ─────────────────────────────────────────────
+function LifeProgressBar({ pct }: { pct: number }) {
+  const clamped = Math.min(1, Math.max(0, pct));
+  const pctDisplay = (clamped * 100).toFixed(1);
+  return (
+    <div className="rounded-2xl border dark:border-white/[0.07] border-black/[0.09] p-4 sm:p-5
+      dark:bg-white/[0.02] bg-black/[0.02]">
+      <div className="flex justify-between items-baseline mb-3">
+        <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500">
+          Life used
+        </p>
+        <p className="text-[13px] font-bold" style={{ color: ACCENT }}>{pctDisplay}%</p>
+      </div>
+      {/* Track */}
+      <div className="relative h-2 rounded-full dark:bg-white/[0.06] bg-black/[0.07] overflow-visible">
+        {/* Fill */}
+        <motion.div
+          className="absolute inset-y-0 left-0 rounded-full"
+          style={{ background: `linear-gradient(90deg, #f59e0b, #fb923c)` }}
+          initial={{ width: 0 }}
+          animate={{ width: `${clamped * 100}%` }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        />
+        {/* Glowing cursor dot */}
+        <motion.div
+          className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full border-2 border-amber-400"
+          style={{ background: '#fff', boxShadow: '0 0 10px 3px rgba(251,191,36,0.55)' }}
+          initial={{ left: 0 }}
+          animate={{ left: `calc(${clamped * 100}% - 7px)` }}
+          transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+        />
+      </div>
+      <div className="flex justify-between mt-2">
+        <p className="text-[10px] dark:text-zinc-600 text-zinc-400">Born</p>
+        <p className="text-[10px] dark:text-zinc-600 text-zinc-400">~{LIFE_EXP_YEARS} yr expectancy</p>
+      </div>
+    </div>
+  );
+}
+
 // ── "Right now" pulsing cards ────────────────────────────────────
 function HeartbeatCard({ sessionBeats }: { sessionBeats: number }) {
   return (
@@ -115,6 +170,12 @@ export function LifeStatsApp() {
   const minutes   = Math.floor(elapsed / MS_PER_MINUTE);
   const seconds   = Math.floor(elapsed / 1000);
 
+  // Life progress
+  const pctLived       = elapsed / LIFE_EXP_MS;
+  const beatsLived     = Math.floor((elapsed / MS_PER_MINUTE) * 72);
+  const beatsRemaining = Math.max(0, TOTAL_LIFETIME_BEATS - beatsLived);
+  const milestone      = getNextMilestone(totalDays);
+
   // Since-you-opened elapsed
   const sessionElapsed  = Math.max(0, now - pageOpenTime.current);
   const sessionBeats    = Math.floor(sessionElapsed / 1000 * RATES_PER_SEC.heartbeats);
@@ -170,6 +231,9 @@ export function LifeStatsApp() {
         </div>
       </div>
 
+      {/* ── Life progress bar ─────────────────────────── */}
+      <LifeProgressBar pct={pctLived} />
+
       {/* ── Hero: alive for ───────────────────────────── */}
       <div
         className="rounded-2xl border dark:border-white/[0.07] border-black/[0.09] p-5 sm:p-6"
@@ -202,6 +266,52 @@ export function LifeStatsApp() {
         </div>
       </div>
 
+      {/* ── Heartbeats remaining + next milestone ─────── */}
+      <div className="grid grid-cols-2 gap-2 sm:gap-3">
+
+        {/* Beats remaining — ticks down */}
+        <div
+          className="rounded-2xl border border-rose-500/20 p-4 flex flex-col gap-1"
+          style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.07) 0%, transparent 60%)' }}
+        >
+          <div className="flex items-center gap-1.5 mb-1">
+            <motion.span
+              className="text-xl leading-none"
+              animate={{ scale: [1, 1.35, 1.15, 1] }}
+              transition={{ duration: 60 / 72, repeat: Infinity, times: [0, 0.14, 0.28, 1], ease: 'easeOut' }}
+            >
+              💔
+            </motion.span>
+            <p className="text-[10px] uppercase tracking-widest font-semibold text-rose-400/70">Beats left</p>
+          </div>
+          <p className="text-[1.4rem] font-black tabular-nums text-rose-400 leading-none">
+            {beatsRemaining.toLocaleString()}
+          </p>
+          <p className="text-[10px] dark:text-zinc-500 text-zinc-400 leading-snug mt-0.5">
+            estimated heartbeats remaining in your life
+          </p>
+        </div>
+
+        {/* Next milestone */}
+        {milestone && (
+          <div
+            className="rounded-2xl border border-amber-500/20 p-4 flex flex-col gap-1"
+            style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.07) 0%, transparent 60%)' }}
+          >
+            <div className="flex items-center gap-1.5 mb-1">
+              <span className="text-xl leading-none">🎯</span>
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-amber-400/70">Next milestone</p>
+            </div>
+            <p className="text-[1.4rem] font-black tabular-nums text-amber-400 leading-none">
+              {milestone.daysLeft.toLocaleString()}
+            </p>
+            <p className="text-[10px] dark:text-zinc-500 text-zinc-400 leading-snug mt-0.5">
+              days until {milestone.label}
+            </p>
+          </div>
+        )}
+      </div>
+
       {/* ── Right now in your body ────────────────────── */}
       <div>
         <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-2.5">
@@ -214,6 +324,9 @@ export function LifeStatsApp() {
         </div>
         <p className="text-[10px] dark:text-zinc-600 text-zinc-400 mt-2 text-center">
           counted in the {sessionSeconds}s you&apos;ve been on this page
+        </p>
+        <p className="text-[10px] dark:text-zinc-600 text-zinc-400 mt-1 text-center">
+          meanwhile, ~{(9_600_000_000 * sessionSeconds).toLocaleString()} heartbeats happened across all 8B humans
         </p>
       </div>
 
