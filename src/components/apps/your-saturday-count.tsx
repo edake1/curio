@@ -414,7 +414,7 @@ export function YourSaturdayCountApp() {
         try {
           const blob = await (await fetch(dataUrl)).blob();
           const file = new File([blob], 'my-saturdays.png', { type: 'image/png' });
-          await navigator.share({ files: [file], title: 'My Saturday Count — Curio' });
+          await navigator.share({ files: [file], title: '4,160 Saturdays — Curio' });
         } catch (err) {
           if (err instanceof Error && err.name === 'AbortError') return;
           // fallback to download
@@ -448,12 +448,12 @@ export function YourSaturdayCountApp() {
       {/* Header */}
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight" style={{ color: 'var(--curio-text)' }}>
-          Your Saturday Count
+          4,160 Saturdays
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: 'var(--curio-text-secondary)' }}>
           On weekdays you belong to obligations. Saturdays are the days you get to choose.
           <br />
-          An 80-year life gives you roughly <strong>4,160</strong> of them.
+          An 80-year life gives you roughly <strong>4,160</strong> of them. How many are left?
         </p>
       </div>
 
@@ -515,7 +515,7 @@ export function YourSaturdayCountApp() {
             color: '#fff',
           }}
         >
-          {loading ? 'Counting your Saturdays…' : 'Count my Saturdays →'}
+          {loading ? 'Counting…' : 'Show me my Saturdays →'}
         </button>
       </div>
 
@@ -625,7 +625,7 @@ export function YourSaturdayCountApp() {
 
               {/* Curio watermark */}
               <p className="text-center text-xs" style={{ color: 'var(--curio-text-muted)' }}>
-                curio · your saturday count
+                curio · 4,160 saturdays
               </p>
             </div>
 

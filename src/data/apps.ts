@@ -100,8 +100,8 @@ export const APPS: AppDefinition[] = [
   },
   {
     id: 'your-saturday-count',
-    name: 'Your Saturday Count',
-    tagline: 'A lifetime is ~4,160 Saturdays. Count yours.',
+    name: '4,160 Saturdays',
+    tagline: 'An 80-year life. Count the days that were yours.',
     icon: CalendarDays,
     color: 'from-amber-500 to-orange-500',
     description: 'How many Saturdays have you lived? How many remain?',

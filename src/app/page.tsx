@@ -73,7 +73,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'life-calendar':    { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)',    label: 'Mortality'    },
   'pick-one-delete':  { accent: '#ef4444', tint: 'rgba(239,68,68,0.07)',    label: 'Values'       },
   'sound-of-your-birth': { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)', label: 'Nostalgia'    },
-  'your-saturday-count': { accent: '#f59e0b', tint: 'rgba(245,158,11,0.07)', label: 'Mortality'    },
+  'your-saturday-count': { accent: '#f59e0b', tint: 'rgba(245,158,11,0.07)', label: 'Time'       },
   'while-here':       { accent: '#0ea5e9', tint: 'rgba(14,165,233,0.07)',   label: 'Mindfulness'  },
 };
 
