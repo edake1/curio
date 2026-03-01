@@ -211,39 +211,37 @@ export function AntiMotivationalApp() {
             return (
               <button key={c.id}
                 onClick={() => { setCruelty(c.id); fetchPoster(category, c.id); }}
-                className="relative overflow-hidden rounded-xl h-[68px] flex flex-col items-center justify-end pb-2.5 border-transparent border transition-all duration-200 active:scale-[0.96] select-none"
+                className="relative overflow-hidden rounded-xl h-[68px] flex flex-col items-center justify-end pb-2.5 transition-all duration-200 active:scale-[0.96] select-none"
                 style={active ? {
-                  border:     `1px solid ${c.color}55`,
-                  boxShadow:  `0 0 24px ${c.color}22, inset 0 0 1px ${c.color}40`,
-                } : {}}>
-
-                {/* Inactive border fallback via Tailwind */}
-                {!active && <span className="absolute inset-0 rounded-xl dark:border-white/[0.08] border-black/[0.1] border pointer-events-none" />}
+                  border:    `1px solid ${c.color}55`,
+                  boxShadow: `0 0 24px ${c.color}22, inset 0 0 1px ${c.color}40`,
+                } : {
+                  border: '1px solid transparent',
+                  boxShadow: 'inset 0 0 0 1px rgba(120,120,140,0.18)',
+                }}>
 
                 {/* Rising fill */}
                 <motion.div
                   animate={{ height: `${fillPct}%` }}
                   transition={{ type: 'spring', stiffness: 240, damping: 28 }}
-                  style={{ background: active ? `${c.color}22` : 'rgba(120,120,140,0.08)' }}
-                  className="absolute bottom-0 inset-x-0 rounded-b-xl"
-                >
-                  {/* Top-edge glow on fill */}
+                  style={{ background: active ? `${c.color}1e` : 'rgba(120,120,140,0.07)' }}
+                  className="absolute bottom-0 inset-x-0 rounded-b-xl">
                   <div className="absolute top-0 inset-x-0 h-px"
                     style={{ background: active
                       ? `linear-gradient(to right, transparent, ${c.color}70, transparent)`
-                      : `linear-gradient(to right, transparent, rgba(160,160,180,0.2), transparent)` }} />
+                      : `linear-gradient(to right, transparent, rgba(140,140,160,0.25), transparent)` }} />
                 </motion.div>
 
-                {/* Label */}
-                <motion.span
-                  animate={{ color: active ? c.color : undefined }}
-                  transition={{ duration: 0.2 }}
-                  className={`relative z-10 text-[11px] font-bold leading-none mb-0.5 ${active ? '' : 'dark:text-zinc-400 text-zinc-500'}`}>
+                {/* Label — plain span; active colour via style, inactive via className so nothing stomps Tailwind */}
+                <span
+                  className={`relative z-10 text-[11px] font-bold leading-none mb-0.5 transition-colors duration-200 ${active ? '' : 'dark:text-zinc-300 text-zinc-700'}`}
+                  style={active ? { color: c.color } : {}}>
                   {c.label}
-                </motion.span>
+                </span>
 
                 {/* Desc */}
-                <span className={`relative z-10 text-[9px] leading-none font-medium transition-colors ${active ? '' : 'dark:text-zinc-600 text-zinc-400'}`}
+                <span
+                  className={`relative z-10 text-[9px] leading-none font-medium transition-colors duration-200 ${active ? '' : 'dark:text-zinc-500 text-zinc-400'}`}
                   style={active ? { color: c.color, opacity: 0.7 } : {}}>
                   {c.desc}
                 </span>
