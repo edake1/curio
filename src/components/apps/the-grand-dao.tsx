@@ -282,11 +282,17 @@ function DownloadBtn({ cardRef, filename, small }: {
       const url = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true });
       const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
       if (isMobile && navigator.canShare) {
-        const blob = await (await fetch(url)).blob();
-        const file = new File([blob], `${filename}.png`, { type: 'image/png' });
-        if (navigator.canShare({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'The Grand Dao' });
-          return;
+        try {
+          const blob = await (await fetch(url)).blob();
+          const file = new File([blob], `${filename}.png`, { type: 'image/png' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: 'The Grand Dao' });
+            return; // share succeeded or user dismissed — either way, done
+          }
+        } catch (e) {
+          // AbortError = user dismissed the share sheet — do nothing
+          if (e instanceof Error && e.name === 'AbortError') return;
+          // Any other share error falls through to desktop download below
         }
       }
       const link = document.createElement('a');
