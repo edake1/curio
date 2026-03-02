@@ -69,6 +69,23 @@ function markUpvoted(id: string) {
   localStorage.setItem(HK_UPVOTED_KEY, JSON.stringify([...s]));
 }
 
+// Bookmark / save tracking
+const HK_SAVED_KEY = 'curio-hk-saved';
+function getSavedSayings(): Saying[] {
+  try { return JSON.parse(localStorage.getItem(HK_SAVED_KEY) ?? '[]'); }
+  catch { return []; }
+}
+function getSavedIds(): Set<string> {
+  return new Set(getSavedSayings().map(s => s.id));
+}
+function toggleSaved(saying: Saying): Saying[] {
+  const current = getSavedSayings();
+  const exists = current.some(s => s.id === saying.id);
+  const next = exists ? current.filter(s => s.id !== saying.id) : [saying, ...current];
+  localStorage.setItem(HK_SAVED_KEY, JSON.stringify(next));
+  return next;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // REGION DISPLAY HELPERS
 // ─────────────────────────────────────────────────────────────────
@@ -85,7 +102,11 @@ const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
 // ─────────────────────────────────────────────────────────────────
 // DAILY SAYING — the hero section
 // ─────────────────────────────────────────────────────────────────
-function DailySaying({ onViewDetails }: { onViewDetails: (s: Saying) => void }) {
+function DailySaying({ onViewDetails, savedIds, onToggleSave }: {
+  onViewDetails: (s: Saying) => void;
+  savedIds: Set<string>;
+  onToggleSave: (s: Saying) => void;
+}) {
   const [saying, setSaying] = useState<Saying | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -170,6 +191,17 @@ function DailySaying({ onViewDetails }: { onViewDetails: (s: Saying) => void }) 
         >
           Explore This Saying
         </button>
+        <button
+          onClick={() => onToggleSave(saying)}
+          className="px-3 py-2.5 rounded-xl text-xs transition-all"
+          style={{
+            background: savedIds.has(saying.id) ? 'rgba(217,119,6,0.1)' : TEAL_DIM,
+            color: savedIds.has(saying.id) ? TERRA : MUTED,
+            border: `1px solid ${savedIds.has(saying.id) ? 'rgba(217,119,6,0.25)' : TEAL_BRD}`,
+          }}
+        >
+          {savedIds.has(saying.id) ? '★' : '☆'}
+        </button>
       </div>
     </motion.div>
   );
@@ -178,7 +210,10 @@ function DailySaying({ onViewDetails }: { onViewDetails: (s: Saying) => void }) 
 // ─────────────────────────────────────────────────────────────────
 // SAYING DETAIL — context, reflections, TTS
 // ─────────────────────────────────────────────────────────────────
-function SayingDetail({ saying, onBack }: { saying: Saying; onBack: () => void }) {
+function SayingDetail({ saying, onBack, savedIds, onToggleSave }: {
+  saying: Saying; onBack: () => void;
+  savedIds: Set<string>; onToggleSave: (s: Saying) => void;
+}) {
   const [context, setContext] = useState<{ origin: string; meaning: string; practice: string } | null>(null);
   const [loadingCtx, setLoadingCtx] = useState(true);
   const [playingTTS, setPlayingTTS] = useState(false);
@@ -263,6 +298,17 @@ function SayingDetail({ saying, onBack }: { saying: Saying; onBack: () => void }
             style={{ color: playingTTS ? TERRA : TEAL, background: TEAL_DIM, border: `1px solid ${TEAL_BRD}` }}
           >
             {playingTTS ? '⏸ Pause' : '🔊 Listen'}
+          </button>
+          <button
+            onClick={() => onToggleSave(saying)}
+            className="text-[10px] tracking-wider uppercase px-3 py-1 rounded-full transition-all"
+            style={{
+              color: savedIds.has(saying.id) ? TERRA : MUTED,
+              background: savedIds.has(saying.id) ? 'rgba(217,119,6,0.1)' : 'rgba(222,198,163,0.06)',
+              border: `1px solid ${savedIds.has(saying.id) ? 'rgba(217,119,6,0.25)' : FAINT}`,
+            }}
+          >
+            {savedIds.has(saying.id) ? '★ Saved' : '☆ Save'}
           </button>
         </div>
       </div>
@@ -543,7 +589,11 @@ function ReflectionsSection({ sayingId }: { sayingId: string }) {
 // ─────────────────────────────────────────────────────────────────
 // BROWSE — archive of all sayings
 // ─────────────────────────────────────────────────────────────────
-function BrowseSection({ onViewDetails }: { onViewDetails: (s: Saying) => void }) {
+function BrowseSection({ onViewDetails, savedIds, onToggleSave }: {
+  onViewDetails: (s: Saying) => void;
+  savedIds: Set<string>;
+  onToggleSave: (s: Saying) => void;
+}) {
   const [sayings, setSayings] = useState<Saying[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
@@ -587,9 +637,7 @@ function BrowseSection({ onViewDetails }: { onViewDetails: (s: Saying) => void }
           ✦ &nbsp; The Archive &nbsp; ✦
         </p>
         <p className="text-sm" style={{ color: IVORY }}>
-          {total > 0
-            ? <>{total.toLocaleString()} sayings from around the world</>
-            : 'Wisdom awaits.'}
+          Sayings from around the world
         </p>
       </div>
 
@@ -642,13 +690,13 @@ function BrowseSection({ onViewDetails }: { onViewDetails: (s: Saying) => void }
 
       {/* Sayings grid */}
       {loading && sayings.length === 0 ? (
-        <div className="space-y-3">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="rounded-2xl p-4 space-y-2 animate-pulse"
-              style={{ background: BG_CARD, border: `1px solid ${FAINT}`, opacity: 0.5 - i * 0.12 }}>
-              <div className="h-3 rounded-full w-1/4" style={{ background: FAINT }} />
-              <div className="h-4 rounded-full w-3/4" style={{ background: TEAL_BRD }} />
-              <div className="h-3 rounded-full w-1/3" style={{ background: FAINT }} />
+        <div className="grid grid-cols-2 gap-2">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-xl p-3 space-y-1.5 animate-pulse"
+              style={{ background: BG_CARD, border: `1px solid ${FAINT}`, opacity: 0.5 - i * 0.08 }}>
+              <div className="h-2.5 rounded-full w-1/3" style={{ background: FAINT }} />
+              <div className="h-3 rounded-full w-full" style={{ background: TEAL_BRD }} />
+              <div className="h-2.5 rounded-full w-1/2" style={{ background: FAINT }} />
             </div>
           ))}
         </div>
@@ -658,38 +706,45 @@ function BrowseSection({ onViewDetails }: { onViewDetails: (s: Saying) => void }
         </p>
       ) : (
         <div className="space-y-3">
-          <AnimatePresence>
-            {sayings.map((s, i) => (
-              <motion.button
-                key={s.id}
-                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: i < 6 ? i * 0.04 : 0 }}
-                onClick={() => onViewDetails(s)}
-                className="w-full text-left rounded-2xl p-4 space-y-2 transition-all hover:scale-[1.01]"
-                style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}
-              >
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">{REGION_EMOJI[s.region] ?? '🌐'}</span>
-                  <span className="text-[10px] tracking-widest uppercase" style={{ color: FAINT }}>
-                    {s.origin}
-                  </span>
-                  <span className="text-[10px] ml-auto px-2 py-0.5 rounded-full"
-                    style={{ color: FAINT, background: 'rgba(222,198,163,0.05)' }}>
-                    {CATEGORY_LABEL[s.category] ?? s.category}
-                  </span>
-                </div>
-                <p className="text-sm leading-relaxed font-serif" style={{ color: IVORY, lineHeight: 1.75 }}>
-                  &ldquo;{s.text}&rdquo;
-                </p>
-                <p className="text-[11px]" style={{ color: MUTED }}>
-                  — {s.attribution}
-                  {s.totalReflections > 0 && (
-                    <span style={{ color: FAINT }}> · {s.totalReflections} reflection{s.totalReflections !== 1 ? 's' : ''}</span>
-                  )}
-                </p>
-              </motion.button>
-            ))}
-          </AnimatePresence>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <AnimatePresence>
+              {sayings.map((s, i) => (
+                <motion.div
+                  key={s.id}
+                  initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: i < 8 ? i * 0.03 : 0 }}
+                  className="rounded-xl p-3 space-y-1.5 group relative"
+                  style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}
+                >
+                  <button
+                    onClick={() => onViewDetails(s)}
+                    className="w-full text-left space-y-1.5"
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs">{REGION_EMOJI[s.region] ?? '🌐'}</span>
+                      <span className="text-[9px] tracking-widest uppercase truncate" style={{ color: FAINT }}>
+                        {s.origin}
+                      </span>
+                    </div>
+                    <p className="text-[13px] leading-snug font-serif line-clamp-3" style={{ color: IVORY }}>
+                      &ldquo;{s.text}&rdquo;
+                    </p>
+                    <p className="text-[10px] truncate" style={{ color: MUTED }}>
+                      — {s.attribution}
+                    </p>
+                  </button>
+                  {/* Save button */}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); onToggleSave(s); }}
+                    className="absolute top-2.5 right-2.5 text-sm leading-none transition-all opacity-50 group-hover:opacity-100"
+                    style={{ color: savedIds.has(s.id) ? TERRA : FAINT }}
+                  >
+                    {savedIds.has(s.id) ? '★' : '☆'}
+                  </button>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
           {hasMore && (
             <div className="space-y-1 pt-1">
               <button
@@ -698,11 +753,8 @@ function BrowseSection({ onViewDetails }: { onViewDetails: (s: Saying) => void }
                 className="w-full py-2.5 text-xs rounded-xl font-medium transition-all disabled:opacity-40"
                 style={{ background: TEAL_DIM, color: TEAL, border: `1px solid ${TEAL_BRD}` }}
               >
-                {loading ? 'Loading…' : 'Show more sayings'}
+                {loading ? 'Loading…' : 'Show more'}
               </button>
-              <p className="text-center text-[10px]" style={{ color: FAINT }}>
-                showing {sayings.length} of {total.toLocaleString()}
-              </p>
             </div>
           )}
         </div>
@@ -725,17 +777,103 @@ function HKDivider() {
 }
 
 // ─────────────────────────────────────────────────────────────────
+// SAVED — bookmarked sayings
+// ─────────────────────────────────────────────────────────────────
+function SavedSection({ onViewDetails, savedIds, onToggleSave, saved }: {
+  onViewDetails: (s: Saying) => void;
+  savedIds: Set<string>;
+  onToggleSave: (s: Saying) => void;
+  saved: Saying[];
+}) {
+  if (saved.length === 0) {
+    return (
+      <div className="rounded-2xl p-8 text-center space-y-2" style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}>
+        <p className="text-sm" style={{ color: MUTED }}>No saved sayings yet.</p>
+        <p className="text-xs" style={{ color: FAINT }}>
+          Tap ☆ on any saying to save it here.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <p className="text-xs text-center" style={{ color: MUTED }}>
+        {saved.length} saved saying{saved.length !== 1 ? 's' : ''}
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        {saved.map((s, i) => (
+          <motion.div
+            key={s.id}
+            initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, delay: i < 8 ? i * 0.03 : 0 }}
+            className="rounded-xl p-3 space-y-1.5 group relative"
+            style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}
+          >
+            <button
+              onClick={() => onViewDetails(s)}
+              className="w-full text-left space-y-1.5"
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs">{REGION_EMOJI[s.region] ?? '🌐'}</span>
+                <span className="text-[9px] tracking-widest uppercase truncate" style={{ color: FAINT }}>
+                  {s.origin}
+                </span>
+              </div>
+              <p className="text-[13px] leading-snug font-serif line-clamp-3" style={{ color: IVORY }}>
+                &ldquo;{s.text}&rdquo;
+              </p>
+              <p className="text-[10px] truncate" style={{ color: MUTED }}>
+                — {s.attribution}
+              </p>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleSave(s); }}
+              className="absolute top-2.5 right-2.5 text-sm leading-none transition-all opacity-50 group-hover:opacity-100"
+              style={{ color: savedIds.has(s.id) ? TERRA : FAINT }}
+            >
+              {savedIds.has(s.id) ? '★' : '☆'}
+            </button>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
 // MAIN EXPORT
 // ─────────────────────────────────────────────────────────────────
+type HikmahTab = 'today' | 'archive' | 'saved';
+
 export function HikmahApp() {
   const [detailSaying, setDetailSaying] = useState<Saying | null>(null);
+  const [tab, setTab] = useState<HikmahTab>('today');
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [saved, setSaved] = useState<Saying[]>([]);
 
-  // Memoize the handlers
+  useEffect(() => {
+    setSavedIds(getSavedIds());
+    setSaved(getSavedSayings());
+  }, []);
+
+  const doToggleSave = useCallback((s: Saying) => {
+    const next = toggleSaved(s);
+    setSaved(next);
+    setSavedIds(new Set(next.map(x => x.id)));
+  }, []);
+
   const viewDetails = useCallback((s: Saying) => setDetailSaying(s), []);
   const goBack = useCallback(() => setDetailSaying(null), []);
 
+  const TABS: { id: HikmahTab; label: string }[] = [
+    { id: 'today', label: 'Today' },
+    { id: 'archive', label: 'Archive' },
+    { id: 'saved', label: `Saved${saved.length > 0 ? ` (${saved.length})` : ''}` },
+  ];
+
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
       {/* Title */}
       <div className="text-center space-y-2">
         <h2 className="text-3xl sm:text-4xl font-bold tracking-tight font-serif" style={{ color: IVORY }}>
@@ -752,18 +890,44 @@ export function HikmahApp() {
       <AnimatePresence mode="wait">
         {detailSaying ? (
           <motion.div key="detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <SayingDetail saying={detailSaying} onBack={goBack} />
+            <SayingDetail saying={detailSaying} onBack={goBack} savedIds={savedIds} onToggleSave={doToggleSave} />
           </motion.div>
         ) : (
-          <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="space-y-6">
-            {/* Daily saying */}
-            <DailySaying onViewDetails={viewDetails} />
+          <motion.div key="tabs" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="space-y-5">
+            {/* Tab bar */}
+            <div className="flex justify-center gap-1.5">
+              {TABS.map(t => (
+                <button key={t.id} onClick={() => setTab(t.id)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold tracking-wider transition-all"
+                  style={{
+                    background: tab === t.id ? TEAL_DIM : 'transparent',
+                    color: tab === t.id ? TEAL : MUTED,
+                    border: `1px solid ${tab === t.id ? TEAL_BRD : 'transparent'}`,
+                  }}>
+                  {t.label}
+                </button>
+              ))}
+            </div>
 
-            <HKDivider />
-
-            {/* Browse archive */}
-            <BrowseSection onViewDetails={viewDetails} />
+            {/* Tab content */}
+            <AnimatePresence mode="wait">
+              {tab === 'today' && (
+                <motion.div key="t-today" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <DailySaying onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                </motion.div>
+              )}
+              {tab === 'archive' && (
+                <motion.div key="t-archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <BrowseSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                </motion.div>
+              )}
+              {tab === 'saved' && (
+                <motion.div key="t-saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                  <SavedSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} saved={saved} />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
       </AnimatePresence>
