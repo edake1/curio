@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Input } from '@/components/ui/input';
 import { Rocket, Cpu, Leaf, Users, FlaskConical, Palette } from 'lucide-react';
@@ -61,8 +61,14 @@ export function WhatYoullSeeApp() {
   );
   const currentYear = new Date().getFullYear();
   const birthYear = currentYear - age;
-  const deathYear = birthYear + lifeExpectancy;
+  const deathYear = Math.round(birthYear + lifeExpectancy);
   const yearsLeft = Math.max(0, deathYear - currentYear);
+
+  // Track expanded card
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const toggleExpand = useCallback((id: string) => {
+    setExpandedCard(prev => prev === id ? null : id);
+  }, []);
 
   const allFuture = useMemo(
     () => FUTURE_EVENTS.filter(e => e.year >= currentYear),
@@ -141,7 +147,7 @@ export function WhatYoullSeeApp() {
 
       {/* ── Hero stats row ── */}
       <div className="grid grid-cols-3 gap-3">
-        <StatCard value={`${yearsLeft}`} label="years of future" sub={`until ~${deathYear}`} color={INDIGO} />
+        <StatCard value={`${Math.round(yearsLeft)}`} label="years of future" sub={`until ~${deathYear}`} color={INDIGO} />
         <StatCard value={`${witnessPct}%`} label="of events you'll see" sub={`${willSee.length} of ${allFuture.length}`} color={GREEN} />
         <StatCard value={nearest ? `${nearest.year}` : '—'} label="next milestone" sub={nearest ? nearest.event.slice(0, 30) + (nearest.event.length > 30 ? '…' : '') : ''} color="#fbbf24" />
       </div>
@@ -229,15 +235,20 @@ export function WhatYoullSeeApp() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {events.map((event, i) => (
-              <EventCard
-                key={`see-${event.year}-${event.event}`}
-                event={event}
-                birthYear={birthYear}
-                delay={di * 0.05 + i * 0.03}
-                variant="witness"
-              />
-            ))}
+            {events.map((event, i) => {
+              const cardId = `see-${event.year}-${event.event}`;
+              return (
+                <EventCard
+                  key={cardId}
+                  event={event}
+                  birthYear={birthYear}
+                  delay={di * 0.05 + i * 0.03}
+                  variant="witness"
+                  isExpanded={expandedCard === cardId}
+                  onToggle={() => toggleExpand(cardId)}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
@@ -263,15 +274,20 @@ export function WhatYoullSeeApp() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            {events.map((event, i) => (
-              <EventCard
-                key={`miss-${event.year}-${event.event}`}
-                event={event}
-                birthYear={birthYear}
-                delay={di * 0.05 + i * 0.03 + 0.2}
-                variant="miss"
-              />
-            ))}
+            {events.map((event, i) => {
+              const cardId = `miss-${event.year}-${event.event}`;
+              return (
+                <EventCard
+                  key={cardId}
+                  event={event}
+                  birthYear={birthYear}
+                  delay={di * 0.05 + i * 0.03 + 0.2}
+                  variant="miss"
+                  isExpanded={expandedCard === cardId}
+                  onToggle={() => toggleExpand(cardId)}
+                />
+              );
+            })}
           </div>
         </div>
       ))}
@@ -298,50 +314,69 @@ function StatCard({ value, label, sub, color }: { value: string; label: string; 
     <motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl p-3.5 text-center space-y-1"
-      style={{ background: BG, border: `1px solid ${color}18` }}
+      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      className="rounded-xl p-3.5 text-center space-y-1 cursor-default"
+      style={{ background: BG, border: `1px solid ${color}25` }}
     >
       <div className="text-xl sm:text-2xl font-bold tabular-nums" style={{ color }}>{value}</div>
       <div className="text-[10px] tracking-wider uppercase" style={{ color: MUTED }}>{label}</div>
-      {sub && <div className="text-[9px] truncate" style={{ color: FAINT }}>{sub}</div>}
+      {sub && <div className="text-[10px] truncate" style={{ color: MUTED, opacity: 0.7 }}>{sub}</div>}
     </motion.div>
   );
 }
 
 // ── Event card ────────────────────────────────────────────────
-function EventCard({ event, birthYear, delay, variant }: {
+function EventCard({ event, birthYear, delay, variant, isExpanded, onToggle }: {
   event: FutureEvent; birthYear: number; delay: number; variant: 'witness' | 'miss';
+  isExpanded: boolean; onToggle: () => void;
 }) {
   const cat = CAT[event.category];
   const ageAtEvent = event.year - birthYear;
   const isWitness = variant === 'witness';
   const certClr = certaintyColor(event.certainty);
+  const certPct = Math.round(event.certainty * 100);
+  const accentClr = isWitness ? (cat?.color || GREEN) : MUTED;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay }}
-      className="rounded-xl p-3.5 space-y-2.5 group relative overflow-hidden"
-      style={{ background: BG, border: `1px solid ${isWitness ? (cat?.color || GREEN) + '18' : FAINT}` }}
+      whileHover={isWitness ? {
+        y: -3,
+        boxShadow: `0 8px 30px ${accentClr}15`,
+        transition: { duration: 0.25 },
+      } : {}}
+      onClick={onToggle}
+      className="rounded-xl p-3.5 space-y-2.5 group relative overflow-hidden cursor-pointer select-none"
+      style={{
+        background: BG,
+        border: `1px solid ${isWitness ? accentClr + '22' : 'rgba(222,198,163,0.08)'}`,
+      }}
     >
-      {/* Soft top accent */}
+      {/* Top accent glow line */}
       {isWitness && cat && (
-        <div className="absolute top-0 left-0 right-0 h-px" style={{ background: cat.color + '40' }} />
+        <motion.div
+          className="absolute top-0 left-0 right-0 h-[2px]"
+          style={{ background: `linear-gradient(to right, transparent, ${cat.color}60, transparent)` }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: delay + 0.2 }}
+        />
       )}
 
       {/* Year + category + age */}
       <div className="flex items-center gap-2">
-        <span className="text-sm font-bold tabular-nums" style={{ color: isWitness ? INDIGO : `${INDIGO}88` }}>
+        <span className="text-sm font-bold tabular-nums" style={{ color: isWitness ? INDIGO : `${INDIGO}66` }}>
           {event.year}
         </span>
         {cat && (
-          <span className="text-[8px] uppercase tracking-[0.15em] px-1.5 py-0.5 rounded"
-            style={{ color: cat.color, background: cat.color + '10' }}>
+          <span className="text-[9px] uppercase tracking-[0.12em] px-2 py-0.5 rounded-md font-medium"
+            style={{ color: cat.color, background: cat.color + '15', border: `1px solid ${cat.color}20` }}>
             {cat.label}
           </span>
         )}
-        <span className="ml-auto text-[10px] tabular-nums" style={{ color: isWitness ? MUTED : FAINT }}>
+        <span className="ml-auto text-[10px] tabular-nums font-medium" style={{ color: isWitness ? MUTED : 'rgba(222,198,163,0.35)' }}>
           age {ageAtEvent}
         </span>
       </div>
@@ -351,26 +386,82 @@ function EventCard({ event, birthYear, delay, variant }: {
         {event.event}
       </p>
 
-      {/* Certainty + source */}
-      <div className="flex items-center gap-2">
-        <div className="flex-1 h-1 rounded-full overflow-hidden" style={{ background: FAINT }}>
+      {/* Certainty bar + label */}
+      <div className="flex items-center gap-2.5">
+        <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(222,198,163,0.08)' }}>
           <motion.div
             initial={{ width: 0 }}
-            animate={{ width: `${event.certainty * 100}%` }}
-            transition={{ duration: 0.5, delay: delay + 0.15 }}
+            animate={{ width: `${certPct}%` }}
+            transition={{ duration: 0.6, delay: delay + 0.15, ease: 'easeOut' }}
             className="h-full rounded-full"
             style={{ background: certClr }}
           />
         </div>
-        <span className="text-[9px] tabular-nums shrink-0" style={{ color: certClr }}>
+        <span className="text-[10px] tabular-nums shrink-0 font-medium" style={{ color: certClr }}>
           {certaintyLabel(event.certainty)}
         </span>
       </div>
+
+      {/* Source — always visible with better contrast */}
       {event.source && (
-        <p className="text-[9px] truncate" style={{ color: FAINT }}>
-          Source: {event.source}
+        <p className="text-[10px]" style={{ color: MUTED, opacity: 0.8 }}>
+          {event.source}
         </p>
       )}
+
+      {/* Expandable detail panel */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.25 }}
+            className="overflow-hidden"
+          >
+            <div className="pt-2 mt-1 space-y-2" style={{ borderTop: `1px solid ${accentClr}15` }}>
+              {/* Detail stats row */}
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <div className="text-xs font-bold tabular-nums" style={{ color: accentClr }}>{certPct}%</div>
+                  <div className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>Certainty</div>
+                </div>
+                <div>
+                  <div className="text-xs font-bold tabular-nums" style={{ color: INDIGO }}>{event.year - new Date().getFullYear()}y</div>
+                  <div className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>From now</div>
+                </div>
+                <div>
+                  <div className="text-xs font-bold tabular-nums" style={{ color: isWitness ? GREEN : RED }}>
+                    {isWitness ? '✓ Witness' : '✗ Miss'}
+                  </div>
+                  <div className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>Outcome</div>
+                </div>
+              </div>
+              {/* Category description */}
+              {cat && (
+                <div className="flex items-center gap-2 pt-1">
+                  <cat.icon className="w-3.5 h-3.5" style={{ color: cat.color }} />
+                  <span className="text-[10px] font-medium" style={{ color: cat.color }}>
+                    {cat.label} — {isWitness ? 'You\'ll be there for this' : 'This happens after your time'}
+                  </span>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Expand indicator */}
+      <div className="flex justify-center">
+        <motion.div
+          animate={{ rotate: isExpanded ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+          className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity"
+          style={{ color: MUTED }}
+        >
+          ▾
+        </motion.div>
+      </div>
     </motion.div>
   );
 }
