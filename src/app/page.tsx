@@ -21,6 +21,7 @@ import { TheGrandDaoApp } from '@/components/apps/the-grand-dao';
 import { YourLastWordsApp } from '@/components/apps/your-last-words';
 import { HikmahApp } from '@/components/apps/hikmah';
 import { DeadApp } from '@/components/apps/dead-app';
+import { TheRewindApp } from '@/components/apps/the-rewind';
 
 // Client-side hydration helper
 const emptySubscribe = () => () => {};
@@ -83,6 +84,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'your-last-words':  { accent: '#c8956c', tint: 'rgba(200,149,108,0.07)', label: 'Mortality'    },
   'hikmah':           { accent: '#0d9488', tint: 'rgba(13,148,136,0.07)',   label: 'Wisdom'       },
   'dead-app':         { accent: '#71717a', tint: 'rgba(113,113,122,0.07)',   label: 'Meta'         },
+  'the-rewind':       { accent: '#d97706', tint: 'rgba(217,119,6,0.07)',     label: 'History'      },
 };
 
 function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
@@ -245,6 +247,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'your-last-words': return <YourLastWordsApp />;
       case 'hikmah': return <HikmahApp />;
       case 'dead-app': return <DeadApp />;
+      case 'the-rewind': return <TheRewindApp />;
       default: return null;
     }
   };

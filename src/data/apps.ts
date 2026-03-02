@@ -17,6 +17,7 @@ import {
   Flame,
   BookOpen,
   Skull,
+  Rewind,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -149,5 +150,13 @@ export const APPS: AppDefinition[] = [
     icon: Skull,
     color: 'from-zinc-700 to-zinc-900',
     description: 'Stay for five minutes. If you can.',
+  },
+  {
+    id: 'the-rewind',
+    name: 'The Rewind',
+    tagline: 'Witness a random moment in human history.',
+    icon: Rewind,
+    color: 'from-amber-600 to-yellow-700',
+    description: 'Press play. History unfolds line by line.',
   },
 ];
