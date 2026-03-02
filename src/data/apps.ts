@@ -19,6 +19,7 @@ import {
   Skull,
   Rewind,
   Gavel,
+  MousePointer2,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -167,5 +168,13 @@ export const APPS: AppDefinition[] = [
     icon: Gavel,
     color: 'from-yellow-500 to-amber-600',
     description: 'Bid life-tokens on abstract treasures. AI reveals what your choices say about you.',
+  },
+  {
+    id: 'dont-move',
+    name: "Don't Move",
+    tagline: 'Stay perfectly still. They hunt you.',
+    icon: MousePointer2,
+    color: 'from-fuchsia-600 to-violet-700',
+    description: 'Predators home in on your cursor. Any movement is death.',
   },
 ];

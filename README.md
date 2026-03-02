@@ -4,7 +4,7 @@ A collection of interactive micro-experiences that make you think, reflect, and 
 
 ## What Is This?
 
-Curio is a single-page hub of 14 mini-apps. Each one is a small, self-contained experience — a moral dilemma, a life visualization, a piece of ancient wisdom, a patience test. You tap in, spend a minute or two, and come away with something: a new perspective, a number that surprises you, a question you can't shake.
+Curio is a single-page hub of 18 mini-apps. Each one is a small, self-contained experience — a moral dilemma, a life visualization, a piece of ancient wisdom, a patience test. You tap in, spend a minute or two, and come away with something: a new perspective, a number that surprises you, a question you can't shake.
 
 The apps range from data-driven introspection (life calendars, birth-year snapshots) to AI-powered generation (fake careers, demotivational posters, wisdom context) to community-driven participation (voting, reflections, last words).
 
@@ -26,6 +26,10 @@ The apps range from data-driven introspection (life calendars, birth-year snapsh
 | 12 | **The Grand Dao** | Ancient cultivation wisdom. Discover your Dao Name, hear AI-spoken cosmic paths, and collect quotes. |
 | 13 | **Your Last Words** | Write what you'd leave behind. AI reflects it back to you. Read what others wrote in the memorial. |
 | 14 | **Hikmah (حكمة)** | A daily piece of wisdom from cultures around the world, with AI-generated historical context and community reflections. |
+| 15 | **Dead App** | The app that doesn't want to be opened. Stay for five minutes. If you can. |
+| 16 | **The Rewind** | Witness a random moment in human history, revealed line by line. |
+| 17 | **The Auction** | 100 tokens. 10 desires. Bid on abstract life experiences and let AI reveal what your choices say about you. |
+| 18 | **Don't Move** | Predators home in on your cursor. Stay perfectly still or die. Near-misses build your score multiplier. |
 
 ## Tech Stack
 
