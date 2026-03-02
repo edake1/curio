@@ -314,7 +314,7 @@ function RegionGrid({ onRegionClick }: { onRegionClick: (region: string) => void
       <p className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
         ✦ Explore by Region
       </p>
-      <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-4 lg:grid-cols-4 gap-1.5">
         {regions.map(r => (
           <button key={r} onClick={() => onRegionClick(r)}
             className="rounded-xl p-2.5 text-center space-y-1 transition-all hover:scale-[1.03]"
@@ -343,7 +343,7 @@ function ArchivesTeaser({ onViewDetails, savedIds, onToggleSave }: {
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch('/api/wisdom/random?count=4');
+        const res = await fetch('/api/wisdom/random?count=8');
         const data = await res.json();
         if (data.sayings) setSayings(data.sayings);
       } catch { /* ignore */ }
@@ -357,7 +357,7 @@ function ArchivesTeaser({ onViewDetails, savedIds, onToggleSave }: {
       <p className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
         ✦ From the Archives
       </p>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
         {sayings.map((s, i) => (
           <motion.div
             key={s.id}
@@ -1068,7 +1068,7 @@ export function HikmahApp() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
       {/* Title */}
       <div className="text-center space-y-1">
         <h2 className="text-2xl sm:text-3xl font-bold tracking-tight font-serif" style={{ color: IVORY }}>
@@ -1081,7 +1081,8 @@ export function HikmahApp() {
 
       <AnimatePresence mode="wait">
         {detailSaying ? (
-          <motion.div key="detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+          <motion.div key="detail" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="max-w-2xl mx-auto">
             <SayingDetail saying={detailSaying} onBack={goBack} savedIds={savedIds} onToggleSave={doToggleSave} />
           </motion.div>
         ) : (
@@ -1111,13 +1112,13 @@ export function HikmahApp() {
                 <motion.div key="t-today" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="space-y-5">
                   {/* 2-column grid on desktop: daily card left, sidebar right */}
-                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
                     {/* Left — daily saying (takes 3/5 on desktop) */}
-                    <div className="md:col-span-3">
+                    <div className="lg:col-span-3">
                       <DailySaying onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
                     </div>
                     {/* Right — discover + region grid (takes 2/5 on desktop) */}
-                    <div className="md:col-span-2 space-y-4">
+                    <div className="lg:col-span-2 space-y-4">
                       <DiscoverSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
                       <HKDivider />
                       <RegionGrid onRegionClick={handleRegionClick} />
@@ -1128,12 +1129,14 @@ export function HikmahApp() {
                 </motion.div>
               )}
               {tab === 'archive' && (
-                <motion.div key="t-archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div key="t-archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="max-w-2xl mx-auto">
                   <BrowseSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} initialRegion={archiveRegion} />
                 </motion.div>
               )}
               {tab === 'saved' && (
-                <motion.div key="t-saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div key="t-saved" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="max-w-2xl mx-auto">
                   <SavedSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} saved={saved} />
                 </motion.div>
               )}
