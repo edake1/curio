@@ -22,6 +22,7 @@ import { YourLastWordsApp } from '@/components/apps/your-last-words';
 import { HikmahApp } from '@/components/apps/hikmah';
 import { DeadApp } from '@/components/apps/dead-app';
 import { TheRewindApp } from '@/components/apps/the-rewind';
+import { TheAuctionApp } from '@/components/apps/the-auction';
 
 // Client-side hydration helper
 const emptySubscribe = () => () => {};
@@ -85,6 +86,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'hikmah':           { accent: '#0d9488', tint: 'rgba(13,148,136,0.07)',   label: 'Wisdom'       },
   'dead-app':         { accent: '#71717a', tint: 'rgba(113,113,122,0.07)',   label: 'Meta'         },
   'the-rewind':       { accent: '#d97706', tint: 'rgba(217,119,6,0.07)',     label: 'History'      },
+  'the-auction':      { accent: '#eab308', tint: 'rgba(234,179,8,0.07)',     label: 'Self'         },
 };
 
 function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
@@ -248,6 +250,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'hikmah': return <HikmahApp />;
       case 'dead-app': return <DeadApp />;
       case 'the-rewind': return <TheRewindApp />;
+      case 'the-auction': return <TheAuctionApp />;
       default: return null;
     }
   };

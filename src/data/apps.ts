@@ -18,6 +18,7 @@ import {
   BookOpen,
   Skull,
   Rewind,
+  Gavel,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -158,5 +159,13 @@ export const APPS: AppDefinition[] = [
     icon: Rewind,
     color: 'from-amber-600 to-yellow-700',
     description: 'Press play. History unfolds line by line.',
+  },
+  {
+    id: 'the-auction',
+    name: 'The Auction',
+    tagline: '100 tokens. 10 desires. What do you value?',
+    icon: Gavel,
+    color: 'from-yellow-500 to-amber-600',
+    description: 'Bid life-tokens on abstract treasures. AI reveals what your choices say about you.',
   },
 ];
