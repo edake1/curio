@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { SEED_DILEMMAS, SEED_DELETE_CHOICES } from '../src/data/seed';
+import { SEED_WISDOM } from '../src/data/wisdom';
 
 const prisma = new PrismaClient();
 
@@ -38,6 +39,24 @@ async function main() {
     create: { id: 'default', totalVisitors: 0 },
   });
   console.log('  ✓ SiteStats singleton ensured');
+
+  // Seed wisdom sayings
+  const wisdomCount = await prisma.wisdomSaying.count();
+  if (wisdomCount === 0) {
+    await prisma.wisdomSaying.createMany({
+      data: SEED_WISDOM.map((s) => ({
+        text: s.text,
+        originalText: s.originalText ?? null,
+        attribution: s.attribution,
+        origin: s.origin,
+        region: s.region,
+        category: s.category,
+      })),
+    });
+    console.log(`  ✓ Created ${SEED_WISDOM.length} wisdom sayings`);
+  } else {
+    console.log(`  · Wisdom sayings already seeded (${wisdomCount} found)`);
+  }
 
   console.log('🌱 Seeding complete!');
 }

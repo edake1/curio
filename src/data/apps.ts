@@ -15,6 +15,7 @@ import {
   X,
   Music,
   Flame,
+  BookOpen,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -131,5 +132,13 @@ export const APPS: AppDefinition[] = [
     icon: Feather,
     color: 'from-amber-800 to-orange-900',
     description: 'Write your last words. A mirror and the unsaid will be returned to you.',
+  },
+  {
+    id: 'hikmah',
+    name: 'Hikmah',
+    tagline: 'Wisdom from every corner of the earth.',
+    icon: BookOpen,
+    color: 'from-emerald-800 to-teal-900',
+    description: 'One saying per day. Deep context. Reflections from around the world.',
   },
 ];

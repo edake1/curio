@@ -1,135 +1,153 @@
 # Curio
 
-A collection of 10 thought-provoking, viral-ready mini-apps—all in one place. Built to spark curiosity, debate, and self-reflection.
+A collection of interactive micro-experiences that make you think, reflect, and see the world differently. Built with care.
 
 ## What Is This?
 
-Curio is a single-page hub of interactive micro-experiences. Users land on a grid of 10 mini-apps, tap into any one, and get drawn into something that makes them think, share, or feel something unexpected. Each app is designed to be instantly engaging, mobile-first, and inherently shareable.
+Curio is a single-page hub of 14 mini-apps. Each one is a small, self-contained experience — a moral dilemma, a life visualization, a piece of ancient wisdom, a patience test. You tap in, spend a minute or two, and come away with something: a new perspective, a number that surprises you, a question you can't shake.
 
-## The 10 Mini-Apps
+The apps range from data-driven introspection (life calendars, birth-year snapshots) to AI-powered generation (fake careers, demotivational posters, wisdom context) to community-driven participation (voting, reflections, last words).
 
-| # | App | What It Does |
+## The Apps
+
+| # | App | Description |
 |---|-----|-------------|
-| 1 | **One Decision** | A daily moral dilemma with real-time crowd voting. "A train is heading toward 5 people…" — pick a side and see how the world voted. |
-| 2 | **This Career Does Not Exist** | AI generates fake-but-plausible job titles, descriptions, salary ranges, and required skills. Hit refresh for another. |
-| 3 | **Parallel You** | Enter your birth year, pick a country, and see what your life would statistically look like if you'd been born there — income, work hours, life expectancy, and a fun fact. |
-| 4 | **Your Life Stats** | Enter your birthday and see your life quantified in heartbeats, breaths, blinks, dreams, and more. |
-| 5 | **Anti-Motivational** | AI-generated demotivational posters — cynically funny quotes styled as classic motivational art. |
-| 6 | **What You'll See** | Enter your age and see a timeline of future world events you're statistically likely to witness, each with a likelihood score. |
-| 7 | **Life Calendar** | Your entire life rendered as a grid of weeks — lived weeks in color, remaining weeks in gray. A visceral mortality visualization. |
-| 8 | **Pick One to Delete** | Two things. You must erase one from existence forever. Real-time voting shows what others chose. |
-| 9 | **Don't Move** | A patience game — hold your mouse/device perfectly still. Animated distractions try to make you flinch. |
-| 10 | **While You Were Here** | Real-time counters showing what happened globally while you've been on the page — births, deaths, emails sent, pizzas ordered. |
+| 1 | **One Decision** | A moral dilemma. Pick a side, see how the world voted in real time. |
+| 2 | **This Career Does Not Exist** | AI-generated jobs that sound real but aren't — title, salary, skills, and all. |
+| 3 | **Parallel You** | Pick a country. See what your life would look like if you'd been born there. |
+| 4 | **Your Life Stats** | Your age in heartbeats, breaths, blinks, dreams, and other strange units. |
+| 5 | **The Void** | AI-generated demotivational posters. Cynically funny, shareable, downloadable. |
+| 6 | **What You'll See** | Future events you're statistically likely to witness in your lifetime. |
+| 7 | **Life Calendar** | Your entire life as a grid of weeks. Lived weeks in color, remaining in gray. |
+| 8 | **Pick One to Delete** | Two things. Erase one forever. See what everyone else chose. |
+| 9 | **Sound of Your Birth** | The #1 song, top movie, and prices from the year you were born. |
+| 10 | **4,160 Saturdays** | How many of your ~4,160 lifetime Saturdays have you already spent? |
+| 11 | **While You Were Here** | Real-time counters: births, deaths, emails, pizzas — all since you opened the page. |
+| 12 | **The Grand Dao** | Ancient cultivation wisdom. Discover your Dao Name, hear AI-spoken cosmic paths, and collect quotes. |
+| 13 | **Your Last Words** | Write what you'd leave behind. AI reflects it back to you. Read what others wrote in the memorial. |
+| 14 | **Hikmah (حكمة)** | A daily piece of wisdom from cultures around the world, with AI-generated historical context and community reflections. |
 
 ## Tech Stack
 
 - **Framework:** Next.js 16 (App Router, React 19)
 - **Language:** TypeScript
-- **Styling:** Tailwind CSS 4 + shadcn/ui components
+- **Styling:** Tailwind CSS 4 + shadcn/ui primitives
 - **Animations:** Framer Motion
-- **Database:** SQLite via Prisma ORM
-- **AI Generation:** z-ai-web-dev-sdk (powers career generator, demotivational quotes, new dilemmas, and new delete-choices)
-- **Runtime:** Bun (standalone output)
+- **Database:** PostgreSQL (Neon) via Prisma ORM
+- **AI:** OpenAI GPT-4o (text generation, context, TTS)
+- **Image Export:** html-to-image
+- **Runtime:** Node.js / Bun
 
 ## Architecture
 
 ```
 src/
 ├── app/
-│   ├── page.tsx               # Hub page + routing shell (~130 lines)
-│   ├── layout.tsx             # Root layout, fonts, metadata
-│   ├── globals.css            # Theme variables, custom utilities
+│   ├── page.tsx                 # Hub + app routing shell
+│   ├── layout.tsx               # Root layout, fonts, metadata
+│   ├── globals.css              # Theme variables, utilities
 │   └── api/
-│       ├── dilemma/           # GET daily/random dilemma, POST AI-generated
-│       │   └── vote/          # POST vote, GET stats
-│       ├── delete-choice/     # GET random choice, POST AI-generated
-│       │   └── vote/          # POST vote, GET stats
+│       ├── dilemma/             # GET daily dilemma
+│       │   └── vote/            # POST vote
+│       ├── delete-choice/       # GET random choice pair
+│       │   └── vote/            # POST vote
+│       ├── dao-debate/          # POST AI Dao debate
 │       ├── generate/
-│       │   ├── career/        # POST → AI or fallback fake career
-│       │   └── demotivational/# POST → AI or fallback quote
-│       └── global-stats/      # GET real-time stats, POST visitor tracking
+│       │   ├── career/          # POST AI career
+│       │   ├── demotivational/  # POST AI poster quote
+│       │   ├── grand-dao/       # POST AI Dao wisdom
+│       │   └── dao-tts/         # POST text-to-speech
+│       ├── last-words/
+│       │   ├── submit/          # POST submit last words
+│       │   ├── gallery/         # GET paginated memorial
+│       │   └── upvote/          # POST upvote
+│       ├── wisdom/
+│       │   ├── daily/           # GET today's saying
+│       │   ├── browse/          # GET filtered archive
+│       │   ├── context/         # GET/generate AI context
+│       │   ├── reflections/     # GET/POST reflections
+│       │   │   └── upvote/      # POST upvote reflection
+│       │   └── generate/        # POST AI-generate new sayings
+│       └── global-stats/        # GET/POST visitor stats
 ├── components/
-│   ├── apps/                  # One file per mini-app
-│   │   ├── one-decision.tsx
-│   │   ├── this-career.tsx
-│   │   ├── parallel-you.tsx
-│   │   ├── life-stats.tsx
-│   │   ├── anti-motivational.tsx
-│   │   ├── what-youll-see.tsx
-│   │   ├── life-calendar.tsx
-│   │   ├── pick-one-delete.tsx
-│   │   ├── dont-move.tsx
-│   │   └── while-here.tsx
-│   ├── share-button.tsx       # Native share / clipboard fallback
-│   └── ui/                    # shadcn/ui primitives (Button, Input, Badge)
-├── data/                      # All externalized data (zero inline constants)
-│   ├── apps.ts                # App definitions (id, name, icon, color)
-│   ├── countries.ts           # 60+ countries with life expectancy & stats
-│   ├── future-events.ts       # 19 future predictions with certainty scores
-│   ├── global-rates.ts        # Real-time stat rates + computation helper
-│   ├── careers.ts             # Fallback career templates & skills
-│   ├── demotivational.ts      # Fallback demotivational quotes
-│   └── seed.ts                # Seed dilemmas & delete choices
+│   ├── apps/                    # One file per app (14 total)
+│   ├── share-button.tsx         # Native share / clipboard fallback
+│   └── ui/                      # shadcn/ui primitives
+├── data/                        # Externalized data — no inline constants
+│   ├── apps.ts                  # App definitions (id, name, icon, color)
+│   ├── countries.ts             # 60+ countries with stats
+│   ├── future-events.ts         # Future predictions with scores
+│   ├── global-rates.ts          # Real-time stat rates
+│   ├── careers.ts               # Fallback career templates
+│   ├── demotivational.ts        # Fallback poster quotes
+│   ├── life-stats.ts            # Life stat definitions
+│   ├── wisdom.ts                # 146 proverbs + region/category constants
+│   └── seed.ts                  # Seed dilemmas & delete choices
 ├── hooks/
-│   └── use-mobile.ts          # useIsMobile hook
+│   └── use-mobile.ts            # useIsMobile hook
 └── lib/
-    ├── db.ts                  # Prisma client singleton
-    ├── hooks.ts               # useFetchOnMount generic hook
-    ├── session.ts             # getSessionId helper
-    ├── types.ts               # Shared interfaces (Dilemma, DeleteChoice)
-    ├── utils.ts               # cn() helper
-    └── validation.ts          # Zod schemas for API input validation
+    ├── db.ts                    # Prisma client singleton
+    ├── openai.ts                # OpenAI client singleton
+    ├── hooks.ts                 # useFetchOnMount generic hook
+    ├── session.ts               # getSessionId helper
+    ├── types.ts                 # Shared interfaces
+    ├── utils.ts                 # cn() helper
+    └── validation.ts            # Zod schemas for API validation
 ```
 
-The app is a client-rendered SPA. The hub page shows all 10 app cards; tapping one renders the corresponding component with a back button. Two apps (One Decision, Pick One to Delete) persist and aggregate votes via SQLite. Three AI-powered apps (Career, Anti-Motivational, Dilemma, Delete-Choice) use server-side generation with hardcoded fallbacks. All data is externalized into `src/data/` — zero inline constants in components or API routes.
+## Data Models (Prisma / PostgreSQL)
 
-## Data Models (Prisma/SQLite)
-
-- **Dilemma** — moral questions with A/B options, vote counts, daily-feature flag
-- **Vote** — individual votes linked to a dilemma + anonymous session ID
-- **DeleteChoice** — "pick one to delete" pairs with vote counts
+- **Dilemma** — moral dilemmas with A/B options and vote counts
+- **Vote** — individual votes linked to a dilemma + session ID
+- **DeleteChoice** — "pick one to erase" pairs with vote counts
 - **DeleteVote** — individual votes for delete choices
-- **SiteStats** — aggregate counters (total votes, visitors)
+- **LastWord** — user-submitted last words with AI mirror text
+- **WisdomSaying** — proverbs and sayings from around the world, with AI-generated context
+- **WisdomReflection** — community reflections on sayings, with tags and upvotes
+- **SiteStats** — aggregate counters (total visitors)
 - **VisitorSession** — anonymous session tracking
 
 ## Getting Started
 
 ```bash
 # Install dependencies
-bun install
+npm install
 
 # Set up environment
 cp .env.example .env
+# → Set DATABASE_URL (PostgreSQL) and OPENAI_API_KEY
 
 # Push database schema
-bun run db:push
+npx prisma db push
 
 # Generate Prisma client
-bun run db:generate
+npx prisma generate
+
+# Seed the database
+npm run db:seed
 
 # Start dev server
-bun run dev
+npm run dev
 ```
 
 ## Environment Variables
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `DATABASE_URL` | SQLite database file path | `file:./dev.db` |
+| Variable | Description |
+|----------|-------------|
+| `DATABASE_URL` | PostgreSQL connection string |
+| `OPENAI_API_KEY` | OpenAI API key (GPT-4o, TTS) |
 
 ## Scripts
 
 | Command | Description |
 |---------|-------------|
-| `bun run dev` | Start development server on port 3000 |
-| `bun run build` | Production build (standalone output) |
-| `bun run start` | Run production server |
-| `bun run lint` | Run ESLint |
-| `bun run db:push` | Push Prisma schema to database |
-| `bun run db:generate` | Generate Prisma client |
-| `bun run db:migrate` | Run Prisma migrations |
-| `bun run db:reset` | Reset database |
-| `bun run db:seed` | Seed database with initial data |
+| `npm run dev` | Development server (port 3000) |
+| `npm run build` | Production build |
+| `npm run start` | Run production server |
+| `npm run lint` | ESLint |
+| `npm run db:push` | Push Prisma schema |
+| `npm run db:generate` | Generate Prisma client |
+| `npm run db:seed` | Seed database |
 
 ## License
 

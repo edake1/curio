@@ -117,3 +117,49 @@ model LastWords {
   @@index([createdAt])
   @@index([upvotes])
 }
+
+// Hikmah — Global Wisdom sayings
+model WisdomSaying {
+  id              String   @id @default(cuid())
+  text            String   // The saying in English
+  originalText    String?  // Original language text (native script)
+  attribution     String   // "Japanese Proverb", "Rumi", "Yoruba Proverb", etc.
+  origin          String   // Specific country or culture
+  region          String   // africa, east-asia, south-asia, southeast-asia, middle-east, europe, americas, indigenous, oceania
+  category        String   // resilience, patience, love, death, wisdom, justice, community, humility, nature, truth, action, knowledge, gratitude, unity, courage, time, change, character
+  contextOrigin   String?  // Where it comes from — AI-generated on first view
+  contextMeaning  String?  // What it means beneath the surface
+  contextPractice String?  // How to apply it to life
+  relatedIds      String?  // JSON array of related saying IDs
+  dailyDate       DateTime? @unique // When featured as daily saying
+  totalReflections Int     @default(0)
+  aiGenerated     Boolean  @default(false)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  reflections     WisdomReflection[]
+
+  @@index([region])
+  @@index([category])
+  @@index([dailyDate])
+  @@index([active])
+}
+
+// Hikmah — Community reflections on sayings
+model WisdomReflection {
+  id        String   @id @default(cuid())
+  sayingId  String
+  text      String
+  tag       String?  // "resonates" | "disagree" | "reminds-me" | "in-my-culture"
+  sessionId String?
+  upvotes   Int      @default(0)
+  createdAt DateTime @default(now())
+
+  saying    WisdomSaying @relation(fields: [sayingId], references: [id], onDelete: Cascade)
+
+  @@index([sayingId])
+  @@index([sessionId])
+  @@index([createdAt])
+  @@index([upvotes])
+}

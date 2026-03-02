@@ -269,7 +269,7 @@ const DaoExportCard = forwardRef<HTMLDivElement, {
 DaoExportCard.displayName = 'DaoExportCard';
 
 function DownloadBtn({ cardRef, filename, small }: {
-  cardRef: React.RefObject<HTMLDivElement>;
+  cardRef: React.RefObject<HTMLDivElement | null>;
   filename: string;
   small?: boolean;
 }) {
