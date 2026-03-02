@@ -92,7 +92,7 @@ function toggleSaved(saying: Saying): Saying[] {
 const REGION_EMOJI: Record<string, string> = {
   'africa': '🌍', 'east-asia': '🏯', 'south-asia': '🕉️',
   'southeast-asia': '🌺', 'middle-east': '🕌', 'europe': '🏛️',
-  'americas': '🌎', 'oceania': '🌊',
+  'americas': '🌎', 'oceania': '�️',
 };
 
 const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
@@ -298,18 +298,6 @@ function DiscoverSection({ onViewDetails, savedIds, onToggleSave }: {
 // REGION GRID — quick access to filtered archive
 // ─────────────────────────────────────────────────────────────────
 function RegionGrid({ onRegionClick }: { onRegionClick: (region: string) => void }) {
-  const [stats, setStats] = useState<Record<string, number>>({});
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const res = await fetch('/api/wisdom/stats');
-        const data = await res.json();
-        if (data.regions) setStats(data.regions);
-      } catch { /* ignore */ }
-    })();
-  }, []);
-
   const regions = [
     'africa', 'east-asia', 'south-asia', 'southeast-asia',
     'middle-east', 'europe', 'americas', 'oceania',
@@ -318,7 +306,7 @@ function RegionGrid({ onRegionClick }: { onRegionClick: (region: string) => void
   const REGION_LABEL: Record<string, string> = {
     'africa': 'Africa', 'east-asia': 'East Asia', 'south-asia': 'South Asia',
     'southeast-asia': 'SE Asia', 'middle-east': 'Middle East', 'europe': 'Europe',
-    'americas': 'Americas', 'oceania': 'Oceania',
+    'americas': 'Americas', 'oceania': 'Pacific Isl.',
   };
 
   return (
@@ -326,7 +314,7 @@ function RegionGrid({ onRegionClick }: { onRegionClick: (region: string) => void
       <p className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
         ✦ Explore by Region
       </p>
-      <div className="grid grid-cols-4 gap-1.5">
+      <div className="grid grid-cols-4 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
         {regions.map(r => (
           <button key={r} onClick={() => onRegionClick(r)}
             className="rounded-xl p-2.5 text-center space-y-1 transition-all hover:scale-[1.03]"
@@ -335,11 +323,6 @@ function RegionGrid({ onRegionClick }: { onRegionClick: (region: string) => void
             <span className="text-[9px] font-medium block truncate" style={{ color: IVORY }}>
               {REGION_LABEL[r]}
             </span>
-            {stats[r] && (
-              <span className="text-[9px] block tabular-nums" style={{ color: FAINT }}>
-                {stats[r]}
-              </span>
-            )}
           </button>
         ))}
       </div>
@@ -1085,7 +1068,16 @@ export function HikmahApp() {
   ];
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-4 space-y-4">
+    <div className="max-w-3xl mx-auto px-4 py-4 space-y-4">
+      {/* Title */}
+      <div className="text-center space-y-1">
+        <h2 className="text-2xl sm:text-3xl font-bold tracking-tight font-serif" style={{ color: IVORY }}>
+          حكمة
+        </h2>
+        <p className="text-xs tracking-wider" style={{ color: MUTED }}>
+          Wisdom from every corner of the earth
+        </p>
+      </div>
 
       <AnimatePresence mode="wait">
         {detailSaying ? (
@@ -1118,11 +1110,19 @@ export function HikmahApp() {
               {tab === 'today' && (
                 <motion.div key="t-today" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                   className="space-y-5">
-                  <DailySaying onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
-                  <HKDivider />
-                  <DiscoverSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
-                  <HKDivider />
-                  <RegionGrid onRegionClick={handleRegionClick} />
+                  {/* 2-column grid on desktop: daily card left, sidebar right */}
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {/* Left — daily saying (takes 3/5 on desktop) */}
+                    <div className="md:col-span-3">
+                      <DailySaying onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                    </div>
+                    {/* Right — discover + region grid (takes 2/5 on desktop) */}
+                    <div className="md:col-span-2 space-y-4">
+                      <DiscoverSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                      <HKDivider />
+                      <RegionGrid onRegionClick={handleRegionClick} />
+                    </div>
+                  </div>
                   <HKDivider />
                   <ArchivesTeaser onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
                 </motion.div>
