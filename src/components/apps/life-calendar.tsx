@@ -261,24 +261,24 @@ export function LifeCalendarApp() {
         <div className="flex flex-wrap gap-x-8 gap-y-3 items-end">
           <div>
             <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-0.5">You are in</p>
-            <p className="text-[2.8rem] font-black tabular-nums leading-none" style={{ color: ACCENT }}>
+            <p className="text-[2rem] sm:text-[2.8rem] font-black tabular-nums leading-none" style={{ color: ACCENT }}>
               week {Math.max(1, weeksLived).toLocaleString()}
             </p>
             <p className="text-[12px] dark:text-zinc-500 text-zinc-400 mt-0.5">age {currentAge}</p>
           </div>
           <div className="w-px self-stretch dark:bg-white/[0.06] bg-black/[0.06]" />
-          <div className="flex gap-6">
-            <div>
+          <div className="flex flex-wrap gap-4 sm:gap-6">
+            <div className="min-w-0">
               <p className="text-[10px] dark:text-zinc-500 text-zinc-400 mb-0.5">Weeks lived</p>
-              <p className="text-[1.4rem] font-bold tabular-nums text-emerald-400 leading-none">{weeksLived.toLocaleString()}</p>
+              <p className="text-[1.1rem] sm:text-[1.4rem] font-bold tabular-nums text-emerald-400 leading-none">{weeksLived.toLocaleString()}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] dark:text-zinc-500 text-zinc-400 mb-0.5">Weeks left</p>
-              <p className="text-[1.4rem] font-bold tabular-nums text-rose-400 leading-none">{weeksLeft.toLocaleString()}</p>
+              <p className="text-[1.1rem] sm:text-[1.4rem] font-bold tabular-nums text-rose-400 leading-none">{weeksLeft.toLocaleString()}</p>
             </div>
-            <div>
+            <div className="min-w-0">
               <p className="text-[10px] dark:text-zinc-500 text-zinc-400 mb-0.5">Life used</p>
-              <p className="text-[1.4rem] font-bold tabular-nums text-amber-400 leading-none">{pct.toFixed(1)}%</p>
+              <p className="text-[1.1rem] sm:text-[1.4rem] font-bold tabular-nums text-amber-400 leading-none">{pct.toFixed(1)}%</p>
             </div>
           </div>
         </div>

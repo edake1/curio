@@ -64,10 +64,14 @@ export function WhatYoullSeeApp() {
   const deathYear = Math.round(birthYear + lifeExpectancy);
   const yearsLeft = Math.max(0, deathYear - currentYear);
 
-  // Track expanded card
+  // Track expanded card + category filter
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const toggleExpand = useCallback((id: string) => {
     setExpandedCard(prev => prev === id ? null : id);
+  }, []);
+  const toggleFilter = useCallback((cat: string) => {
+    setActiveFilter(prev => prev === cat ? null : cat);
   }, []);
 
   const allFuture = useMemo(
@@ -84,9 +88,19 @@ export function WhatYoullSeeApp() {
   );
   const witnessPct = allFuture.length > 0 ? Math.round((willSee.length / allFuture.length) * 100) : 0;
 
-  // Decade groups
-  const seeDecades = useMemo(() => groupByDecade(willSee), [willSee]);
-  const missDecades = useMemo(() => groupByDecade(willMiss), [willMiss]);
+  // Apply category filter
+  const filteredSee = useMemo(
+    () => activeFilter ? willSee.filter(e => e.category === activeFilter) : willSee,
+    [willSee, activeFilter]
+  );
+  const filteredMiss = useMemo(
+    () => activeFilter ? willMiss.filter(e => e.category === activeFilter) : willMiss,
+    [willMiss, activeFilter]
+  );
+
+  // Decade groups (from filtered lists)
+  const seeDecades = useMemo(() => groupByDecade(filteredSee), [filteredSee]);
+  const missDecades = useMemo(() => groupByDecade(filteredMiss), [filteredMiss]);
 
   // Category breakdown for stats
   const catCounts = useMemo(() => {
@@ -193,21 +207,49 @@ export function WhatYoullSeeApp() {
         </div>
       </div>
 
-      {/* ── Category breakdown ── */}
+      {/* ── Category breakdown (clickable filters) ── */}
       {catCounts.length > 0 && (
-        <div className="flex flex-wrap justify-center gap-2">
-          {catCounts.map(([cat, count]) => {
-            const c = CAT[cat];
-            if (!c) return null;
-            const Icon = c.icon;
-            return (
-              <span key={cat} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium"
-                style={{ background: c.color + '10', color: c.color, border: `1px solid ${c.color}20` }}>
-                <Icon className="w-3 h-3" />
-                {c.label} ({count})
-              </span>
-            );
-          })}
+        <div className="space-y-2">
+          <div className="flex flex-wrap justify-center gap-2">
+            {catCounts.map(([cat, count]) => {
+              const c = CAT[cat];
+              if (!c) return null;
+              const Icon = c.icon;
+              const isActive = activeFilter === cat;
+              return (
+                <motion.button
+                  key={cat}
+                  onClick={() => toggleFilter(cat)}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-medium cursor-pointer transition-all"
+                  style={{
+                    background: isActive ? c.color + '25' : c.color + '08',
+                    color: c.color,
+                    border: `1px solid ${isActive ? c.color + '50' : c.color + '18'}`,
+                    boxShadow: isActive ? `0 0 12px ${c.color}20` : 'none',
+                  }}>
+                  <Icon className="w-3 h-3" />
+                  {c.label} ({count})
+                </motion.button>
+              );
+            })}
+          </div>
+          {activeFilter && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <button
+                onClick={() => setActiveFilter(null)}
+                className="text-[10px] tracking-wider underline decoration-dotted underline-offset-2 transition-colors"
+                style={{ color: MUTED }}
+              >
+                Showing {CAT[activeFilter]?.label} only — clear filter
+              </button>
+            </motion.div>
+          )}
         </div>
       )}
 
@@ -216,12 +258,12 @@ export function WhatYoullSeeApp() {
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
           style={{ background: 'rgba(52,211,153,0.08)', color: GREEN, border: '1px solid rgba(52,211,153,0.15)' }}>
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: GREEN }} />
-          {willSee.length} you&apos;ll witness
+          {filteredSee.length} you&apos;ll witness
         </div>
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium"
           style={{ background: 'rgba(248,113,113,0.08)', color: RED, border: '1px solid rgba(248,113,113,0.15)' }}>
           <span className="w-1.5 h-1.5 rounded-full" style={{ background: RED }} />
-          {willMiss.length} you&apos;ll miss
+          {filteredMiss.length} you&apos;ll miss
         </div>
       </div>
 

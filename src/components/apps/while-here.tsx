@@ -193,7 +193,7 @@ export function WhileHereApp() {
               </div>
 
               {/* stat cards */}
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {group.keys.map((key) => {
                   const item = RATE_MAP[key];
                   if (!item) return null;
@@ -203,12 +203,12 @@ export function WhileHereApp() {
                   return (
                     <div
                       key={key}
-                      className="rounded-xl p-3 text-center space-y-1 transition-all"
+                      className="rounded-xl p-3 text-center space-y-1 transition-all min-w-0 overflow-hidden"
                       style={{ background: BG, border: `1px solid ${FAINT}` }}
                     >
                       <span className="text-lg block">{item.emoji}</span>
                       <span
-                        className="text-lg sm:text-xl font-bold tabular-nums block"
+                        className="text-sm sm:text-xl font-bold tabular-nums block"
                         style={{ color: group.accent }}
                       >
                         {item.prefix ?? ''}{formatNumber(val)}

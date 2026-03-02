@@ -143,13 +143,13 @@ export function PickOneDeleteApp() {
                 const kept    = h.picked === 'A' ? h.b : h.a;
                 const cClr    = CAT_CLR[h.cat] || MUTED;
                 return (
-                  <div key={i} className="flex items-center gap-2 text-[11px]"
+                  <div key={i} className="flex items-center gap-2 text-[11px] min-w-0"
                     style={{ color: MUTED }}>
                     <Trash2 className="w-3 h-3 shrink-0" style={{ color: RED }} />
-                    <span style={{ color: RED, textDecoration: 'line-through' }}>{deleted}</span>
-                    <span style={{ color: FAINT }}>→ kept</span>
-                    <span style={{ color: IVORY }}>{kept}</span>
-                    <span className="ml-auto text-[9px] uppercase tracking-widest" style={{ color: cClr }}>{h.cat}</span>
+                    <span className="truncate" style={{ color: RED, textDecoration: 'line-through' }}>{deleted}</span>
+                    <span className="shrink-0" style={{ color: FAINT }}>→</span>
+                    <span className="truncate" style={{ color: IVORY }}>{kept}</span>
+                    <span className="ml-auto shrink-0 text-[9px] uppercase tracking-widest" style={{ color: cClr }}>{h.cat}</span>
                   </div>
                 );
               })}
@@ -236,9 +236,9 @@ export function PickOneDeleteApp() {
                 </div>
 
                 {/* Labels */}
-                <div className="flex justify-between text-[10px] tabular-nums" style={{ color: MUTED }}>
-                  <span><span style={{ color: RED }}>{pA}%</span> deleted {choice.optionA}</span>
-                  <span>{choice.optionB} <span style={{ color: ORG }}>{pB}%</span></span>
+                <div className="flex justify-between gap-3 text-[10px] tabular-nums min-w-0" style={{ color: MUTED }}>
+                  <span className="truncate"><span style={{ color: RED }}>{pA}%</span> deleted {choice.optionA}</span>
+                  <span className="truncate text-right">{choice.optionB} <span style={{ color: ORG }}>{pB}%</span></span>
                 </div>
 
                 <p className="text-xs tabular-nums" style={{ color: FAINT }}>

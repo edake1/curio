@@ -371,7 +371,7 @@ export function DontMoveApp() {
         className="relative w-full rounded-2xl overflow-hidden touch-none select-none border border-zinc-800"
         style={{
           maxWidth: ARENA_W,
-          height: ARENA_H,
+          aspectRatio: `${ARENA_W} / ${ARENA_H}`,
           margin: '0 auto',
           background: '#0a0a0f',
           cursor: gameState === 'playing' ? 'none' : 'default',

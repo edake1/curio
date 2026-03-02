@@ -604,29 +604,29 @@ export function YourSaturdayCountApp() {
               style={{ background: 'var(--curio-card)', border: '1px solid var(--curio-border)' }}
             >
               {/* Stat row */}
-              <div className="grid grid-cols-3 gap-3 text-center">
-                <div className="rounded-xl py-4 px-2" style={{ background: 'var(--curio-surface)' }}>
-                  <div className="text-3xl font-bold tabular-nums" style={{ color: '#f59e0b' }}>
+              <div className="grid grid-cols-3 gap-2 sm:gap-3 text-center">
+                <div className="rounded-xl py-3 sm:py-4 px-1.5 sm:px-2 min-w-0 overflow-hidden" style={{ background: 'var(--curio-surface)' }}>
+                  <div className="text-xl sm:text-3xl font-bold tabular-nums" style={{ color: '#f59e0b' }}>
                     {result.lived.toLocaleString()}
                   </div>
-                  <div className="text-xs mt-1" style={{ color: 'var(--curio-text-muted)' }}>Saturdays lived</div>
+                  <div className="text-[10px] sm:text-xs mt-1" style={{ color: 'var(--curio-text-muted)' }}>Saturdays lived</div>
                 </div>
 
-                <div className="rounded-xl py-4 px-2" style={{ background: 'var(--curio-surface)' }}>
-                  <div className="text-3xl font-bold tabular-nums" style={{ color: 'var(--curio-text-secondary)' }}>
+                <div className="rounded-xl py-3 sm:py-4 px-1.5 sm:px-2 min-w-0 overflow-hidden" style={{ background: 'var(--curio-surface)' }}>
+                  <div className="text-xl sm:text-3xl font-bold tabular-nums" style={{ color: 'var(--curio-text-secondary)' }}>
                     {result.remaining.toLocaleString()}
                   </div>
-                  <div className="text-xs mt-1" style={{ color: 'var(--curio-text-muted)' }}>remaining (to 80)</div>
+                  <div className="text-[10px] sm:text-xs mt-1" style={{ color: 'var(--curio-text-muted)' }}>remaining (to 80)</div>
                 </div>
 
-                <div className="rounded-xl py-4 px-2" style={{ background: 'var(--curio-surface)' }}>
+                <div className="rounded-xl py-3 sm:py-4 px-1.5 sm:px-2 min-w-0 overflow-hidden" style={{ background: 'var(--curio-surface)' }}>
                   <div
-                    className="text-3xl font-bold tabular-nums"
+                    className="text-xl sm:text-3xl font-bold tabular-nums"
                     style={{ color: result.nextMilestone ? 'var(--curio-text)' : 'var(--curio-text-muted)' }}
                   >
                     {result.nextMilestone ? `#${result.nextMilestone.n.toLocaleString()}` : '—'}
                   </div>
-                  <div className="text-xs mt-1" style={{ color: 'var(--curio-text-muted)' }}>
+                  <div className="text-[10px] sm:text-xs mt-1 truncate" style={{ color: 'var(--curio-text-muted)' }}>
                     {result.nextMilestone
                       ? `next milestone · ${result.nextMilestone.weeksAway <= 1 ? 'next week' : `${result.nextMilestone.weeksAway.toLocaleString()} wks`}`
                       : 'all milestones passed'}

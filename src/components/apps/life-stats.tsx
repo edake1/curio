@@ -114,7 +114,7 @@ function HeartbeatCard({ sessionBeats }: { sessionBeats: number }) {
     <motion.div
       animate={{ boxShadow: ['0 0 0 0 rgba(239,68,68,0)', '0 0 20px 6px rgba(239,68,68,0.25)', '0 0 0 0 rgba(239,68,68,0)'] }}
       transition={{ duration: 60 / 72, repeat: Infinity, ease: 'easeOut' }}
-      className="flex-1 rounded-2xl p-4 border dark:border-white/[0.07] border-black/[0.08] dark:bg-white/[0.03] bg-black/[0.03] flex flex-col items-center gap-2"
+      className="flex-1 rounded-2xl p-3 sm:p-4 border dark:border-white/[0.07] border-black/[0.08] dark:bg-white/[0.03] bg-black/[0.03] flex flex-col items-center gap-2 min-w-0 overflow-hidden"
     >
       <motion.span
         className="text-3xl leading-none"
@@ -123,8 +123,8 @@ function HeartbeatCard({ sessionBeats }: { sessionBeats: number }) {
       >
         💓
       </motion.span>
-      <p className="text-[1.4rem] font-black tabular-nums text-rose-400 leading-none">{sessionBeats.toLocaleString()}</p>
-      <p className="text-[10px] font-semibold dark:text-zinc-500 text-zinc-400 text-center">Beats since<br/>you arrived</p>
+      <p className="text-[1rem] sm:text-[1.4rem] font-black tabular-nums text-rose-400 leading-none">{sessionBeats.toLocaleString()}</p>
+      <p className="text-[9px] sm:text-[10px] font-semibold dark:text-zinc-500 text-zinc-400 text-center">Beats since<br/>you arrived</p>
       <p className="text-[10px] dark:text-zinc-600 text-zinc-400">72 bpm</p>
     </motion.div>
   );
@@ -132,7 +132,7 @@ function HeartbeatCard({ sessionBeats }: { sessionBeats: number }) {
 
 function BreathCard({ sessionBreaths }: { sessionBreaths: number }) {
   return (
-    <div className="flex-1 rounded-2xl p-4 border dark:border-white/[0.07] border-black/[0.08] dark:bg-white/[0.03] bg-black/[0.03] flex flex-col items-center gap-2">
+    <div className="flex-1 rounded-2xl p-3 sm:p-4 border dark:border-white/[0.07] border-black/[0.08] dark:bg-white/[0.03] bg-black/[0.03] flex flex-col items-center gap-2 min-w-0 overflow-hidden">
       <motion.span
         className="text-3xl leading-none"
         animate={{ scale: [1, 1.18, 1], opacity: [0.75, 1, 0.75] }}
@@ -140,8 +140,8 @@ function BreathCard({ sessionBreaths }: { sessionBreaths: number }) {
       >
         🫁
       </motion.span>
-      <p className="text-[1.4rem] font-black tabular-nums text-sky-400 leading-none">{sessionBreaths.toLocaleString()}</p>
-      <p className="text-[10px] font-semibold dark:text-zinc-500 text-zinc-400 text-center">Breaths since<br/>you arrived</p>
+      <p className="text-[1rem] sm:text-[1.4rem] font-black tabular-nums text-sky-400 leading-none">{sessionBreaths.toLocaleString()}</p>
+      <p className="text-[9px] sm:text-[10px] font-semibold dark:text-zinc-500 text-zinc-400 text-center">Breaths since<br/>you arrived</p>
       <p className="text-[10px] dark:text-zinc-600 text-zinc-400">16 /min</p>
     </div>
   );
@@ -149,7 +149,7 @@ function BreathCard({ sessionBreaths }: { sessionBreaths: number }) {
 
 function BlinkCard({ sessionBlinks }: { sessionBlinks: number }) {
   return (
-    <div className="flex-1 rounded-2xl p-4 border dark:border-white/[0.07] border-black/[0.08] dark:bg-white/[0.03] bg-black/[0.03] flex flex-col items-center gap-2">
+    <div className="flex-1 rounded-2xl p-3 sm:p-4 border dark:border-white/[0.07] border-black/[0.08] dark:bg-white/[0.03] bg-black/[0.03] flex flex-col items-center gap-2 min-w-0 overflow-hidden">
       <motion.span
         className="text-3xl leading-none inline-block"
         animate={{ scaleY: [1, 1, 0.08, 1, 1] }}
@@ -158,8 +158,8 @@ function BlinkCard({ sessionBlinks }: { sessionBlinks: number }) {
       >
         👁️
       </motion.span>
-      <p className="text-[1.4rem] font-black tabular-nums text-violet-400 leading-none">{sessionBlinks.toLocaleString()}</p>
-      <p className="text-[10px] font-semibold dark:text-zinc-500 text-zinc-400 text-center">Blinks since<br/>you arrived</p>
+      <p className="text-[1rem] sm:text-[1.4rem] font-black tabular-nums text-violet-400 leading-none">{sessionBlinks.toLocaleString()}</p>
+      <p className="text-[9px] sm:text-[10px] font-semibold dark:text-zinc-500 text-zinc-400 text-center">Blinks since<br/>you arrived</p>
       <p className="text-[10px] dark:text-zinc-600 text-zinc-400">15 /min</p>
     </div>
   );
@@ -271,29 +271,29 @@ export function LifeStatsApp() {
             <span className="text-[11px] font-black tracking-wide text-amber-400">LVL {years}</span>
           </div>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
           {/* XP (days) — hero number */}
-          <div className="flex-shrink-0">
-            <p className="text-[3.5rem] sm:text-[4.5rem] font-black tabular-nums leading-none text-amber-400">
+          <div className="min-w-0">
+            <p className="text-[2.5rem] sm:text-[4.5rem] font-black tabular-nums leading-none text-amber-400">
               {totalDays.toLocaleString()}
             </p>
             <p className="text-[13px] dark:text-zinc-500 text-zinc-400 mt-1 font-medium">XP &nbsp;<span className="text-[11px] opacity-60">(days)</span></p>
           </div>
 
           {/* Divider */}
-          <div className="w-px self-stretch dark:bg-white/[0.06] bg-black/[0.06]" />
+          <div className="hidden sm:block w-px self-stretch dark:bg-white/[0.06] bg-black/[0.06]" />
 
           {/* Sub-stats grid — fills remaining space */}
-          <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-3">
+          <div className="flex-1 grid grid-cols-2 gap-x-4 gap-y-3 min-w-0">
             {[
               { label: 'Years',   val: years,   color: 'text-orange-400' },
               { label: 'Hours',   val: hours,   color: 'text-violet-400' },
               { label: 'Minutes', val: minutes, color: 'text-sky-400' },
               { label: 'Seconds', val: seconds, color: 'text-emerald-400' },
             ].map(({ label, val, color }) => (
-              <div key={label}>
+              <div key={label} className="min-w-0 overflow-hidden">
                 <p className="text-[10px] dark:text-zinc-500 text-zinc-400 mb-0.5">{label}</p>
-                <p className={`text-[1.2rem] font-bold tabular-nums leading-none ${color}`}>
+                <p className={`text-[1rem] sm:text-[1.2rem] font-bold tabular-nums leading-none ${color}`}>
                   {val.toLocaleString()}
                 </p>
               </div>
@@ -353,7 +353,7 @@ export function LifeStatsApp() {
         <p className="text-[10px] uppercase tracking-widest font-semibold dark:text-zinc-500 text-zinc-500 mb-2.5">
           ⚡ Active abilities
         </p>
-        <div className="flex gap-2 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
           <HeartbeatCard sessionBeats={sessionBeats} />
           <BreathCard    sessionBreaths={sessionBreaths} />
           <BlinkCard     sessionBlinks={sessionBlinks} />
@@ -383,7 +383,7 @@ export function LifeStatsApp() {
                 border dark:border-white/[0.07] border-black/[0.07]"
             >
               <span className="text-2xl leading-none">{stat.emoji}</span>
-              <p className={`text-[1.35rem] font-bold tabular-nums leading-none mt-2.5 ${stat.color}`}>
+              <p className={`text-[1.1rem] sm:text-[1.35rem] font-bold tabular-nums leading-none mt-2.5 overflow-hidden ${stat.color}`}>
                 {stat.value.toLocaleString()}
               </p>
               <p className="text-[11px] font-semibold dark:text-white/70 text-zinc-600 mt-1">{stat.label}</p>
