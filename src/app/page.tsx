@@ -23,6 +23,7 @@ import { HikmahApp } from '@/components/apps/hikmah';
 import { DeadApp } from '@/components/apps/dead-app';
 import { TheRewindApp } from '@/components/apps/the-rewind';
 import { TheAuctionApp } from '@/components/apps/the-auction';
+import { DontMoveApp } from '@/components/apps/dont-move';
 
 // Client-side hydration helper
 const emptySubscribe = () => () => {};
@@ -87,6 +88,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'dead-app':         { accent: '#71717a', tint: 'rgba(113,113,122,0.07)',   label: 'Meta'         },
   'the-rewind':       { accent: '#d97706', tint: 'rgba(217,119,6,0.07)',     label: 'History'      },
   'the-auction':      { accent: '#eab308', tint: 'rgba(234,179,8,0.07)',     label: 'Self'         },
+  'dont-move':        { accent: '#d946ef', tint: 'rgba(217,70,239,0.07)',   label: 'Reflex'       },
 };
 
 function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
@@ -251,6 +253,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'dead-app': return <DeadApp />;
       case 'the-rewind': return <TheRewindApp />;
       case 'the-auction': return <TheAuctionApp />;
+      case 'dont-move': return <DontMoveApp />;
       default: return null;
     }
   };
