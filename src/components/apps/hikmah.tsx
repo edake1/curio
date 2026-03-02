@@ -100,7 +100,7 @@ const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
 );
 
 // ─────────────────────────────────────────────────────────────────
-// DAILY SAYING — the hero section
+// DAILY SAYING — dramatic hero
 // ─────────────────────────────────────────────────────────────────
 function DailySaying({ onViewDetails, savedIds, onToggleSave }: {
   onViewDetails: (s: Saying) => void;
@@ -122,68 +122,65 @@ function DailySaying({ onViewDetails, savedIds, onToggleSave }: {
 
   if (loading) {
     return (
-      <div className="rounded-2xl p-8 space-y-4 animate-pulse" style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}>
-        <div className="h-3 rounded-full w-1/3 mx-auto" style={{ background: FAINT }} />
-        <div className="h-5 rounded-full w-3/4 mx-auto" style={{ background: TEAL_BRD }} />
-        <div className="h-5 rounded-full w-2/3 mx-auto" style={{ background: TEAL_BRD }} />
+      <div className="rounded-2xl p-8 sm:p-10 space-y-5 animate-pulse" style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}>
         <div className="h-3 rounded-full w-1/4 mx-auto" style={{ background: FAINT }} />
+        <div className="h-6 rounded-full w-4/5 mx-auto" style={{ background: TEAL_BRD }} />
+        <div className="h-6 rounded-full w-3/5 mx-auto" style={{ background: TEAL_BRD }} />
+        <div className="h-3 rounded-full w-1/3 mx-auto" style={{ background: FAINT }} />
       </div>
     );
   }
 
-  if (!saying) {
-    return (
-      <div className="rounded-2xl p-8 text-center" style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}>
-        <p className="text-sm" style={{ color: MUTED }}>No daily saying yet. Seed the database first.</p>
-      </div>
-    );
-  }
+  if (!saying) return null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
-      className="rounded-2xl p-6 sm:p-8 space-y-5"
-      style={{ background: BG_CARD, border: `1px solid ${TEAL_BRD}` }}
+      className="rounded-2xl p-6 sm:p-10 space-y-6 relative overflow-hidden"
+      style={{ background: `linear-gradient(175deg, rgba(13,148,136,0.1) 0%, rgba(13,148,136,0.02) 100%)`, border: `1px solid ${TEAL_BRD}` }}
     >
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      {/* Decorative ornament */}
+      <div className="absolute top-3 left-1/2 -translate-x-1/2 text-[10px] tracking-[0.5em]" style={{ color: FAINT }}>
+        ✦ ✦ ✦
+      </div>
+
+      {/* Origin + badge */}
+      <div className="flex items-center justify-between pt-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">{REGION_EMOJI[saying.region] ?? '🌐'}</span>
           <span className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
             {saying.origin}
           </span>
         </div>
-        <span className="text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full"
+        <span className="text-[10px] tracking-widest uppercase px-2.5 py-1 rounded-full"
           style={{ color: TEAL, background: TEAL_DIM, border: `1px solid ${TEAL_BRD}` }}>
           Today&apos;s Wisdom
         </span>
       </div>
 
-      {/* The saying */}
-      <div className="space-y-3 text-center py-2">
+      {/* The saying — large and dramatic */}
+      <div className="space-y-4 text-center py-4">
         {saying.originalText && (
           <p className="text-sm" style={{ color: MUTED, fontStyle: 'italic' }}>
             {saying.originalText}
           </p>
         )}
-        <p className="text-xl sm:text-2xl leading-relaxed font-serif" style={{ color: IVORY, lineHeight: 1.8 }}>
+        <p className="text-2xl sm:text-3xl leading-relaxed font-serif" style={{ color: IVORY, lineHeight: 1.7 }}>
           &ldquo;{saying.text}&rdquo;
         </p>
-        <p className="text-sm font-medium" style={{ color: SAND }}>
+        <p className="text-sm font-medium tracking-wide" style={{ color: SAND }}>
           — {saying.attribution}
         </p>
       </div>
 
-      {/* Category tag */}
-      <div className="flex justify-center">
+      {/* Category + actions */}
+      <div className="flex items-center justify-center gap-2">
         <span className="text-[10px] tracking-wider uppercase px-3 py-1 rounded-full"
           style={{ color: MUTED, background: 'rgba(222,198,163,0.06)', border: `1px solid ${FAINT}` }}>
           {CATEGORY_LABEL[saying.category] ?? saying.category}
         </span>
       </div>
-
-      {/* Actions */}
-      <div className="flex justify-center gap-3 pt-1">
+      <div className="flex justify-center gap-3">
         <button
           onClick={() => onViewDetails(saying)}
           className="px-5 py-2.5 rounded-xl text-xs font-semibold tracking-wider transition-all"
@@ -203,7 +200,211 @@ function DailySaying({ onViewDetails, savedIds, onToggleSave }: {
           {savedIds.has(saying.id) ? '★' : '☆'}
         </button>
       </div>
+
+      {/* Bottom ornament */}
+      <div className="text-center text-[10px] tracking-[0.5em]" style={{ color: FAINT }}>
+        ✦
+      </div>
     </motion.div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// DISCOVER — random saying shuffler
+// ─────────────────────────────────────────────────────────────────
+function DiscoverSection({ onViewDetails, savedIds, onToggleSave }: {
+  onViewDetails: (s: Saying) => void;
+  savedIds: Set<string>;
+  onToggleSave: (s: Saying) => void;
+}) {
+  const [saying, setSaying] = useState<Saying | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [seenIds, setSeenIds] = useState<string[]>([]);
+
+  const shuffle = useCallback(async () => {
+    setLoading(true);
+    try {
+      const exclude = seenIds.join(',');
+      const res = await fetch(`/api/wisdom/random?count=1&exclude=${exclude}`);
+      const data = await res.json();
+      const s = data.sayings?.[0];
+      if (s) {
+        setSaying(s);
+        setSeenIds(prev => [...prev.slice(-50), s.id]);
+      }
+    } finally { setLoading(false); }
+  }, [seenIds]);
+
+  useEffect(() => { shuffle(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (!saying && !loading) return null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <p className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
+          ✦ Discover
+        </p>
+        <button onClick={shuffle} disabled={loading}
+          className="text-[10px] font-medium tracking-wider px-2.5 py-1 rounded-lg transition-all disabled:opacity-40"
+          style={{ color: TEAL, background: TEAL_DIM, border: `1px solid ${TEAL_BRD}` }}>
+          {loading ? '…' : '↻ Another'}
+        </button>
+      </div>
+
+      <AnimatePresence mode="wait">
+        {saying && (
+          <motion.div
+            key={saying.id}
+            initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.35 }}
+            className="rounded-xl p-4 sm:p-5 space-y-3 group relative"
+            style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm">{REGION_EMOJI[saying.region] ?? '🌐'}</span>
+              <span className="text-[9px] tracking-widest uppercase" style={{ color: FAINT }}>{saying.origin}</span>
+              <span className="text-[9px] ml-auto px-2 py-0.5 rounded-full"
+                style={{ color: FAINT, background: 'rgba(222,198,163,0.05)' }}>
+                {CATEGORY_LABEL[saying.category] ?? saying.category}
+              </span>
+            </div>
+            <p className="text-[15px] leading-relaxed font-serif" style={{ color: IVORY, lineHeight: 1.75 }}>
+              &ldquo;{saying.text}&rdquo;
+            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-[11px]" style={{ color: MUTED }}>— {saying.attribution}</p>
+              <div className="flex gap-1.5">
+                <button onClick={() => onToggleSave(saying)}
+                  className="text-sm leading-none transition-all"
+                  style={{ color: savedIds.has(saying.id) ? TERRA : FAINT }}>
+                  {savedIds.has(saying.id) ? '★' : '☆'}
+                </button>
+                <button onClick={() => onViewDetails(saying)}
+                  className="text-[10px] px-2 py-0.5 rounded-lg transition-all"
+                  style={{ color: TEAL, background: TEAL_DIM }}>
+                  →
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// REGION GRID — quick access to filtered archive
+// ─────────────────────────────────────────────────────────────────
+function RegionGrid({ onRegionClick }: { onRegionClick: (region: string) => void }) {
+  const [stats, setStats] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/wisdom/stats');
+        const data = await res.json();
+        if (data.regions) setStats(data.regions);
+      } catch { /* ignore */ }
+    })();
+  }, []);
+
+  const regions = [
+    'africa', 'east-asia', 'south-asia', 'southeast-asia',
+    'middle-east', 'europe', 'americas', 'oceania',
+  ];
+
+  const REGION_LABEL: Record<string, string> = {
+    'africa': 'Africa', 'east-asia': 'East Asia', 'south-asia': 'South Asia',
+    'southeast-asia': 'SE Asia', 'middle-east': 'Middle East', 'europe': 'Europe',
+    'americas': 'Americas', 'oceania': 'Oceania',
+  };
+
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
+        ✦ Explore by Region
+      </p>
+      <div className="grid grid-cols-4 gap-1.5">
+        {regions.map(r => (
+          <button key={r} onClick={() => onRegionClick(r)}
+            className="rounded-xl p-2.5 text-center space-y-1 transition-all hover:scale-[1.03]"
+            style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}>
+            <span className="text-lg block">{REGION_EMOJI[r]}</span>
+            <span className="text-[9px] font-medium block truncate" style={{ color: IVORY }}>
+              {REGION_LABEL[r]}
+            </span>
+            {stats[r] && (
+              <span className="text-[9px] block tabular-nums" style={{ color: FAINT }}>
+                {stats[r]}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────
+// FROM THE ARCHIVES — teaser of random sayings
+// ─────────────────────────────────────────────────────────────────
+function ArchivesTeaser({ onViewDetails, savedIds, onToggleSave }: {
+  onViewDetails: (s: Saying) => void;
+  savedIds: Set<string>;
+  onToggleSave: (s: Saying) => void;
+}) {
+  const [sayings, setSayings] = useState<Saying[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch('/api/wisdom/random?count=4');
+        const data = await res.json();
+        if (data.sayings) setSayings(data.sayings);
+      } catch { /* ignore */ }
+    })();
+  }, []);
+
+  if (sayings.length === 0) return null;
+
+  return (
+    <div className="space-y-3">
+      <p className="text-[10px] font-semibold tracking-[0.2em] uppercase" style={{ color: MUTED }}>
+        ✦ From the Archives
+      </p>
+      <div className="grid grid-cols-2 gap-2">
+        {sayings.map((s, i) => (
+          <motion.div
+            key={s.id}
+            initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: i * 0.06 }}
+            className="rounded-xl p-3 space-y-1.5 group relative"
+            style={{ background: BG_CARD, border: `1px solid ${FAINT}` }}
+          >
+            <button onClick={() => onViewDetails(s)} className="w-full text-left space-y-1.5">
+              <div className="flex items-center gap-1">
+                <span className="text-xs">{REGION_EMOJI[s.region] ?? '🌐'}</span>
+                <span className="text-[8px] tracking-widest uppercase truncate" style={{ color: FAINT }}>
+                  {s.origin}
+                </span>
+              </div>
+              <p className="text-[12px] leading-snug font-serif line-clamp-3" style={{ color: IVORY }}>
+                &ldquo;{s.text}&rdquo;
+              </p>
+              <p className="text-[9px] truncate" style={{ color: MUTED }}>— {s.attribution}</p>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleSave(s); }}
+              className="absolute top-2 right-2 text-xs leading-none transition-all opacity-40 group-hover:opacity-100"
+              style={{ color: savedIds.has(s.id) ? TERRA : FAINT }}>
+              {savedIds.has(s.id) ? '★' : '☆'}
+            </button>
+          </motion.div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -589,17 +790,18 @@ function ReflectionsSection({ sayingId }: { sayingId: string }) {
 // ─────────────────────────────────────────────────────────────────
 // BROWSE — archive of all sayings
 // ─────────────────────────────────────────────────────────────────
-function BrowseSection({ onViewDetails, savedIds, onToggleSave }: {
+function BrowseSection({ onViewDetails, savedIds, onToggleSave, initialRegion }: {
   onViewDetails: (s: Saying) => void;
   savedIds: Set<string>;
   onToggleSave: (s: Saying) => void;
+  initialRegion?: string;
 }) {
   const [sayings, setSayings] = useState<Saying[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [region, setRegion] = useState('all');
+  const [region, setRegion] = useState(initialRegion ?? 'all');
   const [category, setCategory] = useState('all');
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -855,6 +1057,7 @@ export function HikmahApp() {
   const [tab, setTab] = useState<HikmahTab>('today');
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [saved, setSaved] = useState<Saying[]>([]);
+  const [archiveRegion, setArchiveRegion] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setSavedIds(getSavedIds());
@@ -870,6 +1073,11 @@ export function HikmahApp() {
   const viewDetails = useCallback((s: Saying) => setDetailSaying(s), []);
   const goBack = useCallback(() => setDetailSaying(null), []);
 
+  const handleRegionClick = useCallback((region: string) => {
+    setArchiveRegion(region);
+    setTab('archive');
+  }, []);
+
   const TABS: { id: HikmahTab; label: string }[] = [
     { id: 'today', label: 'Today' },
     { id: 'archive', label: 'Archive' },
@@ -877,19 +1085,7 @@ export function HikmahApp() {
   ];
 
   return (
-    <div className="max-w-xl mx-auto px-4 py-6 space-y-5">
-      {/* Title */}
-      <div className="text-center space-y-2">
-        <h2 className="text-3xl sm:text-4xl font-bold tracking-tight font-serif" style={{ color: IVORY }}>
-          حكمة
-        </h2>
-        <p className="text-lg font-medium" style={{ color: SAND }}>
-          Hikmah
-        </p>
-        <p className="text-xs tracking-wider" style={{ color: MUTED }}>
-          Wisdom from every corner of the earth
-        </p>
-      </div>
+    <div className="max-w-xl mx-auto px-4 py-4 space-y-4">
 
       <AnimatePresence mode="wait">
         {detailSaying ? (
@@ -902,7 +1098,10 @@ export function HikmahApp() {
             {/* Tab bar */}
             <div className="flex justify-center gap-1.5">
               {TABS.map(t => (
-                <button key={t.id} onClick={() => setTab(t.id)}
+                <button key={t.id} onClick={() => {
+                    setTab(t.id);
+                    if (t.id !== 'archive') setArchiveRegion(undefined);
+                  }}
                   className="px-4 py-2 rounded-xl text-xs font-semibold tracking-wider transition-all"
                   style={{
                     background: tab === t.id ? TEAL_DIM : 'transparent',
@@ -917,13 +1116,20 @@ export function HikmahApp() {
             {/* Tab content */}
             <AnimatePresence mode="wait">
               {tab === 'today' && (
-                <motion.div key="t-today" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                <motion.div key="t-today" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="space-y-5">
                   <DailySaying onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                  <HKDivider />
+                  <DiscoverSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                  <HKDivider />
+                  <RegionGrid onRegionClick={handleRegionClick} />
+                  <HKDivider />
+                  <ArchivesTeaser onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
                 </motion.div>
               )}
               {tab === 'archive' && (
                 <motion.div key="t-archive" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <BrowseSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} />
+                  <BrowseSection onViewDetails={viewDetails} savedIds={savedIds} onToggleSave={doToggleSave} initialRegion={archiveRegion} />
                 </motion.div>
               )}
               {tab === 'saved' && (
