@@ -16,6 +16,7 @@ import {
   Music,
   Flame,
   BookOpen,
+  Skull,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -140,5 +141,13 @@ export const APPS: AppDefinition[] = [
     icon: BookOpen,
     color: 'from-emerald-800 to-teal-900',
     description: 'One saying per day. Deep context. Reflections from around the world.',
+  },
+  {
+    id: 'dead-app',
+    name: 'Dead App',
+    tagline: 'The app that doesn\'t want to be opened.',
+    icon: Skull,
+    color: 'from-zinc-700 to-zinc-900',
+    description: 'Stay for five minutes. If you can.',
   },
 ];

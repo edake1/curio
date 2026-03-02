@@ -20,6 +20,7 @@ import { WhileHereApp } from '@/components/apps/while-here';
 import { TheGrandDaoApp } from '@/components/apps/the-grand-dao';
 import { YourLastWordsApp } from '@/components/apps/your-last-words';
 import { HikmahApp } from '@/components/apps/hikmah';
+import { DeadApp } from '@/components/apps/dead-app';
 
 // Client-side hydration helper
 const emptySubscribe = () => () => {};
@@ -81,6 +82,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'the-grand-dao':    { accent: '#c9a227', tint: 'rgba(201,162,39,0.07)',   label: 'Cultivation'  },
   'your-last-words':  { accent: '#c8956c', tint: 'rgba(200,149,108,0.07)', label: 'Mortality'    },
   'hikmah':           { accent: '#0d9488', tint: 'rgba(13,148,136,0.07)',   label: 'Wisdom'       },
+  'dead-app':         { accent: '#71717a', tint: 'rgba(113,113,122,0.07)',   label: 'Meta'         },
 };
 
 function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
@@ -242,6 +244,7 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
       case 'the-grand-dao': return <TheGrandDaoApp />;
       case 'your-last-words': return <YourLastWordsApp />;
       case 'hikmah': return <HikmahApp />;
+      case 'dead-app': return <DeadApp />;
       default: return null;
     }
   };
