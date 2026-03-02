@@ -93,6 +93,8 @@ type Action =
   | { type: 'resetTimer' }
   | { type: 'updateLiveVotes'; votesA: number; votesB: number }
   | { type: 'loadSeenIds'; ids: string[] }
+  | { type: 'loadHistory'; history: HistoryEntry[] }
+  | { type: 'loadTimerPref'; enabled: boolean }
   | { type: 'setPrefetched'; dilemma: Dilemma | null };
 
 const TIMER_DURATION = 15;
@@ -127,6 +129,10 @@ function reducer(prev: AppState, action: Action): AppState {
       return { ...prev, liveVotesA: action.votesA, liveVotesB: action.votesB };
     case 'loadSeenIds':
       return { ...prev, seenIds: [...new Set([...prev.seenIds, ...action.ids])] };
+    case 'loadHistory':
+      return { ...prev, history: action.history };
+    case 'loadTimerPref':
+      return { ...prev, timerEnabled: action.enabled };
     case 'setPrefetched':
       return { ...prev, prefetchedDilemma: action.dilemma };
     default:
@@ -136,12 +142,29 @@ function reducer(prev: AppState, action: Action): AppState {
 
 // ── LocalStorage helpers ────────────────────────────────────────
 const SEEN_KEY = 'curio_dilemma_seen';
+const HISTORY_KEY = 'curio_dilemma_history';
+const TIMER_KEY = 'curio_dilemma_timer';
+
 function loadSeenIds(): string[] {
   if (typeof window === 'undefined') return [];
   try { const raw = localStorage.getItem(SEEN_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
 }
 function saveSeenIds(ids: string[]) {
   try { localStorage.setItem(SEEN_KEY, JSON.stringify(ids)); } catch { /* quota */ }
+}
+function loadHistory(): HistoryEntry[] {
+  if (typeof window === 'undefined') return [];
+  try { const raw = localStorage.getItem(HISTORY_KEY); return raw ? JSON.parse(raw) : []; } catch { return []; }
+}
+function saveHistory(history: HistoryEntry[]) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 100))); } catch { /* quota */ }
+}
+function loadTimerPref(): boolean {
+  if (typeof window === 'undefined') return false;
+  try { return localStorage.getItem(TIMER_KEY) === 'true'; } catch { return false; }
+}
+function saveTimerPref(enabled: boolean) {
+  try { localStorage.setItem(TIMER_KEY, String(enabled)); } catch { /* quota */ }
 }
 
 const INITIAL: AppState = {
@@ -181,10 +204,20 @@ export function OneDecisionApp() {
   // Persist seenIds to localStorage whenever they change
   useEffect(() => { saveSeenIds(state.seenIds); }, [state.seenIds]);
 
-  // Restore seenIds from localStorage on mount
+  // Persist history to localStorage whenever it changes
+  useEffect(() => { if (state.history.length > 0) saveHistory(state.history); }, [state.history]);
+
+  // Persist timer preference
+  useEffect(() => { saveTimerPref(state.timerEnabled); }, [state.timerEnabled]);
+
+  // Restore state from localStorage on mount
   useEffect(() => {
-    const stored = loadSeenIds();
-    if (stored.length) dispatch({ type: 'loadSeenIds', ids: stored });
+    const storedSeen = loadSeenIds();
+    if (storedSeen.length) dispatch({ type: 'loadSeenIds', ids: storedSeen });
+    const storedHistory = loadHistory();
+    if (storedHistory.length) dispatch({ type: 'loadHistory', history: storedHistory });
+    const storedTimer = loadTimerPref();
+    if (storedTimer) dispatch({ type: 'loadTimerPref', enabled: storedTimer });
   }, []);
 
   const generateFresh = useCallback(async (): Promise<Dilemma | null> => {
