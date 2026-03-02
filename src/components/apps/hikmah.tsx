@@ -615,7 +615,11 @@ function BrowseSection({ onViewDetails, savedIds, onToggleSave }: {
       if (!res.ok) return;
       const fetched: Saying[] = data.sayings ?? [];
       setTotal(data.total ?? 0);
-      setSayings(prev => reset ? fetched : [...prev, ...fetched]);
+      setSayings(prev => {
+        if (reset) return fetched;
+        const existingIds = new Set(prev.map(s => s.id));
+        return [...prev, ...fetched.filter(s => !existingIds.has(s.id))];
+      });
       setHasMore((p + 1) * (data.limit ?? 12) < (data.total ?? 0));
       setPage(p);
     } finally { setLoading(false); }

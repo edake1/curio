@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     const [sayings, total] = await Promise.all([
       prisma.wisdomSaying.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
         skip: page * limit,
         take: limit,
         select: {
