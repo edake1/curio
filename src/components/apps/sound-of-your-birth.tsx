@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
 
@@ -184,8 +184,19 @@ export function SoundOfYourBirthApp() {
     ? `${MONTHS[monthNum - 1]} ${dayNum}, ${yearNum}`
     : '';
 
-  const days        = Array.from({ length: 31 }, (_, i) => i + 1);
+  // Days in month — adjusts for Feb, leap years, etc.
+  const daysInMonth = !isNaN(monthNum) && !isNaN(yearNum)
+    ? new Date(yearNum, monthNum, 0).getDate()   // monthNum is 1-indexed, so (yr, m, 0) gives last day of month m
+    : !isNaN(monthNum)
+      ? new Date(2000, monthNum, 0).getDate()     // no year yet — use leap year as safe default
+      : 31;
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const selectYears = Array.from({ length: MAX_YEAR - MIN_YEAR + 1 }, (_, i) => MAX_YEAR - i);
+
+  // Clamp day if it exceeds new daysInMonth (e.g. Feb 29 → non-leap year)
+  useEffect(() => {
+    if (day !== '' && !isNaN(dayNum) && dayNum > daysInMonth) setDay('');
+  }, [daysInMonth, day, dayNum]);
 
   const handleReveal = () => { if (isValid) setShown(true); };
 
@@ -239,7 +250,7 @@ export function SoundOfYourBirthApp() {
 
           <div>
             <p className="text-[10px] mb-1" style={{ color: 'var(--curio-text-muted)' }}>Month</p>
-            <select value={month} onChange={e => { setMonth(e.target.value); setShown(false); }}
+            <select value={month} onChange={e => { setMonth(e.target.value); setDay(''); setShown(false); }}
               className="text-sm font-medium rounded-xl px-3 py-2 outline-none cursor-pointer"
               style={{ background: 'var(--curio-bg-secondary)', border: '1px solid var(--curio-border)', color: 'var(--curio-text)' }}>
               <option value="">—</option>
