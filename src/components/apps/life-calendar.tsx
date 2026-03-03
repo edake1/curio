@@ -46,6 +46,8 @@ interface StaticGrain {
   xPct: number; yPct: number;
   size: number; opacity: number;
   colorIdx: number;
+  phase: number;  // unique shimmer phase
+  shimSpeed: number; // shimmer frequency
 }
 
 interface DustMote {
@@ -65,14 +67,16 @@ function generateStaticGrains(count: number, seed: number): StaticGrain[] {
   const rng = seededRandom(seed);
   return Array.from({ length: count }, () => ({
     xPct: rng(), yPct: rng(),
-    size: 1.5 + rng() * 2.5,
-    opacity: 0.5 + rng() * 0.5,
+    size: 0.6 + rng() * 1.0,
+    opacity: 0.3 + rng() * 0.5,
     colorIdx: Math.floor(rng() * 3),
+    phase: rng() * Math.PI * 2,
+    shimSpeed: 1.5 + rng() * 3.0,
   }));
 }
 
-const TOP_GRAINS = generateStaticGrains(350, 42);
-const BOT_GRAINS = generateStaticGrains(350, 137);
+const TOP_GRAINS = generateStaticGrains(500, 42);
+const BOT_GRAINS = generateStaticGrains(500, 137);
 const GRAIN_COLORS = [GRAIN_SHADOW, ACCENT, GRAIN_LIGHT];
 
 // ── Geometry helpers ─────────────────────────────────────────────
@@ -145,6 +149,7 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
     }
 
     ctx.clearRect(0, 0, w, h);
+    const tSec = now * 0.001;
 
     // ── 1. Ambient dust (behind glass) ──
     for (const d of dustRef.current) {
@@ -187,18 +192,33 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
       ctx.fillStyle = grad1;
       ctx.fillRect(cx - hw - 2, topSandY, glassW + 4, topHeight + 4);
 
-      // Grain texture — visible individual sand grains
+      // Surface wave ripple on top sand
+      const waveT = now * 0.0008;
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-atop';
+      for (let wx = cx - hw; wx < cx + hw; wx += 3) {
+        const waveY = topSandY + Math.sin(wx * 0.06 + waveT) * 1.5;
+        ctx.globalAlpha = 0.06 + 0.04 * Math.sin(wx * 0.03 + waveT * 1.3);
+        ctx.fillStyle = GRAIN_LIGHT;
+        ctx.fillRect(wx, waveY, 3, 2);
+      }
+      ctx.restore();
+
+      // Grain texture — shimmering sand grains
       for (const g of TOP_GRAINS) {
+        const shimmer = 0.5 + 0.5 * Math.sin(tSec * g.shimSpeed + g.phase);
         const gx = cx + (g.xPct - 0.5) * glassW * 0.92;
         const gy = topSandY + g.yPct * topHeight;
         if (gy >= topSandY && gy <= cy - 6) {
           const tN = (gy - (cy - glassH / 2)) / glassH;
           const maxW = hourglassWidthAt(tN, hw, neck) * 0.85;
           if (Math.abs(gx - cx) < maxW) {
-            ctx.globalAlpha = g.opacity;
-            ctx.fillStyle = GRAIN_COLORS[g.colorIdx];
+            const a = g.opacity * (0.4 + 0.6 * shimmer);
+            const r = g.size * (0.7 + 0.5 * shimmer);
+            ctx.globalAlpha = a;
+            ctx.fillStyle = shimmer > 0.85 ? GRAIN_LIGHT : GRAIN_COLORS[g.colorIdx];
             ctx.beginPath();
-            ctx.arc(gx, gy, g.size * 0.6, 0, Math.PI * 2);
+            ctx.arc(gx, gy, r, 0, Math.PI * 2);
             ctx.fill();
           }
         }
@@ -235,6 +255,18 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
       ctx.fillStyle = grad2;
       ctx.fillRect(cx - hw - 2, botSandY, glassW + 4, botHeight + 4);
 
+      // Surface wave ripple on bottom sand
+      const bWaveT = now * 0.0008;
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-atop';
+      for (let wx = cx - hw; wx < cx + hw; wx += 3) {
+        const waveY = botSandY + Math.sin(wx * 0.05 + bWaveT + 2) * 1.2;
+        ctx.globalAlpha = 0.05 + 0.03 * Math.sin(wx * 0.04 + bWaveT * 0.9);
+        ctx.fillStyle = GRAIN_LIGHT;
+        ctx.fillRect(wx, waveY, 3, 2);
+      }
+      ctx.restore();
+
       // Cone mound at deposit point
       const coneH = Math.min(30, botHeight * 0.2);
       const coneW = neck * 5.5;
@@ -250,18 +282,21 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
         ctx.fill();
       }
 
-      // Grain texture — visible individual sand grains
+      // Grain texture — shimmering sand grains
       for (const g of BOT_GRAINS) {
+        const shimmer = 0.5 + 0.5 * Math.sin(tSec * g.shimSpeed + g.phase);
         const gx = cx + (g.xPct - 0.5) * glassW * 0.92;
         const gy = botSandY + g.yPct * botHeight;
         if (gy >= botSandY && gy <= botBase) {
           const tN = (gy - (cy - glassH / 2)) / glassH;
           const maxW = hourglassWidthAt(tN, hw, neck) * 0.85;
           if (Math.abs(gx - cx) < maxW) {
-            ctx.globalAlpha = g.opacity * 0.85;
-            ctx.fillStyle = GRAIN_COLORS[g.colorIdx];
+            const a = g.opacity * (0.4 + 0.6 * shimmer) * 0.85;
+            const r = g.size * (0.7 + 0.5 * shimmer);
+            ctx.globalAlpha = a;
+            ctx.fillStyle = shimmer > 0.85 ? GRAIN_LIGHT : GRAIN_COLORS[g.colorIdx];
             ctx.beginPath();
-            ctx.arc(gx, gy, g.size * 0.6, 0, Math.PI * 2);
+            ctx.arc(gx, gy, r, 0, Math.PI * 2);
             ctx.fill();
           }
         }
