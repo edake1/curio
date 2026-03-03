@@ -74,7 +74,7 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'life-stats':       { accent: '#f97316', tint: 'rgba(249,115,22,0.07)',   label: 'Perspective'  },
   'anti-motivational':{ accent: '#a78bfa', tint: 'rgba(167,139,250,0.07)', label: 'Despair'      },
   'what-youll-see':   { accent: '#6366f1', tint: 'rgba(99,102,241,0.07)',   label: 'Future'       },
-  'life-calendar':    { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)',    label: 'Mortality'    },
+  'life-calendar':    { accent: '#c9a95c', tint: 'rgba(201,169,92,0.07)',    label: 'Mortality'    },
   'pick-one-delete':  { accent: '#ef4444', tint: 'rgba(239,68,68,0.07)',    label: 'Values'       },
   'sound-of-your-birth': { accent: '#f43f5e', tint: 'rgba(244,63,94,0.07)', label: 'Nostalgia'    },
   'the-grand-dao':    { accent: '#c9a227', tint: 'rgba(201,162,39,0.07)',   label: 'Cultivation'  },

@@ -80,11 +80,11 @@ export const APPS: AppDefinition[] = [
   },
   {
     id: 'life-calendar',
-    name: 'Life Calendar',
-    tagline: 'Weeks lived. Saturdays left. One grid.',
+    name: 'The Hourglass',
+    tagline: 'Watch the sand fall. Grain by grain.',
     icon: Calendar,
-    color: 'from-rose-500 to-pink-600',
-    description: 'Your life in weeks — and the Saturdays you have left.',
+    color: 'from-amber-500 to-yellow-700',
+    description: 'Your life draining in real time — how much sand is left?',
   },
   {
     id: 'pick-one-delete',
