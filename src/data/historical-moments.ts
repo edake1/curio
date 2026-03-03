@@ -7,6 +7,7 @@ export interface HistoricalMoment {
   lines: string[];        // revealed one at a time
   reflection: string;     // shown after all lines
   category: 'war' | 'science' | 'culture' | 'disaster' | 'revolution' | 'exploration' | 'invention';
+  context?: string;       // optional "learn more" paragraph
 }
 
 export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
@@ -24,6 +25,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The world entered the atomic age in 43 seconds.',
     category: 'war',
+    context: 'The B-29 bomber Enola Gay dropped "Little Boy," a uranium-235 bomb, over Hiroshima at 8:15 AM on August 6, 1945. The blast killed an estimated 80,000 people instantly and leveled 69% of the city\'s buildings. By the end of 1945, the death toll had risen to roughly 140,000 from radiation sickness, burns, and injuries. The "nuclear shadows" — permanent silhouettes seared into stone by the thermal flash — remain some of the most haunting artifacts of the attack.',
   },
   {
     year: 1916,
@@ -38,6 +40,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The longest day of the longest war the world had known.',
     category: 'war',
+    context: 'The Battle of the Somme (July 1–November 18, 1916) was one of the bloodiest battles in human history. The British suffered 57,470 casualties on the first day alone — still the worst single day in British military history. Over the full 141-day battle, combined casualties exceeded one million men from both sides. The battle advanced the front line just six miles.',
   },
   {
     year: 1944,
@@ -52,6 +55,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The beginning of the end, paid for in blood and saltwater.',
     category: 'war',
+    context: 'Operation Overlord, the D-Day invasion on June 6, 1944, was the largest amphibious assault in history. Allied forces landed on five beaches code-named Utah, Omaha, Gold, Juno, and Sword. The average age of soldiers at Omaha Beach was 22. The invasion opened a Western Front against Nazi Germany and is widely considered the turning point that led to Allied victory in Europe less than a year later.',
   },
 
   // ── SCIENCE ────────────────────────────────────
@@ -68,6 +72,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'For one moment, every human alive shared the same sky.',
     category: 'science',
+    context: 'Apollo 11 launched on July 16, 1969, and landed on the Moon four days later. Neil Armstrong and Buzz Aldrin spent about two and a half hours on the lunar surface while Michael Collins orbited above. Armstrong\'s "one small step" quote was watched by an estimated 600 million people — about 20% of the world\'s population at the time. The mission returned 47.5 pounds of lunar samples to Earth.',
   },
   {
     year: 1928,
@@ -82,6 +87,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Alexander Fleming\'s "mistake" became penicillin.',
     category: 'science',
+    context: 'Alexander Fleming returned to his laboratory at St. Mary\'s Hospital in September 1928 to find a petri dish contaminated with Penicillium mold. The area around the mold was clear of Staphylococcus bacteria. It took another decade before Howard Florey and Ernst Chain developed mass production methods for penicillin, which was first used widely during World War II. The three shared the 1945 Nobel Prize in Medicine.',
   },
   {
     year: 1953,
@@ -96,6 +102,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Watson and Crick decoded the blueprint of biology over lunch.',
     category: 'science',
+    context: 'James Watson and Francis Crick published the structure of DNA in the journal Nature on April 25, 1953, in a one-page paper. Their work built heavily on X-ray crystallography data from Rosalind Franklin, whose contribution was largely uncredited during her lifetime. The discovery of the double helix laid the foundation for modern genetics, genomics, and biotechnology.',
   },
   {
     year: 1905,
@@ -110,6 +117,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Einstein\'s miracle year began with a daydream on a tram.',
     category: 'science',
+    context: 'In 1905, while working as a patent examiner in Bern, 26-year-old Albert Einstein published four groundbreaking papers: on the photoelectric effect (which earned him the Nobel Prize), Brownian motion, special relativity, and mass-energy equivalence (E=mc²). This "Annus Mirabilis" fundamentally reshaped physics. Einstein was not yet a professor and had been rejected from multiple academic positions.',
   },
 
   // ── CULTURE ────────────────────────────────────
@@ -126,6 +134,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Elvis left the building for the last time.',
     category: 'culture',
+    context: 'Elvis Presley died on August 16, 1977, at Graceland in Memphis. The official cause was cardiac arrhythmia, though multiple prescription drugs were found in his system. He was 42 years old and had sold over 500 million records worldwide. An estimated 80,000 mourners lined the streets of Memphis for his funeral procession. Graceland became a National Historic Landmark and receives over 600,000 visitors annually.',
   },
   {
     year: 1889,
@@ -140,6 +149,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Van Gogh painted 900 works. The world didn\'t notice until he was gone.',
     category: 'culture',
+    context: 'Vincent van Gogh produced roughly 2,100 artworks in just over a decade, including about 860 oil paintings. During his lifetime, he sold only one painting — "The Red Vineyard" — for 400 francs. He suffered from severe depression, famously severed part of his own ear, and died from a gunshot wound in July 1890 at age 37. His painting "Portrait of Dr. Gachet" sold for $82.5 million in 1990.',
   },
   {
     year: 1963,
@@ -154,6 +164,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Martin Luther King Jr. ad-libbed the most famous speech in American history.',
     category: 'culture',
+    context: 'The March on Washington for Jobs and Freedom took place on August 28, 1963. King\'s prepared text did not include the "I have a dream" refrain — gospel singer Mahalia Jackson shouted "Tell them about the dream, Martin!" and he departed from his notes. The speech was 17 minutes long and is credited with helping pass the Civil Rights Act of 1964 and the Voting Rights Act of 1965.',
   },
 
   // ── DISASTER ───────────────────────────────────
@@ -170,6 +181,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The Titanic was called unsinkable. The ocean disagreed.',
     category: 'disaster',
+    context: 'RMS Titanic struck an iceberg at 11:40 PM on April 14, 1912, and sank at 2:20 AM on April 15. Of the roughly 2,224 people aboard, 1,517 died — partly because the ship carried lifeboats for only 1,178 people. The wreck was not found until 1985, resting at a depth of 12,500 feet. The disaster led directly to the establishment of the International Ice Patrol and the requirement that ships carry enough lifeboats for all passengers.',
   },
   {
     year: 1986,
@@ -184,6 +196,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Chernobyl turned a city of 50,000 into a ghost town overnight.',
     category: 'disaster',
+    context: 'The Chernobyl disaster on April 26, 1986, was the worst nuclear accident in history. Reactor No. 4 exploded during a safety test due to design flaws and operator error. The explosion released 400 times more radiation than the Hiroshima bomb. The city of Pripyat was evacuated 36 hours later. A 30-kilometer exclusion zone still exists today, though wildlife has paradoxically flourished in the absence of humans.',
   },
   {
     year: 79,
@@ -198,6 +211,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Pompeii was forgotten for 1,700 years. Then someone started digging.',
     category: 'disaster',
+    context: 'Mount Vesuvius erupted on August 24, AD 79, burying Pompeii and neighboring Herculaneum under 4 to 6 meters of volcanic ash and pumice. The eruption released 100,000 times the thermal energy of the Hiroshima bomb. The city was rediscovered in 1748 and has since become one of the world\'s most important archaeological sites, offering an unparalleled snapshot of Roman daily life frozen in time.',
   },
 
   // ── REVOLUTION ─────────────────────────────────
@@ -214,6 +228,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The Bastille fell, and a monarchy crumbled with it.',
     category: 'revolution',
+    context: 'The storming of the Bastille on July 14, 1789, was the flashpoint of the French Revolution. The fortress held only seven prisoners at the time, but it was a powerful symbol of royal tyranny. Governor Bernard-René de Launay was killed and his head paraded on a pike. July 14 became France\'s national holiday. The revolution eventually led to the execution of King Louis XVI and the rise of Napoleon Bonaparte.',
   },
   {
     year: 1989,
@@ -228,6 +243,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The Berlin Wall fell because of a bureaucratic mistake.',
     category: 'revolution',
+    context: 'On November 9, 1989, East German spokesman Günter Schabowski announced new travel regulations at a press conference. When asked when they took effect, he said "immediately, without delay" — which was not the plan. Thousands rushed to border crossings. Guards, overwhelmed and without orders, opened the gates. The Wall had divided Berlin for 28 years. Germany was officially reunified on October 3, 1990.',
   },
   {
     year: 1955,
@@ -242,6 +258,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Rosa Parks sat down so a movement could stand up.',
     category: 'revolution',
+    context: 'Rosa Parks was arrested on December 1, 1955, for refusing to give up her bus seat to a white passenger in Montgomery, Alabama. Contrary to popular myth, she was not simply tired — she was a trained activist and secretary of the local NAACP. Her arrest triggered the Montgomery Bus Boycott, which lasted 381 days and ended when the Supreme Court ruled bus segregation unconstitutional.',
   },
 
   // ── EXPLORATION ────────────────────────────────
@@ -258,6 +275,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Columbus found a world that didn\'t need discovering.',
     category: 'exploration',
+    context: 'Christopher Columbus sailed from Spain on August 3, 1492, with three ships: the Niña, the Pinta, and the Santa María. He made landfall in the Bahamas on October 12, believing he had reached Asia. His voyages initiated centuries of European colonization and the Columbian Exchange — the widespread transfer of plants, animals, culture, and disease between the Old and New Worlds, with devastating consequences for Indigenous populations.',
   },
   {
     year: 1911,
@@ -272,6 +290,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Scott\'s team arrived 34 days later. None of them made it home.',
     category: 'exploration',
+    context: 'Roald Amundsen\'s Norwegian team reached the South Pole on December 14, 1911, beating Robert Falcon Scott\'s British team by 34 days. Amundsen used sled dogs and Inuit techniques; Scott relied on ponies and man-hauling. All five members of Scott\'s polar party died on the return journey from cold, starvation, and exhaustion. Scott\'s diary, found with his body, became one of the most famous documents in exploration history.',
   },
   {
     year: 1961,
@@ -284,8 +303,9 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
       'Below him, oceans and continents drift past the tiny window.',
       'He lands in a farmer\'s field. The farmer stares.',
     ],
-    reflection: 'Yuri Gagarin was the first human to see Earth from space— and return.',
+    reflection: 'Yuri Gagarin was the first human to see Earth from space — and return.',
     category: 'exploration',
+    context: 'Yuri Gagarin orbited Earth aboard Vostok 1 on April 12, 1961, in a flight lasting 108 minutes. He was 27 years old. The Soviets chose him partly because he was only 5\'2" — the capsule was tiny. He ejected at 7 km altitude and parachuted to the ground separately. He became an international hero and died in a MiG-15 training accident in 1968, at age 34.',
   },
 
   // ── INVENTION ──────────────────────────────────
@@ -302,6 +322,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Alexander Graham Bell\'s first phone call was a cry for help.',
     category: 'invention',
+    context: 'Alexander Graham Bell patented the telephone on March 7, 1876 — just hours before a rival inventor, Elisha Gray, filed a similar patent. The famous first words, "Mr. Watson, come here. I want to see you," were spoken on March 10. Bell offered to sell his patent to Western Union for $100,000; they declined, calling it a "toy." Western Union later estimated the patent was worth $25 million.',
   },
   {
     year: 1903,
@@ -316,6 +337,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'The Wright Brothers flew shorter than a 747 is long. 66 years later: the Moon.',
     category: 'invention',
+    context: 'Orville and Wilbur Wright achieved the first sustained, controlled, powered flight at Kill Devil Hills, North Carolina, on December 17, 1903. The first flight lasted 12 seconds and covered 120 feet. The fourth and longest flight that day lasted 59 seconds over 852 feet. Only five people witnessed it. The local newspaper misspelled their names. Just 66 years later, humans walked on the Moon.',
   },
   {
     year: 1440,
@@ -330,6 +352,7 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Gutenberg didn\'t invent reading. He made it unstoppable.',
     category: 'invention',
+    context: 'Johannes Gutenberg developed movable type printing around 1440 in Mainz, Germany. His Gutenberg Bible, completed around 1455, is considered the first major book printed with movable type in the West. Before the press, a single book could take a monk a year to copy by hand. Within 50 years of Gutenberg\'s invention, an estimated 20 million volumes had been printed, fundamentally democratizing knowledge.',
   },
   {
     year: 1879,
@@ -344,5 +367,836 @@ export const HISTORICAL_MOMENTS: HistoricalMoment[] = [
     ],
     reflection: 'Edison didn\'t just invent the lightbulb. He made darkness optional.',
     category: 'invention',
+    context: 'Thomas Edison tested over 3,000 materials before finding a viable filament. His carbonized bamboo filament eventually lasted over 1,200 hours. Edison didn\'t just invent the bulb — he created the entire electrical infrastructure: power stations, wiring, outlets, and meters. His Pearl Street Station in Manhattan, opened in 1882, was the world\'s first commercial electrical power distribution system.',
+  },
+
+  // ── BATCH 2: moments 26–40 ────────────────────
+
+  // WAR
+  {
+    year: 1945,
+    location: 'Berlin, Germany',
+    lines: [
+      'Soviet soldiers are 800 meters from the bunker.',
+      'A man and a woman sit on a small couch underground.',
+      'He bites into a cyanide capsule. She does the same.',
+      'Aides carry their bodies upstairs and burn them.',
+      'A war that killed 70 million people ends in a garden.',
+      'Nobody photographs it.',
+    ],
+    reflection: 'Hitler died the way he lived — surrounded by fire and ruin.',
+    category: 'war',
+    context: 'Adolf Hitler committed suicide on April 30, 1945, in his underground bunker beneath the Reich Chancellery in Berlin. He shot himself while biting a cyanide capsule; Eva Braun, whom he had married the day before, took cyanide alone. Their bodies were carried to the garden above and burned as Soviet shells hit nearby. Berlin surrendered two days later. The war in Europe ended on May 8.',
+  },
+  {
+    year: 1937,
+    location: 'Guernica, Spain',
+    lines: [
+      'It is market day in a small Basque town.',
+      'At 4:30 PM, German bombers appear overhead.',
+      'They bomb for three hours straight.',
+      'The town has no military value at all.',
+      '1,654 civilians are killed.',
+      'A painter in Paris reads the news. He picks up a brush.',
+    ],
+    reflection: 'Picasso painted Guernica in five weeks. It has never stopped screaming.',
+    category: 'war',
+    context: 'On April 26, 1937, the German Condor Legion bombed the Basque town of Guernica at the request of Francisco Franco\'s Nationalist forces during the Spanish Civil War. The attack killed an estimated 1,654 people and was one of the first deliberate aerial bombings of a civilian population. Pablo Picasso\'s enormous painting Guernica, completed in just five weeks, became the 20th century\'s most powerful anti-war symbol.',
+  },
+
+  // SCIENCE
+  {
+    year: 1687,
+    location: 'Cambridge, England',
+    lines: [
+      'A reclusive professor publishes a book almost no one can understand.',
+      'It contains three laws.',
+      'The first says: things keep doing what they\'re doing.',
+      'The second says: force equals mass times acceleration.',
+      'The third says: every action has an equal and opposite reaction.',
+      'These three sentences explain the motion of everything in the universe.',
+    ],
+    reflection: 'Newton wrote the operating manual for reality.',
+    category: 'science',
+    context: 'Isaac Newton\'s Philosophiæ Naturalis Principia Mathematica, published on July 5, 1687, is arguably the most influential scientific work ever written. It laid out the three laws of motion and the law of universal gravitation, explaining everything from falling apples to planetary orbits. Edmond Halley funded its publication out of his own pocket after the Royal Society spent its budget on a book about fish.',
+  },
+  {
+    year: 1895,
+    location: 'Würzburg, Germany',
+    lines: [
+      'A physicist notices a fluorescent screen glowing in the dark.',
+      'Something invisible is passing through solid objects.',
+      'He places his wife\'s hand in front of the beam.',
+      'On the photograph, her bones are clearly visible.',
+      'She sees the image and says: "I have seen my death."',
+      'He calls the invisible rays "X" because he doesn\'t know what they are.',
+    ],
+    reflection: 'Röntgen saw through flesh and changed medicine forever.',
+    category: 'science',
+    context: 'Wilhelm Conrad Röntgen discovered X-rays on November 8, 1895, while experimenting with cathode rays. The first X-ray image was of his wife Anna Bertha\'s hand, clearly showing her bones and wedding ring. Röntgen refused to patent the discovery, believing it should benefit all of humanity. He received the first Nobel Prize in Physics in 1901 and donated the prize money to his university.',
+  },
+
+  // CULTURE
+  {
+    year: 1888,
+    location: 'Roundhay, England',
+    lines: [
+      'A man points a wooden box at his garden.',
+      'His mother-in-law walks through the frame.',
+      'She moves for exactly 2.11 seconds.',
+      'The film is sixteen frames long.',
+      'It is the oldest surviving motion picture.',
+      'The woman in it will be dead within ten days.',
+    ],
+    reflection: 'The first movie ever shot is also a ghost story.',
+    category: 'culture',
+    context: 'Roundhay Garden Scene was filmed by Louis Le Prince on October 14, 1888, in Leeds, England. At 2.11 seconds and sixteen frames, it is the oldest surviving motion picture. It shows Le Prince\'s son, mother-in-law (Sarah Whitley), and two friends walking in a garden. Whitley died just ten days after filming. Le Prince himself vanished from a train in 1890 and was never found — one of history\'s strangest unsolved mysteries.',
+  },
+  {
+    year: 1791,
+    location: 'Vienna, Austria',
+    lines: [
+      'A composer lies in bed, delirious with fever.',
+      'He is dictating his final work to a student.',
+      'It is a requiem — a mass for the dead.',
+      'He tells his wife he is writing it for himself.',
+      'He dies before finishing it.',
+      'He is 35. He is buried in an unmarked grave.',
+    ],
+    reflection: 'Mozart composed his own funeral music and never heard it played.',
+    category: 'culture',
+    context: 'Wolfgang Amadeus Mozart died on December 5, 1791, at age 35, while composing his Requiem in D minor. The work was commissioned anonymously by Count Franz von Walsegg, who intended to pass it off as his own. Mozart became convinced he was writing his own death mass. His student Franz Xaver Süssmayr completed the Requiem after Mozart\'s death. Mozart was buried in a common grave in Vienna — its exact location remains unknown.',
+  },
+
+  // DISASTER
+  {
+    year: 2004,
+    location: 'Indian Ocean',
+    lines: [
+      'The ocean pulls back from the shore like a held breath.',
+      'Children run out to collect the stranded fish.',
+      'Nobody recognizes the warning.',
+      'A wave 30 meters high races across the ocean at 800 km/h.',
+      'It hits 14 countries in a single morning.',
+      '230,000 people die before lunch.',
+    ],
+    reflection: 'The Boxing Day tsunami was the deadliest wave in recorded history.',
+    category: 'disaster',
+    context: 'On December 26, 2004, a magnitude 9.1 earthquake off the coast of Sumatra triggered a series of tsunamis that struck 14 countries around the Indian Ocean. Waves reached heights of 30 meters and traveled at up to 800 km/h. Approximately 230,000 people were killed, making it one of the deadliest natural disasters in recorded history. There was no tsunami warning system in the Indian Ocean at the time.',
+  },
+  {
+    year: 1666,
+    location: 'London, England',
+    lines: [
+      'A baker on Pudding Lane forgets to put out his oven.',
+      'At 1 AM, his house catches fire.',
+      'The Lord Mayor is woken and looks at the flames.',
+      '"A woman could piss it out," he says, and goes back to bed.',
+      'The fire burns for four days.',
+      '13,200 houses and 87 churches are destroyed. The city is rebuilt from scratch.',
+    ],
+    reflection: 'The Great Fire of London started with one man\'s carelessness.',
+    category: 'disaster',
+    context: 'The Great Fire of London began on September 2, 1666, in Thomas Farriner\'s bakery on Pudding Lane. Strong winds spread the fire rapidly through the densely packed timber buildings. Over four days, it destroyed 13,200 houses, 87 parish churches, and most government buildings. Remarkably, only six verified deaths were recorded. The fire led to the rebuilding of London in stone and brick, and Christopher Wren designed 51 new churches including St. Paul\'s Cathedral.',
+  },
+
+  // REVOLUTION
+  {
+    year: 1917,
+    location: 'Petrograd, Russia',
+    lines: [
+      'Bread lines stretch for blocks in the freezing cold.',
+      'Women textile workers walk off the job.',
+      'Within days, 200,000 people fill the streets.',
+      'The Tsar orders the army to shoot.',
+      'The soldiers turn their rifles around.',
+      'A 300-year dynasty ends in a week.',
+    ],
+    reflection: 'The Russian Revolution began because women were hungry.',
+    category: 'revolution',
+    context: 'The February Revolution of 1917 began on International Women\'s Day (March 8 in the Gregorian calendar) when women textile workers in Petrograd went on strike to demand bread. Within days, 200,000 workers had joined them. Tsar Nicholas II ordered troops to fire on demonstrators, but soldiers mutinied and joined the crowds. Nicholas abdicated on March 15, ending the 304-year Romanov dynasty. The October Revolution later that year brought the Bolsheviks to power.',
+  },
+  {
+    year: 1776,
+    location: 'Philadelphia, Pennsylvania',
+    lines: [
+      'A 33-year-old redhead sits alone in a rented room.',
+      'He writes for seventeen days straight.',
+      '"We hold these truths to be self-evident…"',
+      'Fifty-six men sign the document.',
+      'If they lose the war, every one of them will hang.',
+      'They sign anyway.',
+    ],
+    reflection: 'Jefferson wrote a death warrant disguised as a birth certificate.',
+    category: 'revolution',
+    context: 'Thomas Jefferson drafted the Declaration of Independence over 17 days in June 1776, working from a portable writing desk in a rented room in Philadelphia. He was 33 years old. Benjamin Franklin and John Adams made small edits; Congress cut about a quarter of the text, including a passage condemning slavery. The 56 signers knew they were committing treason against the British Crown — punishable by hanging.',
+  },
+
+  // EXPLORATION
+  {
+    year: 1519,
+    location: 'Sanlúcar de Barrameda, Spain',
+    lines: [
+      'Five ships and 270 men sail west to go east.',
+      'Their captain is Portuguese, sailing for Spain.',
+      'They cross the Atlantic, round South America, and enter the Pacific.',
+      'The captain is killed in the Philippines.',
+      'Only one ship makes it back. Only 18 men.',
+      'They have sailed around the entire Earth.',
+    ],
+    reflection: 'Magellan proved the world was round. He didn\'t live to celebrate.',
+    category: 'exploration',
+    context: 'Ferdinand Magellan\'s expedition departed Spain on September 20, 1519, with five ships and approximately 270 men. They navigated the treacherous strait at South America\'s tip (now named after Magellan) and entered the Pacific — a crossing that took 99 days. Magellan was killed in a skirmish in the Philippines on April 27, 1521. Juan Sebastián Elcano completed the voyage; only the ship Victoria and 18 men returned to Spain on September 6, 1522.',
+  },
+  {
+    year: 1977,
+    location: 'Cape Canaveral, Florida',
+    lines: [
+      'Two identical spacecraft launch 16 days apart.',
+      'They carry golden records with music, greetings, and images of Earth.',
+      'They visit Jupiter, Saturn, Uranus, and Neptune.',
+      'Then they keep going.',
+      'One crosses into interstellar space in 2012.',
+      'It is now the farthest human-made object from Earth.',
+    ],
+    reflection: 'Voyager 1 is 24 billion km away. It still phones home.',
+    category: 'exploration',
+    context: 'Voyager 1 launched on September 5, 1977, and Voyager 2 on August 20 (Voyager 2 launched first but Voyager 1 traveled faster). Both carry Golden Records: gold-plated copper discs containing sounds and images of Earth, curated by a committee chaired by Carl Sagan. Voyager 1 crossed into interstellar space on August 25, 2012 — the first human-made object to do so. As of 2024, it is over 24 billion km from Earth and still transmitting data.',
+  },
+
+  // INVENTION
+  {
+    year: 1839,
+    location: 'Paris, France',
+    lines: [
+      'A man coats a copper plate with silver iodide.',
+      'He places it in a wooden box with a lens.',
+      'He opens the shutter for several minutes.',
+      'A ghostly image appears on the plate.',
+      'It is a view of a Paris boulevard.',
+      'Only one person stood still long enough to appear — a man getting his shoes shined.',
+    ],
+    reflection: 'Daguerre froze time. The first photo of a human is a stranger who never knew.',
+    category: 'invention',
+    context: 'Louis Daguerre announced the daguerreotype process in 1839, though his famous Boulevard du Temple photograph dates to late 1838. The image required a 10-minute exposure, so all the moving people and carriages on the busy boulevard are invisible. Only a man getting his shoes shined stood still long enough to be captured — making him the first person ever photographed. His identity remains unknown.',
+  },
+  {
+    year: 1990,
+    location: 'Geneva, Switzerland',
+    lines: [
+      'A British scientist writes a proposal titled "Information Management."',
+      'His boss scribbles "Vague but exciting" on the cover.',
+      'He builds a system to link documents across computers.',
+      'He calls it the World Wide Web.',
+      'He does not patent it.',
+      'He gives it away for free. To everyone.',
+    ],
+    reflection: 'Tim Berners-Lee invented the web and gave humanity its nervous system.',
+    category: 'invention',
+    context: 'Tim Berners-Lee, a British scientist at CERN, submitted his proposal for the World Wide Web on March 12, 1989. His supervisor Mike Sendall wrote "Vague but exciting" on the cover. Berners-Lee built the first web browser, the first web server, and wrote the first web page (about the World Wide Web itself). He made the technology royalty-free in 1993, forgoing billions in potential earnings. The first website went live on August 6, 1991.',
+  },
+  {
+    year: 1947,
+    location: 'Murray Hill, New Jersey',
+    lines: [
+      'Three physicists stare at a tiny crystal of germanium.',
+      'Two gold contacts touch its surface.',
+      'A small current goes in. A larger current comes out.',
+      'Signal amplification — without vacuum tubes.',
+      'The device fits on a fingertip.',
+      'Every phone, computer, and satellite that will ever exist begins here.',
+    ],
+    reflection: 'The transistor was so small nobody noticed it would change everything.',
+    category: 'invention',
+    context: 'John Bardeen, Walter Brattain, and William Shockley demonstrated the first transistor at Bell Laboratories on December 23, 1947. The point-contact transistor used a small piece of germanium with two gold contacts. It could amplify electrical signals without the heat, bulk, and fragility of vacuum tubes. All three won the Nobel Prize in Physics in 1956. Today, a single computer chip contains billions of transistors, each far smaller than a virus.',
+  },
+
+  // ── BATCH 3: moments 41–55 ────────────────────
+
+  // WAR
+  {
+    year: 1968,
+    location: 'My Lai, Vietnam',
+    lines: [
+      'American soldiers enter a village at dawn.',
+      'They have been told it is a Viet Cong stronghold.',
+      'There are only women, children, and elderly men.',
+      'Over four hours, soldiers kill 504 unarmed civilians.',
+      'A helicopter pilot lands between the soldiers and survivors to stop it.',
+      'The massacre is covered up for a year.',
+    ],
+    reflection: 'My Lai revealed that the uniform doesn\'t decide who the enemy is.',
+    category: 'war',
+    context: 'On March 16, 1968, American soldiers of Charlie Company, 1st Battalion, 20th Infantry, entered the hamlet of My Lai in South Vietnam. Expecting Viet Cong fighters, they found unarmed civilians. Over four hours, soldiers killed 504 men, women, and children. Warrant Officer Hugh Thompson landed his helicopter between soldiers and survivors, threatening to open fire on his own troops. The massacre was covered up for over a year until journalist Seymour Hersh broke the story in 1969.',
+  },
+  {
+    year: 1945,
+    location: 'Nagasaki, Japan',
+    lines: [
+      'The primary target is Kokura, but clouds obscure the city.',
+      'The bomber diverts to its secondary target.',
+      'At 11:02 AM, the second atomic bomb detonates.',
+      'It explodes directly over a Catholic cathedral filled with worshippers.',
+      '40,000 people die instantly.',
+      'It is the last nuclear weapon ever used in war.',
+    ],
+    reflection: 'Nagasaki was destroyed by a backup plan. Kokura survived by cloud cover.',
+    category: 'war',
+    context: 'The second atomic bomb, "Fat Man," was originally targeted at the city of Kokura on August 9, 1945. Smoke and cloud cover made visual bombing impossible after three passes, so the B-29 Bockscar diverted to its secondary target: Nagasaki. The bomb detonated directly over Urakami Cathedral, the largest Christian church in East Asia. Approximately 40,000 people died instantly and another 40,000 by year\'s end. Japan surrendered six days later.',
+  },
+
+  // SCIENCE
+  {
+    year: 1543,
+    location: 'Frombork, Poland',
+    lines: [
+      'A 70-year-old astronomer lies on his deathbed.',
+      'A freshly printed book is placed in his hands.',
+      'In it, he claims the Earth moves around the Sun.',
+      'For 1,400 years, everyone believed the opposite.',
+      'The church will ban the book for 200 years.',
+      'He dies hours after touching the first copy.',
+    ],
+    reflection: 'Copernicus moved the Earth and never saw the fallout.',
+    category: 'science',
+    context: 'Nicolaus Copernicus completed De revolutionibus orbium coelestium around 1530 but delayed publication for years, fearing ridicule and religious backlash. The book was finally published in 1543 by his student Georg Joachim Rheticus. Legend holds that Copernicus received the first printed copy on his deathbed on May 24, 1543. The Catholic Church placed the book on its Index of Forbidden Books in 1616, where it remained until 1835.',
+  },
+  {
+    year: 1859,
+    location: 'London, England',
+    lines: [
+      'A naturalist publishes a book after 20 years of hesitation.',
+      'He is terrified of the reaction.',
+      'The book says all living things share a common ancestor.',
+      'It says survival favors the useful, not the perfect.',
+      'The first printing of 1,250 copies sells out on day one.',
+      'Biology will never be the same.',
+    ],
+    reflection: 'Darwin waited two decades to tell humanity it was related to apes.',
+    category: 'science',
+    context: 'Charles Darwin conceived his theory of natural selection in the late 1830s but delayed publication for nearly 20 years, terrified of the social and religious consequences. He was finally forced to publish when Alfred Russel Wallace independently arrived at the same theory. On the Origin of Species appeared on November 24, 1859. All 1,250 copies of the first edition sold out on the first day. It remains one of the most transformative books in scientific history.',
+  },
+  {
+    year: 1666,
+    location: 'Woolsthorpe, England',
+    lines: [
+      'A 23-year-old has been sent home because the plague closed his university.',
+      'He sits in his mother\'s garden with nothing to do.',
+      'An apple falls from a tree.',
+      'He wonders: does the same force reach the Moon?',
+      'In the next 18 months, he invents calculus, discovers the spectrum of light, and figures out gravity.',
+      'He tells no one for 20 years.',
+    ],
+    reflection: 'Newton\'s greatest year happened because a plague gave him free time.',
+    category: 'science',
+    context: 'In 1665, the Great Plague forced Cambridge University to close, and 23-year-old Isaac Newton retreated to his mother\'s farm at Woolsthorpe Manor. During this "annus mirabilis" (miracle year), he developed the foundations of calculus, discovered that white light is composed of a spectrum of colors using a prism, and began formulating his theory of universal gravitation. He published none of it for nearly two decades, until Edmond Halley persuaded him to write the Principia.',
+  },
+
+  // CULTURE
+  {
+    year: 1599,
+    location: 'London, England',
+    lines: [
+      'A playwright dips his quill and writes a line.',
+      '"To be, or not to be — that is the question."',
+      'The play is about a prince who cannot decide whether to act.',
+      'It is performed in a wooden theater open to the sky.',
+      'Groundlings pay one penny to stand and watch.',
+      'It will become the most-performed play in human history.',
+    ],
+    reflection: 'Shakespeare gave humanity its mirror. 400 years later, we still look.',
+    category: 'culture',
+    context: 'Hamlet was likely written between 1599 and 1601 and first performed at the Globe Theatre in Southwark, London. The Globe was an open-air theater where groundlings could stand in the pit for a penny. "To be, or not to be" is the most quoted line in the English language. Hamlet has been adapted into over 50 films and is performed somewhere in the world on any given day. Shakespeare himself may have played the Ghost of Hamlet\'s father.',
+  },
+  {
+    year: 1827,
+    location: 'Vienna, Austria',
+    lines: [
+      'A composer lies dying.',
+      'He has been completely deaf for years.',
+      'His greatest symphony was conducted while he heard nothing.',
+      'At the premiere, the audience erupted in applause.',
+      'Someone had to turn him around so he could see it.',
+      'He composed the soundtrack of joy without ever hearing a note.',
+    ],
+    reflection: 'Beethoven proved that music lives in the mind, not the ear.',
+    category: 'culture',
+    context: 'Ludwig van Beethoven began losing his hearing in his late 20s and was functionally deaf by 1814. His Ninth Symphony, premiered on May 7, 1824, was composed entirely while deaf. At the premiere in Vienna, he stood on stage conducting but was out of sync with the orchestra. When the audience erupted, contralto soloist Caroline Unger had to turn him around to see the applause. He died on March 26, 1827, in Vienna during a thunderstorm.',
+  },
+
+  // DISASTER
+  {
+    year: 2011,
+    location: 'Fukushima, Japan',
+    lines: [
+      'A 9.0 earthquake strikes off the coast at 2:46 PM.',
+      'The tsunami wall is designed for 5.7 meters.',
+      'The wave that arrives is 14 meters tall.',
+      'Seawater floods the backup generators of a nuclear plant.',
+      'Three reactors melt down over the next three days.',
+      '154,000 people are evacuated. Many will never return home.',
+    ],
+    reflection: 'Fukushima was designed for the last disaster, not the next one.',
+    category: 'disaster',
+    context: 'The Tōhoku earthquake on March 11, 2011, was a magnitude 9.0 — the most powerful ever recorded in Japan. The Fukushima Daiichi nuclear plant\'s seawall was designed for a 5.7-meter tsunami; the wave that struck was over 14 meters. Seawater flooded the backup diesel generators, causing cooling systems to fail. Three of six reactors suffered meltdowns. It was the worst nuclear disaster since Chernobyl and led Japan to shut down all 54 of its nuclear reactors for safety reviews.',
+  },
+  {
+    year: 1347,
+    location: 'Sicily, Italy',
+    lines: [
+      'Twelve ships dock at the port of Messina.',
+      'Most of the sailors aboard are already dead.',
+      'The living ones are covered in black boils.',
+      'Within weeks, the disease spreads to the mainland.',
+      'It will kill one in three Europeans.',
+      'In some villages, there is no one left to bury the dead.',
+    ],
+    reflection: 'The Black Death arrived by ship and rewrote the story of civilization.',
+    category: 'disaster',
+    context: 'The Black Death arrived in Sicily in October 1347 aboard twelve Genoese trading ships from the Black Sea port of Caffa, where Mongol besiegers had catapulted plague-infected corpses over the city walls. Caused by the bacterium Yersinia pestis spread by fleas on rats, the plague killed an estimated 25 to 50 million Europeans — roughly one-third of the continent\'s population — between 1347 and 1353. The resulting labor shortage fundamentally shifted economic power toward workers, helping end feudalism.',
+  },
+
+  // REVOLUTION
+  {
+    year: 1930,
+    location: 'Dandi, India',
+    lines: [
+      'A thin man in a loincloth begins walking.',
+      '78 people follow him.',
+      'They walk 240 miles in 24 days.',
+      'At the shore, he bends down and picks up a handful of salt.',
+      'Making salt without paying the British tax is illegal.',
+      '60,000 people are arrested in the months that follow.',
+    ],
+    reflection: 'Gandhi broke an empire by picking up salt.',
+    category: 'revolution',
+    context: 'Mohandas Gandhi began the Salt March on March 12, 1930, walking 240 miles from his ashram at Sabarmati to the coastal village of Dandi in 24 days. By the time he arrived on April 5, thousands had joined him. He picked up a handful of natural salt from the mudflats, symbolically defying the British salt tax. The act of civil disobedience triggered a wave of protests across India; 60,000 people were arrested. It was a turning point in the Indian independence movement.',
+  },
+  {
+    year: 1804,
+    location: 'Saint-Domingue (Haiti)',
+    lines: [
+      'Half a million enslaved people rise up.',
+      'They defeat the local militia.',
+      'Then the Spanish army.',
+      'Then the British army.',
+      'Then Napoleon\'s army — the most powerful in the world.',
+      'On January 1, 1804, they declare independence.',
+    ],
+    reflection: 'Haiti was the first nation founded by former slaves. It cost them everything.',
+    category: 'revolution',
+    context: 'The Haitian Revolution (1791–1804) was the only successful large-scale slave revolt in history. Enslaved people in the French colony of Saint-Domingue rose up in August 1791 and over 13 years defeated French, Spanish, and British armies. Toussaint Louverture emerged as the revolution\'s greatest leader before being captured and dying in a French prison. Jean-Jacques Dessalines declared independence on January 1, 1804. Haiti became the first free Black republic but was forced to pay France 150 million francs in "reparations" for lost slave property.',
+  },
+
+  // EXPLORATION
+  {
+    year: 1960,
+    location: 'Mariana Trench, Pacific Ocean',
+    lines: [
+      'A steel sphere sinks into absolute darkness.',
+      'Two men sit inside it.',
+      'The descent takes nearly five hours.',
+      'At 10,916 meters, they reach the deepest point on Earth.',
+      'Through the porthole, they see a flatfish staring back at them.',
+      'Life exists even here.',
+    ],
+    reflection: 'Piccard and Walsh went deeper than Everest is tall — and found they weren\'t alone.',
+    category: 'exploration',
+    context: 'On January 23, 1960, Swiss oceanographer Jacques Piccard and U.S. Navy Lieutenant Don Walsh descended to the bottom of the Challenger Deep in the Mariana Trench aboard the bathyscaphe Trieste. The descent took 4 hours and 47 minutes to reach 10,916 meters — deeper than Mount Everest is tall. At the bottom, they spotted a flatfish, proving that life exists even at crushing pressures of over 1,000 atmospheres. No human returned to that depth until James Cameron in 2012.',
+  },
+
+  // INVENTION
+  {
+    year: 1796,
+    location: 'Berkeley, England',
+    lines: [
+      'A country doctor notices something about milkmaids.',
+      'They get cowpox, but they never get smallpox.',
+      'He scrapes pus from a milkmaid\'s blister.',
+      'He injects it into an 8-year-old boy.',
+      'Then exposes the boy to smallpox.',
+      'The boy does not get sick. Vaccination is born.',
+    ],
+    reflection: 'Edward Jenner saved more lives than any human in history — starting with one child.',
+    category: 'invention',
+    context: 'Edward Jenner, a country doctor in Berkeley, Gloucestershire, noticed that milkmaids who caught cowpox seemed immune to smallpox. On May 14, 1796, he took pus from a cowpox blister on milkmaid Sarah Nelmes and inoculated 8-year-old James Phipps. When later exposed to smallpox, the boy remained healthy. Jenner coined the term "vaccine" from vacca (Latin for cow). His work ultimately led to the eradication of smallpox in 1980 — the only human disease ever eliminated.',
+  },
+  {
+    year: 1831,
+    location: 'London, England',
+    lines: [
+      'A bookbinder\'s apprentice with no formal education enters a laboratory.',
+      'He wraps wire around an iron ring and connects it to a battery.',
+      'When he switches the current on, a needle twitches across the room.',
+      'Electricity has become magnetism. Magnetism has become electricity.',
+      'Every electric motor, generator, and transformer traces back to this moment.',
+      'Michael Faraday has just unified two forces of nature.',
+    ],
+    reflection: 'Faraday couldn\'t do the math. He didn\'t need to — he could see the fields.',
+    category: 'invention',
+    context: 'Michael Faraday, the son of a blacksmith with almost no formal education, became one of the most influential scientists in history. On August 29, 1831, he demonstrated electromagnetic induction: moving a magnet through a coil of wire generates an electric current. This single discovery underpins every electric generator, transformer, and motor in the world. Faraday thought in visual "lines of force" rather than equations — an approach later vindicated when James Clerk Maxwell translated his ideas into mathematics.',
+  },
+
+  // ── BATCH 4: moments 56–75 ────────────────────
+
+  // WAR
+  {
+    year: 1914,
+    location: 'Sarajevo, Bosnia',
+    lines: [
+      'An archduke takes a wrong turn down a narrow street.',
+      'A 19-year-old assassin is sitting in a café on that same street.',
+      'He steps outside. The car has stalled.',
+      'He fires two shots.',
+      'The archduke and his wife are dead within the hour.',
+      'Within five weeks, the entire world is at war.',
+    ],
+    reflection: 'A wrong turn in Sarajevo killed 20 million people.',
+    category: 'war',
+    context: 'On June 28, 1914, Archduke Franz Ferdinand of Austria-Hungary was assassinated in Sarajevo by Gavrilo Princip, a 19-year-old Bosnian Serb nationalist. An earlier assassination attempt that morning had failed. The archduke\'s driver then took a wrong turn onto a street where Princip happened to be. The assassination triggered a chain of alliances: Austria-Hungary declared war on Serbia, Russia mobilized, Germany declared war on Russia and France, and Britain entered when Germany invaded Belgium. By August 4, most of Europe was at war.',
+  },
+  {
+    year: 1994,
+    location: 'Kigali, Rwanda',
+    lines: [
+      'The president\'s plane is shot down at 8:20 PM.',
+      'Within an hour, roadblocks appear across the city.',
+      'Neighbors turn on neighbors.',
+      'The killings are done with machetes, not bombs.',
+      'In 100 days, 800,000 people are murdered.',
+      'The world watches. Nobody intervenes.',
+    ],
+    reflection: 'Rwanda proved that "never again" was just a phrase.',
+    category: 'war',
+    context: 'The Rwandan genocide began on April 7, 1994, the day after President Juvénal Habyarimana\'s plane was shot down over Kigali. Over approximately 100 days, Hutu extremists murdered an estimated 800,000 Tutsis and moderate Hutus — roughly 70% of Rwanda\'s Tutsi population. Killings were organized by government officials and carried out largely with machetes. The United Nations had peacekeepers in the country but was ordered not to intervene. The genocide ended when the Rwandan Patriotic Front, led by Paul Kagame, took control of the country.',
+  },
+  {
+    year: 1863,
+    location: 'Gettysburg, Pennsylvania',
+    lines: [
+      'Two armies collide in a town neither planned to fight in.',
+      'For three days, the hills and fields become a slaughterhouse.',
+      '50,000 men fall — dead, wounded, or missing.',
+      'On the third day, 12,500 Confederates charge across an open field.',
+      'They are cut down before they reach the stone wall.',
+      'The tide of the war turns in an afternoon.',
+    ],
+    reflection: 'Gettysburg was the high-water mark of the Confederacy. The wave broke there.',
+    category: 'war',
+    context: 'The Battle of Gettysburg, fought July 1–3, 1863, was the bloodiest battle of the American Civil War. Over three days, approximately 165,000 soldiers clashed in and around a small Pennsylvania town. On the third day, General Robert E. Lee ordered Pickett\'s Charge — a frontal assault across nearly a mile of open ground. Of the 12,500 Confederates who charged, roughly half were killed, wounded, or captured. The defeat ended Lee\'s second invasion of the North and is considered the turning point of the war.',
+  },
+
+  // SCIENCE
+  {
+    year: 2012,
+    location: 'Geneva, Switzerland',
+    lines: [
+      'Inside a 27-kilometer ring beneath the Alps, particles race near the speed of light.',
+      'Two beams of protons collide millions of times per second.',
+      'Scientists are looking for something that should exist but has never been seen.',
+      'On July 4, the data confirms it.',
+      'The Higgs boson is real.',
+      'Peter Higgs, sitting in the audience, begins to cry.',
+    ],
+    reflection: 'The "God particle" was found 48 years after one man predicted it on paper.',
+    category: 'science',
+    context: 'The Higgs boson was confirmed on July 4, 2012, at CERN\'s Large Hadron Collider — a 27-kilometer particle accelerator beneath the Swiss-French border. Peter Higgs had predicted the particle in 1964 to explain why matter has mass. The discovery required the most complex machine ever built, 10,000 scientists from over 100 countries, and $13.25 billion. Higgs, then 83 years old, was in the audience when the result was announced. He shared the 2013 Nobel Prize in Physics with François Englert.',
+  },
+  {
+    year: 1898,
+    location: 'Paris, France',
+    lines: [
+      'A woman stirs a boiling cauldron of pitchblende in a leaky shed.',
+      'She has been refining eight tons of ore by hand.',
+      'After four years, she isolates one-tenth of a gram of a new element.',
+      'It glows blue in the dark.',
+      'She names it after her homeland: polonium. Then another: radium.',
+      'She carries test tubes in her pockets. They will kill her.',
+    ],
+    reflection: 'Marie Curie discovered radioactivity and it ate her alive. She won two Nobel Prizes anyway.',
+    category: 'science',
+    context: 'Marie Skłodowska Curie and her husband Pierre spent four years processing eight tonnes of pitchblende ore in a converted shed. In 1898 they discovered two new elements: polonium (named for Marie\'s native Poland) and radium. Marie was the first woman to win a Nobel Prize (Physics, 1903, shared with Pierre and Henri Becquerel), and the first person to win two Nobel Prizes (Chemistry, 1911). She died in 1934 of aplastic anemia caused by radiation exposure. Her notebooks are still too radioactive to handle without protective equipment.',
+  },
+
+  // CULTURE
+  {
+    year: 1928,
+    location: 'New York City',
+    lines: [
+      'A cartoon mouse appears on a movie screen.',
+      'He whistles while steering a steamboat.',
+      'The audience has never seen a cartoon with synchronized sound.',
+      'The mouse\'s creator was fired from his last job for "lacking imagination."',
+      'He mortgaged his house to finish the film.',
+      'The mouse will become the most recognized character on Earth.',
+    ],
+    reflection: 'Walt Disney bet everything on a mouse. The mouse won.',
+    category: 'culture',
+    context: 'Steamboat Willie premiered at the Colony Theatre in New York on November 18, 1928. It was not the first cartoon, but it was the first with fully synchronized sound throughout. Walt Disney had lost the rights to his previous character, Oswald the Lucky Rabbit, when his distributor hired away most of his animators. Desperate, he created Mickey Mouse on a train ride home. Disney mortgaged his house to finish the film. November 18 is now celebrated as Mickey Mouse\'s official birthday.',
+  },
+  {
+    year: 1922,
+    location: 'Valley of the Kings, Egypt',
+    lines: [
+      'A boy carrying water trips over a stone step.',
+      'His employer, an archaeologist, starts digging.',
+      'They find a sealed doorway.',
+      'Behind it is a room full of gold that has been untouched for 3,000 years.',
+      '"Can you see anything?" asks Lord Carnarvon.',
+      '"Yes, wonderful things."',
+    ],
+    reflection: 'Howard Carter found Tutankhamun because a boy stumbled.',
+    category: 'culture',
+    context: 'On November 4, 1922, a water boy carrying jars for Howard Carter\'s excavation team stumbled on a stone step in the Valley of the Kings. It led to a sealed doorway, then a corridor, then a second sealed door. When Carter peered through a small hole with a candle, Lord Carnarvon asked, "Can you see anything?" Carter replied, "Yes, wonderful things." Tutankhamun\'s tomb was the most intact royal burial ever found, containing over 5,000 artifacts including the famous gold death mask.',
+  },
+  {
+    year: 1936,
+    location: 'Berlin, Germany',
+    lines: [
+      'The Nazis host the Olympics to showcase Aryan supremacy.',
+      'A Black American sprinter crouches at the starting line.',
+      'Jesse Owens wins the 100 meters. Then the 200. Then the long jump.',
+      'Then the 4x100 relay.',
+      'Four gold medals. In Hitler\'s stadium.',
+      'The Führer leaves rather than shake his hand.',
+    ],
+    reflection: 'Owens ran so fast he outran an ideology.',
+    category: 'culture',
+    context: 'Jesse Owens won four gold medals at the 1936 Berlin Olympics — the 100m, 200m, long jump, and 4x100m relay — in front of Adolf Hitler, who had intended the Games to showcase Aryan racial supremacy. German long jumper Luz Long helped Owens qualify by advising him to adjust his takeoff mark; they became friends. Owens returned home to a nation that still enforced racial segregation; he was not invited to the White House, and President Roosevelt never sent a telegram of congratulations.',
+  },
+
+  // DISASTER
+  {
+    year: 1906,
+    location: 'San Francisco, California',
+    lines: [
+      'At 5:12 AM, the city shakes for 42 seconds.',
+      'The earthquake is violent, but the fires are worse.',
+      'Broken gas mains ignite block after block.',
+      'The fire department\'s water mains are ruptured.',
+      'For three days, the city burns.',
+      '80% of San Francisco is destroyed. 3,000 people are dead.',
+    ],
+    reflection: 'San Francisco didn\'t burn because of an earthquake. It burned because it had no water.',
+    category: 'disaster',
+    context: 'The 1906 San Francisco earthquake struck at 5:12 AM on April 18, with an estimated magnitude of 7.9. The quake itself caused significant damage, but the ensuing fires were far more destructive. Ruptured water mains left firefighters helpless as fires burned for three days. Authorities dynamited buildings to create firebreaks, often spreading the flames further. Over 80% of the city was destroyed, 3,000 people died, and 250,000 were left homeless. The disaster led to major advances in seismology and building codes.',
+  },
+  {
+    year: 1970,
+    location: 'Huascarán, Peru',
+    lines: [
+      'An earthquake shakes loose a slab of glacier from the mountain.',
+      'It falls 3,000 meters and mixes with rock and mud.',
+      'The avalanche travels at 300 km/h.',
+      'The town of Yungay sits directly in its path.',
+      'The entire town is buried.',
+      'Of 25,000 residents, only 350 survive.',
+    ],
+    reflection: 'Yungay was erased in three minutes. The mountain didn\'t care.',
+    category: 'disaster',
+    context: 'On May 31, 1970, a magnitude 7.9 earthquake off the coast of Peru triggered an avalanche of ice and rock from the north face of Mount Huascarán. The debris flow traveled at up to 300 km/h, burying the town of Yungay under millions of cubic meters of mud, ice, and rock. Of the town\'s 25,000 inhabitants, only about 350 survived — most by running to a nearby cemetery on higher ground. The disaster killed an estimated 70,000 people across the region.',
+  },
+
+  // REVOLUTION
+  {
+    year: 2010,
+    location: 'Sidi Bouzid, Tunisia',
+    lines: [
+      'A fruit vendor argues with a municipal inspector.',
+      'She slaps him and confiscates his cart.',
+      'He goes to the governor\'s office to complain. They refuse to see him.',
+      'He walks to the middle of the street and sets himself on fire.',
+      'Within weeks, the president flees the country.',
+      'The fire spreads to Egypt, Libya, Syria, Yemen, and Bahrain.',
+    ],
+    reflection: 'Mohamed Bouazizi lit a match and started the Arab Spring.',
+    category: 'revolution',
+    context: 'On December 17, 2010, Mohamed Bouazizi, a 26-year-old street vendor in Sidi Bouzid, Tunisia, set himself on fire outside the local government office after a municipal inspector confiscated his produce cart and allegedly slapped and spat on him. He died on January 4, 2011. His self-immolation sparked protests that toppled Tunisian President Ben Ali within weeks, then spread across the Arab world. Uprisings erupted in Egypt, Libya, Syria, Yemen, and Bahrain in what became known as the Arab Spring.',
+  },
+  {
+    year: 1688,
+    location: 'London, England',
+    lines: [
+      'The king has a son, securing a Catholic dynasty.',
+      'Seven noblemen secretly invite a Dutch prince to invade.',
+      'William of Orange lands with 15,000 soldiers.',
+      'Not a single battle is fought.',
+      'The king flees to France.',
+      'Parliament declares that monarchs rule only with the consent of the people.',
+    ],
+    reflection: 'The Glorious Revolution overthrew a king without spilling a drop of blood.',
+    category: 'revolution',
+    context: 'In 1688, seven English nobles invited the Dutch stadtholder William of Orange to invade England and depose King James II, whose Catholic policies threatened the Protestant establishment. William landed with approximately 15,000 troops on November 5, 1688. James\'s army deserted him, and he fled to France. Parliament declared that James had "abdicated" and offered the throne to William and his wife Mary. The resulting Bill of Rights (1689) established parliamentary sovereignty and became a model for constitutional government worldwide.',
+  },
+
+  // EXPLORATION
+  {
+    year: 1831,
+    location: 'Plymouth, England',
+    lines: [
+      'A 22-year-old who almost became a priest boards a ship called the Beagle.',
+      'The voyage is meant to last two years. It lasts five.',
+      'He collects beetles, fossils, and finches.',
+      'On the Galápagos Islands, he notices that each island\'s finches have different beaks.',
+      'A thought forms that he is afraid to write down.',
+      'It takes him 20 more years to publish it.',
+    ],
+    reflection: 'Darwin sailed around the world and came home with the most dangerous idea in history.',
+    category: 'exploration',
+    context: 'Charles Darwin boarded HMS Beagle on December 27, 1831, as an unpaid gentleman naturalist. He was 22 years old and nearly became a clergyman instead. The voyage, originally planned for two years, lasted five. Darwin collected thousands of specimens and filled notebooks with observations. His five weeks in the Galápagos Islands in 1835 were pivotal: he noticed that finches on different islands had differently shaped beaks adapted to local food sources — a key insight that led to the theory of natural selection.',
+  },
+  {
+    year: 1953,
+    location: 'Mount Everest, Nepal',
+    lines: [
+      'The air contains one-third the oxygen of sea level.',
+      'Two men push upward from Camp IX.',
+      'One is a beekeeper from New Zealand. The other is a Sherpa from Nepal.',
+      'At 11:30 AM, they reach a place no human has ever stood.',
+      'They spend 15 minutes at the top of the world.',
+      'Tenzing leaves an offering of chocolate. Hillary leaves a crucifix.',
+    ],
+    reflection: 'Hillary and Tenzing stood on top of the world. The mountain let them.',
+    category: 'exploration',
+    context: 'Edmund Hillary and Tenzing Norgay reached the summit of Mount Everest at 11:30 AM on May 29, 1953. At 8,849 meters, it was the highest point any human had ever stood. The air contained only one-third the oxygen at sea level. They spent about 15 minutes at the top; Tenzing buried chocolate and biscuits as a Buddhist offering, while Hillary left a crucifix. When asked if they stepped on the summit simultaneously, both men maintained a diplomatic silence. The news reached London on the morning of Queen Elizabeth II\'s coronation.',
+  },
+
+  // INVENTION
+  {
+    year: 1928,
+    location: 'San Francisco, California',
+    lines: [
+      'A 21-year-old farm boy demonstrates a device to investors.',
+      'On a small glass tube, a glowing line appears.',
+      'He transmits a simple image: a dollar sign.',
+      'The investors laugh. "When do we see some dollars in this thing?"',
+      'The boy has just demonstrated electronic television.',
+      'His name is Philo Farnsworth. The world will forget him.',
+    ],
+    reflection: 'Farnsworth invented TV at 21. RCA took the credit. He died in obscurity.',
+    category: 'invention',
+    context: 'Philo Taylor Farnsworth first conceived of electronic television at age 14 while plowing a potato field in Idaho — the parallel lines of the furrows inspired the idea of scanning an image line by line. On September 7, 1927, at age 21, he successfully demonstrated fully electronic television in his San Francisco laboratory. RCA and its president David Sarnoff fought Farnsworth in a bitter patent war for years. Farnsworth eventually won but was financially exhausted. He died in 1971, largely forgotten by the public.',
+  },
+  {
+    year: 1454,
+    location: 'Venice, Italy',
+    lines: [
+      'A glassmaker on the island of Murano makes a mistake.',
+      'He adds too much manganese to a batch of glass.',
+      'Instead of colored glass, the result is perfectly clear.',
+      'For the first time, humans can see through glass without distortion.',
+      'Within decades, lenses are ground from it.',
+      'Spectacles, telescopes, and microscopes follow — each one rewriting what humanity can see.',
+    ],
+    reflection: 'Clear glass was an accident. It gave us the stars and the cells.',
+    category: 'invention',
+    context: 'Venetian glassmakers on the island of Murano had been producing colored glass for centuries, but around 1450, the accidental addition of manganese dioxide produced cristallo — the first truly clear glass. This seemingly small accident had enormous consequences: it enabled the development of eyeglasses (extending the productive lives of scholars), microscopes (revealing cells and bacteria), telescopes (revealing planets and galaxies), and eventually fiber optics. Clear glass quietly underpins much of modern science and technology.',
+  },
+  {
+    year: 1983,
+    location: 'Moscow, Soviet Union',
+    lines: [
+      'A Soviet early-warning system detects five nuclear missiles incoming from America.',
+      'The officer on duty is supposed to report it immediately.',
+      'A report means retaliation. Retaliation means the end of the world.',
+      'He stares at the screen. Something feels wrong.',
+      'He decides it is a false alarm. He does not report.',
+      'He is right. A satellite had mistaken sunlight on clouds for missiles.',
+    ],
+    reflection: 'Stanislav Petrov saved the world by doing nothing. Almost no one knows his name.',
+    category: 'invention',
+    context: 'On September 26, 1983, Soviet Lieutenant Colonel Stanislav Petrov was the duty officer at the Serpukhov-15 early warning center when the system reported five incoming American ICBMs. Standard protocol required him to report the attack immediately, which would have triggered a full nuclear retaliation. Petrov judged it a false alarm, reasoning that a real first strike would involve hundreds of missiles, not five. He was right — a satellite had mistaken sunlight reflecting off high-altitude clouds for missile launches. His decision likely prevented nuclear war.',
+  },
+  {
+    year: 1609,
+    location: 'Padua, Italy',
+    lines: [
+      'A professor points a modified spyglass at the night sky.',
+      'He sees mountains on the Moon.',
+      'He sees four tiny lights orbiting Jupiter.',
+      'If moons orbit Jupiter, not everything orbits the Earth.',
+      'The Church tells him to stop looking.',
+      'He keeps looking.',
+    ],
+    reflection: 'Galileo aimed a tube at the sky and broke a 1,500-year illusion.',
+    category: 'science',
+    context: 'In late 1609, Galileo Galilei pointed an improved telescope at the night sky from Padua, Italy. He discovered mountains and craters on the Moon, four moons orbiting Jupiter (now called the Galilean moons), the phases of Venus, and countless stars invisible to the naked eye. His observations supported the Copernican heliocentric model, putting him in direct conflict with the Catholic Church. In 1633, the Inquisition forced him to recant under threat of torture. He spent the last nine years of his life under house arrest.',
+  },
+  {
+    year: 2001,
+    location: 'New York City',
+    lines: [
+      'It is a clear Tuesday morning in September.',
+      'At 8:46 AM, the North Tower shudders.',
+      'People on the street look up.',
+      'At 9:03 AM, the second plane hits live on television.',
+      'At 9:59, the South Tower falls in 10 seconds.',
+      '2,977 people die. The 21st century begins.',
+    ],
+    reflection: 'September 11 lasted one morning and changed every morning after.',
+    category: 'disaster',
+    context: 'On the morning of September 11, 2001, 19 al-Qaeda hijackers commandeered four commercial airliners. American Airlines Flight 11 struck the North Tower of the World Trade Center at 8:46 AM; United Airlines Flight 175 hit the South Tower at 9:03 AM. American Airlines Flight 77 crashed into the Pentagon at 9:37 AM. United Airlines Flight 93, likely headed for the U.S. Capitol, crashed in a Pennsylvania field at 10:03 AM after passengers fought the hijackers. 2,977 people died. The attacks led to the War on Terror, the invasion of Afghanistan, and sweeping changes to global security.',
+  },
+
+  // ── FINAL 4: moments 72–75 ────────────────────
+  {
+    year: 1348,
+    location: 'Florence, Italy',
+    lines: [
+      'The city\'s population falls from 120,000 to 50,000 in one summer.',
+      'Bodies pile in the streets faster than anyone can bury them.',
+      'Priests refuse to give last rites.',
+      'The survivors inherit the property of the dead.',
+      'Labor becomes scarce. Workers demand higher wages.',
+      'The feudal system cracks. The Renaissance begins.',
+    ],
+    reflection: 'The worst plague in history accidentally built the world\'s greatest culture.',
+    category: 'disaster',
+    context: 'The Black Death reached Florence in 1348 and killed roughly 60% of the city\'s population within months. Bodies piled in streets and churches. Giovanni Boccaccio documented the horror in The Decameron. But the aftermath reshaped European society: the massive death toll created labor shortages, empowering surviving workers to demand higher wages and breaking down feudal structures. Inherited wealth concentrated in fewer hands, funding the patronage of art and architecture that sparked the Italian Renaissance.',
+  },
+  {
+    year: 1865,
+    location: 'Washington, D.C.',
+    lines: [
+      'The president laughs at a joke in a theater.',
+      'A famous actor slips into the presidential box.',
+      'A single shot rings out.',
+      'The actor leaps to the stage and shouts in Latin.',
+      'The president is carried across the street to a boarding house.',
+      'He dies at 7:22 the next morning. He is 56.',
+    ],
+    reflection: 'Lincoln won the war. Booth stole the peace.',
+    category: 'war',
+    context: 'Abraham Lincoln was shot by actor John Wilkes Booth at Ford\'s Theatre in Washington, D.C., on April 14, 1865 — just five days after Robert E. Lee\'s surrender at Appomattox. Booth, a Confederate sympathizer, leapt from the presidential box to the stage, reportedly shouting "Sic semper tyrannis" ("Thus always to tyrants"). Lincoln was carried to Petersen House across the street and died at 7:22 AM the next morning. His assassination robbed the nation of his comparatively lenient plans for Reconstruction.',
+  },
+  {
+    year: 1969,
+    location: 'Bethel, New York',
+    lines: [
+      'A dairy farmer rents out his field for a music festival.',
+      'Organizers expect 50,000 people.',
+      '400,000 arrive.',
+      'It rains. The roads are impassable. There is not enough food.',
+      'For three days, nobody fights. Nobody riots.',
+      'Half a million strangers just listen to music together.',
+    ],
+    reflection: 'Woodstock was a logistical disaster and a spiritual triumph.',
+    category: 'culture',
+    context: 'The Woodstock Music & Art Fair took place August 15–18, 1969, on Max Yasgur\'s dairy farm near Bethel, New York — 43 miles from the actual town of Woodstock. Organizers expected 50,000 attendees; an estimated 400,000 showed up. Traffic jams stretched for miles; performers had to be helicoptered in. Despite rain, mud, food shortages, and inadequate sanitation, there were no reported violent incidents. Artists included Jimi Hendrix, Janis Joplin, The Who, and Joan Baez. Hendrix\'s feedback-drenched rendition of "The Star-Spangled Banner" became an iconic moment of the 1960s counterculture.',
+  },
+  {
+    year: 1770,
+    location: 'The Pacific Ocean',
+    lines: [
+      'A ship called the Endeavour reaches the east coast of a vast continent.',
+      'The crew sees smoke rising from the shore.',
+      'People have lived here for 65,000 years — the oldest continuous civilization on Earth.',
+      'The captain plants a flag and claims it for a king who will never see it.',
+      'He names the bay after the botanist\'s plant collection.',
+      'Botany Bay. The beginning of a long theft.',
+    ],
+    reflection: 'Cook charted a coastline. The people who lived there didn\'t need a map.',
+    category: 'exploration',
+    context: 'Lieutenant James Cook\'s HMS Endeavour reached the east coast of Australia on April 19, 1770. The crew anchored at a bay so rich in plant specimens that botanist Joseph Banks collected thousands of samples — hence the name Botany Bay. Aboriginal Australians had inhabited the continent for at least 65,000 years, making them the world\'s oldest continuous civilization. Cook claimed the eastern coastline for King George III under the doctrine of terra nullius ("nobody\'s land"), disregarding the Indigenous population. This claim became the legal basis for British colonization of Australia.',
   },
 ];
