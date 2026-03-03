@@ -497,3 +497,36 @@ button, a, input, select, textarea {
 .elevation-5 {
   box-shadow: 0 19px 38px rgba(0, 0, 0, 0.3), 0 15px 12px rgba(0, 0, 0, 0.22);
 }
+
+/* ── Curio hero gradient animation ─────────────── */
+@keyframes gradient-drift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.curio-title-gradient {
+  background: linear-gradient(
+    135deg,
+    #a78bfa 0%,
+    #c084fc 18%,
+    #e879f9 36%,
+    #f0abfc 50%,
+    #67e8f9 68%,
+    #7dd3fc 82%,
+    #a78bfa 100%
+  );
+  background-size: 300% 300%;
+  animation: gradient-drift 8s ease infinite;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+
+.curio-title-glow {
+  animation: glow-pulse 4s ease-in-out infinite;
+}

@@ -116,15 +116,28 @@ function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
         <div className="absolute top-4 right-4 z-10">
           <ThemeSelector />
         </div>
-        <div className="max-w-5xl mx-auto px-5 pt-14 pb-10 text-center">
-          <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.5 }}>
-            <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-3">
-              <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">Curio</span>
-            </h1>
-            <p className="text-base sm:text-lg font-medium tracking-wide" style={{ color: 'var(--curio-text-secondary)' }}>
-              Questions worth sitting with.
-            </p>
+        <div className="max-w-5xl mx-auto px-5 pt-16 pb-12 text-center">
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.7, ease: [0.23, 1, 0.32, 1] }}>
+            {/* Glow bloom behind title */}
+            <div className="relative inline-block">
+              <div
+                className="curio-title-glow absolute inset-0 blur-3xl -z-10 scale-150"
+                style={{ background: 'radial-gradient(ellipse, rgba(168,85,247,0.35) 0%, rgba(236,72,153,0.2) 40%, rgba(103,232,249,0.15) 70%, transparent 100%)' }}
+              />
+              <h1 className="text-5xl sm:text-7xl font-bold tracking-tight mb-4">
+                <span className="curio-title-gradient">Curio</span>
+              </h1>
+            </div>
           </motion.div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3, duration: 0.8 }}
+            className="text-sm sm:text-base font-normal tracking-[0.15em] uppercase"
+            style={{ color: 'var(--curio-text-muted)' }}
+          >
+            A quiet corner of the internet
+          </motion.p>
         </div>
         {/* Hairline separator */}
         <div className="h-px mx-4" style={{ background: 'var(--curio-header-line)' }} />
@@ -222,7 +235,7 @@ function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
 
       <footer className="relative z-10 max-w-5xl mx-auto px-4 py-6 flex items-center justify-between text-xs" style={{ borderTop: '1px solid var(--curio-border-subtle)', color: 'var(--curio-text-muted)' }}>
         <span>Built with curiosity.</span>
-        <span>{APPS.length} experiments</span>
+        <span>{APPS.length} curiosities</span>
       </footer>
     </motion.div>
   );

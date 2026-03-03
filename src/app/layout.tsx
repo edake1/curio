@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
+import { Geist, Geist_Mono, Cormorant_Garamond } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
@@ -13,10 +13,10 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -47,7 +47,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className="dark" data-theme="midnight">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} antialiased transition-colors duration-300`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cormorant.variable} antialiased transition-colors duration-300`}
         style={{ backgroundColor: 'var(--curio-bg)', color: 'var(--curio-text)' }}
       >
         <ThemeProvider>

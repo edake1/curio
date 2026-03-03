@@ -13,6 +13,7 @@ const BG      = 'var(--curio-card, rgba(30,30,28,0.55))';
 const AMBER   = '#d97706';
 const AMBER_D = 'rgba(217,119,6,0.08)';
 const AMBER_B = 'rgba(217,119,6,0.18)';
+const SERIF   = 'var(--font-cormorant), Georgia, serif';
 
 // ── category styling ─────────────────────────────────────────
 const CAT_STYLE: Record<string, { color: string; label: string }> = {
@@ -243,10 +244,10 @@ export function TheRewindApp() {
 
         {/* Header */}
         <div className="text-center space-y-1">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight" style={{ color: IVORY }}>
+          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ color: IVORY, fontFamily: SERIF }}>
             The Rewind
           </h2>
-          <p className="text-[11px] tracking-[0.2em] uppercase" style={{ color: MUTED }}>
+          <p className="text-xs tracking-[0.2em] uppercase" style={{ color: MUTED }}>
             Witness a moment in human history
           </p>
         </div>
@@ -255,7 +256,7 @@ export function TheRewindApp() {
         {uniqueSeen.size > 0 && !showHistory && (
           <div className="flex items-center justify-center gap-3">
             <button onClick={() => setShowHistory(true)}
-              className="inline-flex items-center gap-1.5 text-[10px] tracking-wider px-3 py-1.5 rounded-lg transition-all hover:opacity-80"
+              className="inline-flex items-center gap-1.5 text-xs tracking-wider px-3 py-1.5 rounded-lg transition-all hover:opacity-80"
               style={{ color: MUTED, background: FAINT }}>
               <History className="w-3 h-3" /> {uniqueSeen.size} witnessed
             </button>
@@ -288,8 +289,8 @@ export function TheRewindApp() {
                   ].map(s => (
                     <div key={s.label} className="text-center">
                       <div className="text-xl font-bold" style={{ color: IVORY }}>{s.value}</div>
-                      <div className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>{s.label}</div>
-                      {s.sub && <div className="text-[8px]" style={{ color: FAINT }}>{s.sub}</div>}
+                      <div className="text-[10px] uppercase tracking-wider" style={{ color: MUTED }}>{s.label}</div>
+                      {s.sub && <div className="text-[9px]" style={{ color: MUTED }}>{s.sub}</div>}
                     </div>
                   ))}
                 </div>
@@ -302,13 +303,13 @@ export function TheRewindApp() {
                     const pct = Math.round((s / total) * 100);
                     return (
                       <div key={key} className="flex items-center gap-2">
-                        <span className="text-[9px] w-20 text-right uppercase tracking-wider" style={{ color: st.color }}>{st.label}</span>
+                        <span className="text-[10px] w-20 text-right uppercase tracking-wider" style={{ color: st.color }}>{st.label}</span>
                         <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: `${st.color}15` }}>
                           <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
                             className="h-full rounded-full" style={{ background: st.color }} />
                         </div>
-                        <span className="text-[9px] w-8 tabular-nums" style={{ color: MUTED }}>{s}/{total}</span>
+                        <span className="text-[10px] w-8 tabular-nums" style={{ color: MUTED }}>{s}/{total}</span>
                       </div>
                     );
                   })}
@@ -332,11 +333,11 @@ export function TheRewindApp() {
                         <span className="w-1.5 h-1.5 rounded-full shrink-0 mt-1" style={{ background: st?.color || MUTED }} />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <span className="text-[10px] tabular-nums" style={{ color: MUTED }}>{formatYear(m.year)}</span>
-                            <span className="text-[10px]" style={{ color: FAINT }}>·</span>
-                            <span className="text-[10px] truncate" style={{ color: MUTED }}>{m.location}</span>
+                            <span className="text-xs tabular-nums" style={{ color: MUTED }}>{formatYear(m.year)}</span>
+                            <span className="text-xs" style={{ color: FAINT }}>·</span>
+                            <span className="text-xs truncate" style={{ color: MUTED }}>{m.location}</span>
                           </div>
-                          <p className="text-xs leading-snug" style={{ color: IVORY }}>{m.reflection}</p>
+                          <p className="text-sm leading-snug" style={{ color: IVORY, fontFamily: SERIF }}>{m.reflection}</p>
                         </div>
                         <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity shrink-0" style={{ color: MUTED }} />
                       </button>
@@ -392,7 +393,7 @@ export function TheRewindApp() {
               </div>
 
               <div className="space-y-3">
-                <p className="text-xs" style={{ color: MUTED }}>Press to travel back in time</p>
+                <p className="text-sm" style={{ color: MUTED }}>Press to travel back in time</p>
                 <div className="flex items-center justify-center gap-6">
                   {[
                     { val: HISTORICAL_MOMENTS.length, label: 'moments' },
@@ -400,8 +401,8 @@ export function TheRewindApp() {
                     { val: '7', label: 'categories' },
                   ].map(s => (
                     <div key={s.label} className="text-center">
-                      <div className="text-sm font-bold" style={{ color: IVORY }}>{s.val}</div>
-                      <div className="text-[8px] uppercase tracking-wider" style={{ color: FAINT }}>{s.label}</div>
+                      <div className="text-base font-bold" style={{ color: IVORY }}>{s.val}</div>
+                      <div className="text-[9px] uppercase tracking-wider" style={{ color: MUTED }}>{s.label}</div>
                     </div>
                   ))}
                 </div>
@@ -421,7 +422,7 @@ export function TheRewindApp() {
                   animate={{ opacity: 0.04, scale: 1 }}
                   transition={{ duration: 1.5 }}
                   className="text-[120px] sm:text-[160px] font-black leading-none block"
-                  style={{ color: catColor }}
+                  style={{ color: catColor, fontFamily: SERIF }}
                 >
                   {moment.year < 0 ? Math.abs(moment.year) : moment.year}
                 </motion.span>
@@ -430,8 +431,8 @@ export function TheRewindApp() {
               {/* Era + time context */}
               <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
                 className="text-center">
-                <span className="text-[9px] uppercase tracking-[0.25em] px-3 py-1 rounded-full"
-                  style={{ color: AMBER, background: AMBER_D }}>
+                <span className="text-[10px] uppercase tracking-[0.25em] px-3 py-1 rounded-full"
+                  style={{ color: AMBER, background: AMBER_D, fontFamily: SERIF }}>
                   {getEra(moment.year)} &middot; {yearsAgo(moment.year)}
                 </span>
               </motion.div>
@@ -439,14 +440,14 @@ export function TheRewindApp() {
               {/* Location + year + category */}
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                 className="flex items-center justify-center gap-4 flex-wrap">
-                <span className="inline-flex items-center gap-1.5 text-xs tracking-wider" style={{ color: MUTED }}>
-                  <Clock className="w-3 h-3" /> {formatYear(moment.year)}
+                <span className="inline-flex items-center gap-1.5 text-sm tracking-wider" style={{ color: MUTED }}>
+                  <Clock className="w-3.5 h-3.5" /> {formatYear(moment.year)}
                 </span>
-                <span className="inline-flex items-center gap-1.5 text-xs tracking-wider" style={{ color: MUTED }}>
-                  <MapPin className="w-3 h-3" /> {moment.location}
+                <span className="inline-flex items-center gap-1.5 text-sm tracking-wider" style={{ color: MUTED }}>
+                  <MapPin className="w-3.5 h-3.5" /> {moment.location}
                 </span>
                 {cat && (
-                  <span className="text-[9px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full"
+                  <span className="text-[10px] uppercase tracking-[0.2em] px-2 py-0.5 rounded-full"
                     style={{ color: cat.color, background: cat.color + '12', border: `1px solid ${cat.color}22` }}>
                     {cat.label}
                   </span>
@@ -475,10 +476,11 @@ export function TheRewindApp() {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                        className="text-sm sm:text-base leading-relaxed py-2"
+                        className="text-base sm:text-lg leading-relaxed py-2.5"
                         style={{
                           color: i === moment.lines.length - 1 ? IVORY : MUTED,
                           fontWeight: i === moment.lines.length - 1 ? 600 : 400,
+                          fontFamily: SERIF,
                         }}
                       >
                         {line}
@@ -538,7 +540,7 @@ export function TheRewindApp() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="space-y-5"
                   >
-                    <p className="text-sm sm:text-base italic leading-relaxed text-center px-2" style={{ color: AMBER }}>
+                    <p className="text-base sm:text-lg italic leading-relaxed text-center px-2" style={{ color: AMBER, fontFamily: SERIF }}>
                       {moment.reflection}
                     </p>
 
@@ -568,7 +570,7 @@ export function TheRewindApp() {
                               transition={{ duration: 0.3 }}
                               className="overflow-hidden"
                             >
-                              <p className="px-4 pb-4 text-xs sm:text-sm leading-relaxed" style={{ color: MUTED }}>
+                              <p className="px-4 pb-4 text-sm sm:text-base leading-relaxed" style={{ color: MUTED, fontFamily: SERIF }}>
                                 {moment.context}
                               </p>
                             </motion.div>
@@ -599,7 +601,7 @@ export function TheRewindApp() {
 
         {/* Footer */}
         {uniqueSeen.size > 0 && !showHistory && (
-          <div className="text-center text-[10px] tabular-nums" style={{ color: FAINT }}>
+          <div className="text-center text-xs tabular-nums" style={{ color: MUTED }}>
             {uniqueSeen.size} of {HISTORICAL_MOMENTS.length} moments witnessed ({seenPct}%)
           </div>
         )}
