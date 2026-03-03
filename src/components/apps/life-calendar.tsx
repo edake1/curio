@@ -65,14 +65,14 @@ function generateStaticGrains(count: number, seed: number): StaticGrain[] {
   const rng = seededRandom(seed);
   return Array.from({ length: count }, () => ({
     xPct: rng(), yPct: rng(),
-    size: 0.6 + rng() * 1.4,
-    opacity: 0.25 + rng() * 0.45,
+    size: 1.5 + rng() * 2.5,
+    opacity: 0.5 + rng() * 0.5,
     colorIdx: Math.floor(rng() * 3),
   }));
 }
 
-const TOP_GRAINS = generateStaticGrains(220, 42);
-const BOT_GRAINS = generateStaticGrains(220, 137);
+const TOP_GRAINS = generateStaticGrains(350, 42);
+const BOT_GRAINS = generateStaticGrains(350, 137);
 const GRAIN_COLORS = [GRAIN_SHADOW, ACCENT, GRAIN_LIGHT];
 
 // ── Geometry helpers ─────────────────────────────────────────────
@@ -97,15 +97,15 @@ function hourglassWidthAt(t: number, hw: number, neck: number): number {
 }
 
 function createDustMotes(cx: number, cy: number, glassW: number, glassH: number): DustMote[] {
-  return Array.from({ length: 15 }, (_, i) => {
-    const angle = (i / 15) * Math.PI * 2;
-    const dist = glassW * 0.55 + Math.random() * glassW * 0.35;
+  return Array.from({ length: 25 }, (_, i) => {
+    const angle = (i / 25) * Math.PI * 2;
+    const dist = glassW * 0.45 + Math.random() * glassW * 0.5;
     return {
       baseX: cx + Math.cos(angle) * dist,
-      baseY: cy + Math.sin(angle) * (glassH * 0.3) + (Math.random() - 0.5) * glassH * 0.25,
-      size: 0.5 + Math.random() * 1,
-      opacity: 0.12 + Math.random() * 0.2,
-      speed: 0.2 + Math.random() * 0.4,
+      baseY: cy + Math.sin(angle) * (glassH * 0.4) + (Math.random() - 0.5) * glassH * 0.3,
+      size: 1.2 + Math.random() * 1.8,
+      opacity: 0.3 + Math.random() * 0.35,
+      speed: 0.15 + Math.random() * 0.35,
       phase: Math.random() * Math.PI * 2,
     };
   });
@@ -149,9 +149,17 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
     // ── 1. Ambient dust (behind glass) ──
     for (const d of dustRef.current) {
       const t = now * 0.001;
-      const dx = d.baseX + Math.sin(t * d.speed + d.phase) * 15;
-      const dy = d.baseY + Math.cos(t * d.speed * 0.7 + d.phase) * 10;
-      ctx.globalAlpha = d.opacity * (0.5 + 0.5 * Math.sin(t * 0.8 + d.phase));
+      const dx = d.baseX + Math.sin(t * d.speed + d.phase) * 20;
+      const dy = d.baseY + Math.cos(t * d.speed * 0.7 + d.phase) * 14;
+      const flicker = 0.6 + 0.4 * Math.sin(t * 0.8 + d.phase);
+      // Soft glow halo
+      ctx.globalAlpha = d.opacity * flicker * 0.3;
+      ctx.fillStyle = GRAIN_LIGHT;
+      ctx.beginPath();
+      ctx.arc(dx, dy, d.size * 3, 0, Math.PI * 2);
+      ctx.fill();
+      // Core dot
+      ctx.globalAlpha = d.opacity * flicker;
       ctx.fillStyle = ACCENT;
       ctx.beginPath();
       ctx.arc(dx, dy, d.size, 0, Math.PI * 2);
@@ -179,25 +187,27 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
       ctx.fillStyle = grad1;
       ctx.fillRect(cx - hw - 2, topSandY, glassW + 4, topHeight + 4);
 
-      // Grain texture
+      // Grain texture — visible individual sand grains
       for (const g of TOP_GRAINS) {
-        const gx = cx + (g.xPct - 0.5) * glassW * 0.95;
+        const gx = cx + (g.xPct - 0.5) * glassW * 0.92;
         const gy = topSandY + g.yPct * topHeight;
         if (gy >= topSandY && gy <= cy - 6) {
           const tN = (gy - (cy - glassH / 2)) / glassH;
-          const maxW = hourglassWidthAt(tN, hw, neck) * 0.88;
+          const maxW = hourglassWidthAt(tN, hw, neck) * 0.85;
           if (Math.abs(gx - cx) < maxW) {
             ctx.globalAlpha = g.opacity;
             ctx.fillStyle = GRAIN_COLORS[g.colorIdx];
-            ctx.fillRect(gx - g.size * 0.5, gy - g.size * 0.5, g.size, g.size);
+            ctx.beginPath();
+            ctx.arc(gx, gy, g.size * 0.6, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
       ctx.globalAlpha = 1;
 
       // Funnel depression at drain point
-      const funnelD = Math.min(16, topHeight * 0.2);
-      const funnelW = neck * 3.5;
+      const funnelD = Math.min(22, topHeight * 0.25);
+      const funnelW = neck * 5;
       if (funnelD > 2) {
         ctx.save();
         ctx.globalCompositeOperation = 'destination-out';
@@ -226,8 +236,8 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
       ctx.fillRect(cx - hw - 2, botSandY, glassW + 4, botHeight + 4);
 
       // Cone mound at deposit point
-      const coneH = Math.min(22, botHeight * 0.15);
-      const coneW = neck * 4;
+      const coneH = Math.min(30, botHeight * 0.2);
+      const coneW = neck * 5.5;
       if (coneH > 2) {
         const cg = ctx.createLinearGradient(cx, botSandY - coneH, cx, botSandY);
         cg.addColorStop(0, SAND_TOP);
@@ -240,17 +250,19 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
         ctx.fill();
       }
 
-      // Grain texture
+      // Grain texture — visible individual sand grains
       for (const g of BOT_GRAINS) {
-        const gx = cx + (g.xPct - 0.5) * glassW * 0.95;
+        const gx = cx + (g.xPct - 0.5) * glassW * 0.92;
         const gy = botSandY + g.yPct * botHeight;
         if (gy >= botSandY && gy <= botBase) {
           const tN = (gy - (cy - glassH / 2)) / glassH;
-          const maxW = hourglassWidthAt(tN, hw, neck) * 0.88;
+          const maxW = hourglassWidthAt(tN, hw, neck) * 0.85;
           if (Math.abs(gx - cx) < maxW) {
-            ctx.globalAlpha = g.opacity * 0.7;
+            ctx.globalAlpha = g.opacity * 0.85;
             ctx.fillStyle = GRAIN_COLORS[g.colorIdx];
-            ctx.fillRect(gx - g.size * 0.5, gy - g.size * 0.5, g.size, g.size);
+            ctx.beginPath();
+            ctx.arc(gx, gy, g.size * 0.6, 0, Math.PI * 2);
+            ctx.fill();
           }
         }
       }
@@ -259,17 +271,17 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
 
     // ── 5. Falling grains with sparkle ──
     const grains = grainsRef.current;
-    if (now - lastSpawnRef.current > 100 && topFill > 0.005) {
+    if (now - lastSpawnRef.current > 70 && topFill > 0.005) {
       lastSpawnRef.current = now;
-      const count = Math.random() < 0.35 ? 2 : 1;
+      const count = Math.random() < 0.4 ? 3 : Math.random() < 0.6 ? 2 : 1;
       for (let k = 0; k < count; k++) {
         grains.push({
-          x: cx + (Math.random() - 0.5) * neck * 1.4,
+          x: cx + (Math.random() - 0.5) * neck * 1.6,
           y: cy - 2,
-          vy: 0.5 + Math.random() * 0.8,
-          vx: (Math.random() - 0.5) * 0.3,
-          size: 1 + Math.random() * 1.4,
-          opacity: 0.6 + Math.random() * 0.4,
+          vy: 0.6 + Math.random() * 1.0,
+          vx: (Math.random() - 0.5) * 0.5,
+          size: 1.4 + Math.random() * 1.8,
+          opacity: 0.7 + Math.random() * 0.3,
           settled: false,
         });
       }
@@ -284,11 +296,19 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
       const maxX = hourglassWidthAt(tP, hw, neck) * 0.85;
       g.x = Math.max(cx - maxX, Math.min(cx + maxX, g.x));
 
-      const sparkle = Math.sin(now * 0.008 + i * 23) > 0.93;
+      const sparkle = Math.sin(now * 0.006 + i * 17) > 0.85;
+      if (sparkle) {
+        // Sparkle glow halo
+        ctx.fillStyle = 'rgba(255,251,230,0.25)';
+        ctx.globalAlpha = 1;
+        ctx.beginPath();
+        ctx.arc(g.x, g.y, g.size * 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
       ctx.fillStyle = sparkle ? '#fffbe6' : SAND_FALL;
       ctx.globalAlpha = sparkle ? 1 : g.opacity;
       ctx.beginPath();
-      ctx.arc(g.x, g.y, sparkle ? g.size * 1.3 : g.size, 0, Math.PI * 2);
+      ctx.arc(g.x, g.y, sparkle ? g.size * 1.5 : g.size, 0, Math.PI * 2);
       ctx.fill();
     }
 
@@ -301,24 +321,35 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // ── 7. Glass reflections ──
+    // ── 7. Glass reflections — bright enough to see ──
     ctx.save();
     drawHourglassPath(ctx, cx, cy, glassW, glassH);
     ctx.clip();
-    const hl1 = ctx.createLinearGradient(cx - hw * 0.65, cy - glassH * 0.4, cx - hw * 0.25, cy - glassH * 0.05);
+    // Left highlight streak (top bulb)
+    const hl1 = ctx.createLinearGradient(cx - hw * 0.75, cy - glassH * 0.42, cx - hw * 0.15, cy - glassH * 0.02);
     hl1.addColorStop(0, 'rgba(255,255,255,0)');
-    hl1.addColorStop(0.3, 'rgba(255,255,255,0.055)');
-    hl1.addColorStop(0.7, 'rgba(255,255,255,0.035)');
+    hl1.addColorStop(0.2, 'rgba(255,255,255,0.14)');
+    hl1.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+    hl1.addColorStop(0.8, 'rgba(255,255,255,0.06)');
     hl1.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hl1;
-    ctx.fillRect(cx - hw, cy - glassH / 2, hw * 0.55, glassH * 0.48);
-    const hl2 = ctx.createLinearGradient(cx + hw * 0.25, cy + glassH * 0.05, cx + hw * 0.65, cy + glassH * 0.4);
+    ctx.fillRect(cx - hw, cy - glassH / 2, hw * 0.65, glassH * 0.5);
+    // Right highlight streak (bottom bulb)
+    const hl2 = ctx.createLinearGradient(cx + hw * 0.15, cy + glassH * 0.02, cx + hw * 0.75, cy + glassH * 0.42);
     hl2.addColorStop(0, 'rgba(255,255,255,0)');
-    hl2.addColorStop(0.3, 'rgba(255,255,255,0.04)');
-    hl2.addColorStop(0.7, 'rgba(255,255,255,0.025)');
+    hl2.addColorStop(0.2, 'rgba(255,255,255,0.1)');
+    hl2.addColorStop(0.5, 'rgba(255,255,255,0.07)');
+    hl2.addColorStop(0.8, 'rgba(255,255,255,0.04)');
     hl2.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hl2;
-    ctx.fillRect(cx + hw * 0.15, cy + glassH * 0.02, hw * 0.55, glassH * 0.48);
+    ctx.fillRect(cx + hw * 0.1, cy + glassH * 0.01, hw * 0.65, glassH * 0.5);
+    // Thin bright edge along left glass curve
+    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - hw + 3, cy - glassH * 0.35);
+    ctx.quadraticCurveTo(cx - hw + 2, cy - glassH * 0.1, cx - neck - 1, cy);
+    ctx.stroke();
     ctx.restore();
 
     // ── 8. Caps ──
@@ -331,13 +362,15 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
     ctx.roundRect(cx - capW / 2, cy + glassH / 2, capW, capH, 3);
     ctx.fill();
 
-    // ── 9. Pulsing neck glow ──
-    const pulse = 0.08 + 0.06 * Math.sin(now * 0.002);
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, neck * 5);
+    // ── 9. Pulsing neck glow — dramatic breathing ──
+    const pulse = 0.18 + 0.12 * Math.sin(now * 0.0015);
+    const glowR = neck * 8;
+    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, glowR);
     glow.addColorStop(0, `rgba(232,200,114,${pulse.toFixed(3)})`);
+    glow.addColorStop(0.4, `rgba(201,169,92,${(pulse * 0.4).toFixed(3)})`);
     glow.addColorStop(1, 'transparent');
     ctx.fillStyle = glow;
-    ctx.fillRect(cx - neck * 5, cy - neck * 5, neck * 10, neck * 10);
+    ctx.fillRect(cx - glowR, cy - glowR, glowR * 2, glowR * 2);
 
     frameRef.current = requestAnimationFrame(draw);
   }, [pctLived]);
