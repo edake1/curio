@@ -67,55 +67,121 @@ const GROUPS: StatGroup[] = [
   { title: "The Physical World", icon: "🌍", keys: ["pizzas", "youtubeHours", "lightningStrikes"], accent: "#f59e0b" },
 ];
 
-const RATE_MAP: Record<string, { emoji: string; label: string; color: string; prefix?: string }> = {};
-for (const r of GLOBAL_RATES) RATE_MAP[r.key] = { emoji: r.emoji, label: r.label, color: r.color };
+const RATE_MAP: Record<string, { emoji: string; label: string; color: string; prefix?: string; perSecond?: number }> = {};
+for (const r of GLOBAL_RATES) RATE_MAP[r.key] = { emoji: r.emoji, label: r.label, color: r.color, perSecond: r.perSecond };
 RATE_MAP[NET_POPULATION_DISPLAY.key] = {
   emoji: NET_POPULATION_DISPLAY.emoji,
   label: NET_POPULATION_DISPLAY.label,
   color: NET_POPULATION_DISPLAY.color,
   prefix: NET_POPULATION_DISPLAY.prefix,
+  perSecond: 2.5,
 };
 
-function getWorldContext(key: string, value: number): string | null {
-  if (key === "births") {
-    if (value >= 1000) return `Enough to fill ${Math.floor(value / 30)} classrooms`;
-    if (value >= 100) return `A small village was just born`;
-    if (value >= 10) return `A football team of new lives`;
-    return null;
-  }
-  if (key === "deaths") {
-    if (value >= 500) return `A neighborhood went silent`;
-    if (value >= 50) return `A bus full of final goodbyes`;
-    return null;
-  }
-  if (key === "netPopulation") {
-    if (value >= 100) return `Earth just got a little more crowded`;
-    return null;
-  }
-  if (key === "googleSearches") {
-    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(1)}M questions asked`;
-    if (value >= 100_000) return `A city's worth of curiosity`;
-    return null;
-  }
-  if (key === "emails") {
-    if (value >= 10_000_000) return `More words than every book in a library`;
-    return null;
-  }
-  if (key === "pizzas") {
-    if (value >= 1000) return `A pizza party spanning continents`;
-    if (value >= 100) return `Enough to feed a block party`;
-    return null;
-  }
-  if (key === "lightningStrikes") {
-    if (value >= 5000) return `The sky has been busy`;
-    return null;
-  }
+// Per-second rate formatter
+function fmtRate(r: number): string {
+  if (r >= 1_000_000) return `${(r / 1_000_000).toFixed(1)}M`;
+  if (r >= 1_000) return `${(r / 1_000).toFixed(1)}K`;
+  if (r >= 1) return `~${r.toFixed(0)}`;
+  return `~${r.toFixed(1)}`;
+}
+
+// ── Rotating world context — cycles every 8s with evolving comparisons ──
+type CtxFn = (n: number) => string;
+const WORLD_CONTEXTS: Record<string, CtxFn[]> = {
+  births: [
+    (n) => n < 50 ? `${n} new heartbeats in the world` : `${Math.floor(n / 48)} school buses of new arrivals`,
+    (n) => `Each one just took their first breath`,
+    (n) => n < 1000 ? `A village of ${n} just appeared` : `A town of ${formatNumber(n)} — formed while you watched`,
+    (n) => `That's ~4 per second, faster than you can count`,
+    (n) => `${formatNumber(n)} tiny fists clenching for the first time`,
+  ],
+  deaths: [
+    (n) => n < 100 ? `${n} stories just ended` : `${formatNumber(n)} lifetimes of memory, gone`,
+    (n) => `Each one knew something no one else ever will`,
+    (n) => `~2 per second — each one someone's entire universe`,
+    (n) => n < 500 ? `A neighborhood went quiet` : `${Math.floor(n / 50)} buses of final goodbyes`,
+    (n) => `Someone's last thought just happened`,
+  ],
+  netPopulation: [
+    (n) => `+${formatNumber(n)} — the planet just got more crowded`,
+    (n) => `~2.5 more arrivals than departures every second`,
+    (n) => n > 300 ? `${Math.floor(n / 30)} classrooms of net gain` : `The balance keeps tipping toward life`,
+    (n) => `By tomorrow: +215,000 more humans on Earth`,
+  ],
+  emails: [
+    (n) => `If printed: ${formatNumber(Math.round(n * 0.1))} sheets — a stack ${(n * 0.0001 / 1000).toFixed(1)}km tall`,
+    (n) => `~3.9M per second — most are never opened`,
+    (n) => `More text than ${Math.max(1, Math.floor(n / 80_000)).toLocaleString()} copies of War and Peace`,
+    (n) => `If each took 1s to read: ${Math.max(1, Math.floor(n / 31_536_000)).toLocaleString()} years of non-stop reading`,
+    (n) => `That's ${Math.max(1, Math.floor(n / 5_000_000_000)).toLocaleString()}+ emails per person on Earth since you arrived`,
+  ],
+  tweets: [
+    (n) => `${formatNumber(n)} opinions launched into the void`,
+    (n) => `~5.8K per second — the world never shuts up`,
+    (n) => `It would take ${Math.max(1, Math.floor(n / 86_400))} days to read them all`,
+    (n) => `Approximately ${Math.max(1, Math.floor(n / 5)).toLocaleString()} of these contain the word "I"`,
+    (n) => `${formatNumber(n)} thoughts that will be forgotten by tomorrow`,
+  ],
+  googleSearches: [
+    (n) => `${formatNumber(n)} questions — humanity never stops wondering`,
+    (n) => `~99K per second, and half of them start with "why"`,
+    (n) => `More questions than every exam in history combined`,
+    (n) => `If each was spoken aloud: ${Math.max(1, Math.floor(n * 3 / 86_400)).toLocaleString()} days of talking`,
+    (n) => `Right now, someone is googling "am I normal"`,
+  ],
+  pizzas: [
+    (n) => `Laid end to end: ${(n * 0.3 / 1000).toFixed(1)}km of pizza`,
+    (n) => `~350 per second — the world runs on cheese`,
+    (n) => `≈ ${Math.max(1, Math.floor(n * 0.3)).toLocaleString()}kg of mozzarella consumed`,
+    (n) => n > 5000 ? `Enough slices to give one to ${formatNumber(n * 8)} people` : `A few thousand pies, just since you arrived`,
+    (n) => `Somewhere, one of those ${formatNumber(n)} is a pineapple pizza`,
+  ],
+  youtubeHours: [
+    (n) => `It would take you ${Math.max(1, Math.floor(n / 8_760)).toLocaleString()} years to watch all of this`,
+    (n) => `~500 hours per second — 57 years of video every minute`,
+    (n) => `${formatNumber(n)} hours uploaded and nobody watched most of it`,
+    (n) => `That's ${Math.max(1, Math.floor(n / 24)).toLocaleString()} days of non-stop playback`,
+  ],
+  lightningStrikes: [
+    (n) => `${formatNumber(n)} bolts — each one hotter than the sun's surface`,
+    (n) => `~100 per second — the sky is never still`,
+    (n) => `≈ ${(n * 0.001).toFixed(1)} gigajoules of raw energy unleashed`,
+    (n) => `Could power ${Math.max(1, Math.floor(n * 0.001)).toLocaleString()} homes for a day`,
+    (n) => `In ${Math.floor(n / 100)}s, the atmosphere lit up ${formatNumber(n)} times`,
+  ],
+};
+
+// Time-aware context — acknowledges the user has been here a while
+function getTimeAwareContext(key: string, value: number, elapsed: number): string | null {
+  const mins = Math.floor(elapsed / 60);
+  if (mins < 5) return null; // only kick in after 5 min
+  if (key === "births" && mins >= 30) return `In the ${mins} minutes you've been here, ${formatNumber(value)} humans were born`;
+  if (key === "deaths" && mins >= 30) return `${formatNumber(value)} people died while you stared at this screen`;
+  if (key === "emails" && mins >= 10) return `Since you arrived: ${formatNumber(value)} emails — and counting`;
+  if (key === "googleSearches" && mins >= 15) return `${formatNumber(value)} questions asked since you got here. What's yours?`;
+  if (key === "pizzas" && mins >= 20) return `${formatNumber(value)} pizzas since you arrived — you might want one`;
+  if (key === "lightningStrikes" && mins >= 60) return `${formatNumber(value)} bolts in ${mins} minutes. The sky never stops.`;
   return null;
 }
 
+/** Get a rotating context string — cycles every 8 seconds, with time-aware overrides */
+function getWorldContext(key: string, value: number, elapsed: number): string | null {
+  const templates = WORLD_CONTEXTS[key];
+  if (!templates || value < 3) return null;
+  const cycle = Math.floor(elapsed / 8);
+  // Every 3rd cycle (every 24s), show a time-aware message if available
+  if (cycle % 3 === 2) {
+    const timeCtx = getTimeAwareContext(key, value, elapsed);
+    if (timeCtx) return timeCtx;
+  }
+  return templates[cycle % templates.length](value);
+}
+
 function fmtElapsed(s: number): string {
-  const m = Math.floor(s / 60);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
   const sec = Math.floor(s % 60);
+  if (h > 0) return `${h}:${m.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`;
   return `${m}:${sec.toString().padStart(2, "0")}`;
 }
 
@@ -244,23 +310,6 @@ function BlinkCard({ sessionBlinks }: { sessionBlinks: number }) {
     </div>
   );
 }
-
-// ── Milestone flash (world tab) ──────────────────────────────────
-function MilestoneFlash({ text }: { text: string }) {
-  return (
-    <motion.span
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -4 }}
-      transition={{ duration: 0.4 }}
-      className="block text-[9px] mt-1 tracking-wide dark:text-zinc-500 text-zinc-400"
-      style={{ fontStyle: "italic" }}
-    >
-      {text}
-    </motion.span>
-  );
-}
-
 
 // ── YOU tab ──────────────────────────────────────────────────────
 function YouView({
@@ -417,18 +466,50 @@ function WorldView({ elapsed }: { elapsed: number }) {
             <span className="text-[10px] font-semibold tracking-[0.2em] uppercase dark:text-zinc-500 text-zinc-400">{group.title}</span>
             <div className="flex-1 h-px" style={{ background: FAINT }} />
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {group.keys.map((key) => {
               const item = RATE_MAP[key];
               if (!item) return null;
               const val = stats[key] ?? 0;
-              const ctx = getWorldContext(key, val);
+              const ctx = getWorldContext(key, val, elapsed);
+              const rate = item.perSecond;
               return (
-                <div key={key} className="rounded-xl p-3 text-center space-y-1 transition-all min-w-0 overflow-hidden dark:bg-white/[0.03] bg-black/[0.03] border dark:border-white/[0.06] border-black/[0.06]">
-                  <span className="text-lg block">{item.emoji}</span>
-                  <span className="text-sm sm:text-xl font-bold tabular-nums block" style={{ color: group.accent }}>{item.prefix ?? ""}{formatNumber(val)}</span>
-                  <span className="text-[9px] tracking-wider uppercase block dark:text-zinc-600 text-zinc-400">{item.label}</span>
-                  <AnimatePresence mode="wait">{ctx && <MilestoneFlash key={ctx} text={ctx} />}</AnimatePresence>
+                <div key={key} className="rounded-2xl p-4 sm:p-5 text-center space-y-1.5 transition-all min-w-0 overflow-hidden dark:bg-white/[0.03] bg-black/[0.03] border dark:border-white/[0.06] border-black/[0.06] relative">
+                  <span className="text-2xl sm:text-3xl block">{item.emoji}</span>
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key={formatNumber(val)}
+                      initial={{ opacity: 0.5, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0.3, y: -4 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="text-xl sm:text-2xl font-bold tabular-nums block"
+                      style={{ color: group.accent }}
+                    >
+                      {item.prefix ?? ""}{formatNumber(val)}
+                    </motion.span>
+                  </AnimatePresence>
+                  <span className="text-[10px] sm:text-xs tracking-wider uppercase block dark:text-zinc-500 text-zinc-400 font-medium">{item.label}</span>
+                  {rate && (
+                    <span className="text-[9px] sm:text-[10px] tabular-nums block dark:text-zinc-600 text-zinc-400/60">
+                      {fmtRate(rate)}/sec
+                    </span>
+                  )}
+                  <AnimatePresence mode="wait">
+                    {ctx && (
+                      <motion.span
+                        key={ctx}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
+                        transition={{ duration: 0.5 }}
+                        className="block text-[10px] sm:text-[11px] mt-1 tracking-wide dark:text-zinc-500 text-zinc-400 leading-snug"
+                        style={{ fontStyle: "italic" }}
+                      >
+                        {ctx}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </div>
               );
             })}
@@ -436,14 +517,34 @@ function WorldView({ elapsed }: { elapsed: number }) {
         </motion.div>
       ))}
 
-      {/* Perspective footer */}
+      {/* Perspective footer — also rotates */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }} className="text-center py-4 space-y-1">
         <div className="flex items-center justify-center gap-3">
           <div className="h-px w-12" style={{ background: FAINT }} />
           <span className="text-[10px] tracking-widest" style={{ color: FAINT }}>✦</span>
           <div className="h-px w-12" style={{ background: FAINT }} />
         </div>
-        <p className="text-[11px] dark:text-zinc-500 text-zinc-400">All of this happened while you read a screen.</p>
+        <AnimatePresence mode="wait">
+          <motion.p
+            key={Math.floor(elapsed / 12)}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            transition={{ duration: 0.5 }}
+            className="text-[11px] dark:text-zinc-500 text-zinc-400"
+          >
+            {[
+              "All of this happened while you stared at a screen.",
+              "The world didn't pause while you were reading.",
+              `In ${fmtElapsed(elapsed)}, the planet changed more than you'll ever know.`,
+              "You blinked. A thousand things happened.",
+              "This is one second of Earth. Every second.",
+              `${formatNumber(stats.births ?? 0)} new humans. None of them know you exist.`,
+              elapsed > 300 ? `You've been here ${fmtElapsed(elapsed)}. The world didn't wait.` : "Every number here is someone's life.",
+              elapsed > 1800 ? `In ${Math.floor(elapsed / 60)} minutes, more changed than you'll ever process.` : "These aren't just numbers. They're lives.",
+            ][Math.floor(elapsed / 12) % 8]}
+          </motion.p>
+        </AnimatePresence>
       </motion.div>
     </div>
   );

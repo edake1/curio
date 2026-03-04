@@ -19,7 +19,8 @@ export const visitorSchema = z.object({
 });
 
 // Safely parse JSON from AI completion text
-export function safeParseJSON(text: string): Record<string, unknown> | null {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function safeParseJSON(text: string): Record<string, any> | null {
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   if (!jsonMatch) return null;
   try {

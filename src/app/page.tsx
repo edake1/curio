@@ -1,26 +1,101 @@
 'use client';
 
-import { useState, useSyncExternalStore, useEffect } from 'react';
+import React, { useState, useSyncExternalStore, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowUpRight } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import {
+  DndContext, closestCenter, DragEndEvent,
+  MouseSensor, TouchSensor, useSensor, useSensors,
+} from '@dnd-kit/core';
+import { SortableContext, useSortable, rectSortingStrategy, arrayMove } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { APPS } from '@/data/apps';
 import { ShareButton } from '@/components/share-button';
 import { ThemeSelector } from '@/components/theme-selector';
-import { OneDecisionApp } from '@/components/apps/one-decision';
-import { ThisCareerApp } from '@/components/apps/this-career';
-import { ParallelYouApp } from '@/components/apps/parallel-you';
-import { LifeStatsApp } from '@/components/apps/life-stats';
-import { AntiMotivationalApp } from '@/components/apps/anti-motivational';
-import { WhatYoullSeeApp } from '@/components/apps/what-youll-see';
-import { LifeCalendarApp } from '@/components/apps/life-calendar';
-import { PickOneDeleteApp } from '@/components/apps/pick-one-delete';
-import { SoundOfYourBirthApp } from '@/components/apps/sound-of-your-birth';
-import { TheGrandDaoApp } from '@/components/apps/the-grand-dao';
-import { YourLastWordsApp } from '@/components/apps/your-last-words';
-import { HikmahApp } from '@/components/apps/hikmah';
-import { DeadApp } from '@/components/apps/dead-app';
-import { TheRewindApp } from '@/components/apps/the-rewind';
-import { TheAuctionApp } from '@/components/apps/the-auction';
+
+// ── Lazy-loaded app components ──────────────────────
+const DynLoading = () => (
+  <div className="flex items-center justify-center py-20">
+    <div className="w-6 h-6 border-2 border-violet-500/30 border-t-violet-500 rounded-full animate-spin" />
+  </div>
+);
+const APP_COMPONENTS: Record<string, React.ComponentType> = {
+  'one-decision': dynamic(() => import('@/components/apps/one-decision').then(m => ({ default: m.OneDecisionApp })), { loading: DynLoading }),
+  'this-career': dynamic(() => import('@/components/apps/this-career').then(m => ({ default: m.ThisCareerApp })), { loading: DynLoading }),
+  'parallel-you': dynamic(() => import('@/components/apps/parallel-you').then(m => ({ default: m.ParallelYouApp })), { loading: DynLoading }),
+  'life-stats': dynamic(() => import('@/components/apps/life-stats').then(m => ({ default: m.LifeStatsApp })), { loading: DynLoading }),
+  'anti-motivational': dynamic(() => import('@/components/apps/anti-motivational').then(m => ({ default: m.AntiMotivationalApp })), { loading: DynLoading }),
+  'what-youll-see': dynamic(() => import('@/components/apps/what-youll-see').then(m => ({ default: m.WhatYoullSeeApp })), { loading: DynLoading }),
+  'life-calendar': dynamic(() => import('@/components/apps/life-calendar').then(m => ({ default: m.LifeCalendarApp })), { loading: DynLoading }),
+  'pick-one-delete': dynamic(() => import('@/components/apps/pick-one-delete').then(m => ({ default: m.PickOneDeleteApp })), { loading: DynLoading }),
+  'sound-of-your-birth': dynamic(() => import('@/components/apps/sound-of-your-birth').then(m => ({ default: m.SoundOfYourBirthApp })), { loading: DynLoading }),
+  'the-grand-dao': dynamic(() => import('@/components/apps/the-grand-dao').then(m => ({ default: m.TheGrandDaoApp })), { loading: DynLoading }),
+  'your-last-words': dynamic(() => import('@/components/apps/your-last-words').then(m => ({ default: m.YourLastWordsApp })), { loading: DynLoading }),
+  'hikmah': dynamic(() => import('@/components/apps/hikmah').then(m => ({ default: m.HikmahApp })), { loading: DynLoading }),
+  'dead-app': dynamic(() => import('@/components/apps/dead-app').then(m => ({ default: m.DeadApp })), { loading: DynLoading }),
+  'the-rewind': dynamic(() => import('@/components/apps/the-rewind').then(m => ({ default: m.TheRewindApp })), { loading: DynLoading }),
+  'the-auction': dynamic(() => import('@/components/apps/the-auction').then(m => ({ default: m.TheAuctionApp })), { loading: DynLoading }),
+};
+
+// ── Error boundary ──────────────────────────────────
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20 gap-4" style={{ color: 'var(--curio-text-muted)' }}>
+          <p className="text-lg font-medium">Something went wrong</p>
+          <button
+            onClick={() => this.setState({ hasError: false })}
+            className="px-4 py-2 rounded-lg text-sm transition-colors hover:bg-white/5"
+            style={{ backgroundColor: 'var(--curio-bg-card)', border: '1px solid var(--curio-border-subtle)' }}
+          >
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+// ── Drag-to-reorder persistence ─────────────────────
+const STORAGE_KEY = 'curio-app-order';
+
+function useAppOrder() {
+  const [order, setOrder] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return APPS.map(a => a.id);
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        const allIds = new Set(APPS.map(a => a.id));
+        if (Array.isArray(parsed) && parsed.every((id: string) => allIds.has(id))) {
+          const remaining = APPS.filter(a => !parsed.includes(a.id)).map(a => a.id);
+          return [...parsed, ...remaining];
+        }
+      }
+    } catch { /* ignore corrupt storage */ }
+    return APPS.map(a => a.id);
+  });
+
+  const reorder = useCallback((newOrder: string[]) => {
+    setOrder(newOrder);
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(newOrder)); } catch {}
+  }, []);
+
+  return [order, reorder] as const;
+}
 
 // Client-side hydration helper
 const emptySubscribe = () => () => {};
@@ -85,7 +160,119 @@ const APP_META: Record<string, { accent: string; tint: string; label: string }> 
   'the-auction':      { accent: '#eab308', tint: 'rgba(234,179,8,0.07)',     label: 'Self'         },
 };
 
+// ── Sortable card (drag-to-reorder + keyboard a11y) ──
+function SortableCard({ app, index, meta, onSelectApp }: {
+  app: (typeof APPS)[number]; index: number;
+  meta: { accent: string; tint: string; label: string };
+  onSelectApp: (id: string) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: app.id });
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 50 : 'auto' }}
+      {...attributes}
+      {...listeners}
+    >
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: isDragging ? 0.6 : 1, y: 0 }}
+        transition={{ delay: 0.04 * index, duration: 0.35 }}
+        whileHover={isDragging ? undefined : { y: -4, transition: { duration: 0.18 } }}
+        whileTap={isDragging ? undefined : { scale: 0.97 }}
+        onClick={() => onSelectApp(app.id)}
+        onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onSelectApp(app.id); } }}
+        role="button"
+        tabIndex={0}
+        aria-label={`Open ${app.name}`}
+        className={`group relative cursor-pointer overflow-hidden rounded-2xl${isDragging ? ' ring-2 ring-white/20 shadow-2xl' : ''}`}
+        style={{
+          backgroundColor: 'var(--curio-bg-card)',
+          border: '1px solid var(--curio-border-subtle)',
+          boxShadow: isDragging ? `0 16px 48px ${meta.accent}30` : 'var(--curio-card-shadow)',
+          transition: 'box-shadow 0.25s ease, border-color 0.25s ease',
+        }}
+        onMouseEnter={e => {
+          if (isDragging) return;
+          (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${meta.accent}30, 0 8px 32px ${meta.accent}18, 0 2px 8px rgba(0,0,0,0.3)`;
+          (e.currentTarget as HTMLElement).style.borderColor = `${meta.accent}40`;
+        }}
+        onMouseLeave={e => {
+          (e.currentTarget as HTMLElement).style.boxShadow = 'var(--curio-card-shadow)';
+          (e.currentTarget as HTMLElement).style.borderColor = 'var(--curio-border-subtle)';
+        }}
+      >
+        {/* App-color tint */}
+        <div
+          className="absolute inset-0 pointer-events-none transition-opacity duration-300"
+          style={{ background: `radial-gradient(ellipse at 5% 5%, ${meta.accent}18 0%, transparent 65%)`, opacity: 0.6 }}
+        />
+        <div
+          className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style={{ background: `radial-gradient(ellipse at 5% 5%, ${meta.accent}28 0%, transparent 65%)` }}
+        />
+
+        {/* Watermark number */}
+        <div
+          className="absolute top-3 right-3.5 text-3xl sm:text-4xl font-black tabular-nums leading-none select-none pointer-events-none"
+          style={{ color: meta.accent, opacity: 0.12 }}
+        >
+          {String(index + 1).padStart(2, '0')}
+        </div>
+
+        {/* Card body */}
+        <div className="relative p-4 sm:p-5 flex flex-col h-full min-h-[148px] sm:min-h-[168px]">
+          <div className="mb-3 sm:mb-4">
+            <div
+              className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}
+              style={{ boxShadow: `0 4px 16px ${meta.accent}40` }}
+            >
+              <app.icon className="w-5 h-5 text-white" />
+            </div>
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-sm sm:text-base leading-snug mb-1" style={{ color: 'var(--curio-text)' }}>
+              {app.name}
+            </h3>
+            <p className="text-xs sm:text-sm leading-relaxed line-clamp-2" style={{ color: 'var(--curio-text-muted)' }}>
+              {app.tagline}
+            </p>
+          </div>
+          <div className="mt-3 flex items-center justify-between">
+            <span
+              className="text-[10px] sm:text-xs font-medium tracking-wider uppercase px-1.5 py-0.5 rounded"
+              style={{ color: meta.accent, backgroundColor: `${meta.accent}18` }}
+            >
+              {meta.label}
+            </span>
+            <ArrowUpRight
+              className="w-3.5 h-3.5 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+              style={{ color: meta.accent, opacity: 0.7 }}
+            />
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
+  const [appOrder, setAppOrder] = useAppOrder();
+  const orderedApps = appOrder.map(id => APPS.find(a => a.id === id)!).filter(Boolean);
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+  );
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIdx = appOrder.indexOf(active.id as string);
+      const newIdx = appOrder.indexOf(over.id as string);
+      setAppOrder(arrayMove(appOrder, oldIdx, newIdx));
+    }
+  }, [appOrder, setAppOrder]);
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="min-h-screen relative overflow-x-hidden">
 
@@ -141,92 +328,16 @@ function HubPage({ onSelectApp }: { onSelectApp: (id: string) => void }) {
 
       {/* ── App grid ──────────────────────────────────── */}
       <main className="relative z-10 max-w-5xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-          {APPS.map((app, index) => {
-            const meta = APP_META[app.id] ?? { accent: '#8b5cf6', tint: 'rgba(139,92,246,0.07)', label: '' };
-            return (
-              <motion.div
-                key={app.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.04 * index, duration: 0.35 }}
-                whileHover={{ y: -4, transition: { duration: 0.18 } }}
-                whileTap={{ scale: 0.97 }}
-                onClick={() => onSelectApp(app.id)}
-                className="group relative cursor-pointer overflow-hidden rounded-2xl"
-                style={{
-                  backgroundColor: 'var(--curio-bg-card)',
-                  border: '1px solid var(--curio-border-subtle)',
-                  boxShadow: 'var(--curio-card-shadow)',
-                  transition: 'box-shadow 0.25s ease, border-color 0.25s ease',
-                }}
-                onMouseEnter={e => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = `0 0 0 1px ${meta.accent}30, 0 8px 32px ${meta.accent}18, 0 2px 8px rgba(0,0,0,0.3)`;
-                  (e.currentTarget as HTMLElement).style.borderColor = `${meta.accent}40`;
-                }}
-                onMouseLeave={e => {
-                  (e.currentTarget as HTMLElement).style.boxShadow = 'var(--curio-card-shadow)';
-                  (e.currentTarget as HTMLElement).style.borderColor = 'var(--curio-border-subtle)';
-                }}
-              >
-                {/* App-color tint: stronger on hover via opacity transition */}
-                <div
-                  className="absolute inset-0 pointer-events-none transition-opacity duration-300"
-                  style={{ background: `radial-gradient(ellipse at 5% 5%, ${meta.accent}18 0%, transparent 65%)`, opacity: 0.6 }}
-                />
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ background: `radial-gradient(ellipse at 5% 5%, ${meta.accent}28 0%, transparent 65%)` }}
-                />
-
-                {/* Watermark number */}
-                <div
-                  className="absolute top-3 right-3.5 text-3xl sm:text-4xl font-black tabular-nums leading-none select-none pointer-events-none transition-opacity duration-300"
-                  style={{ color: meta.accent, opacity: 0.12 }}
-                >
-                  {String(index + 1).padStart(2, '0')}
-                </div>
-
-                {/* Card body */}
-                <div className="relative p-4 sm:p-5 flex flex-col h-full min-h-[148px] sm:min-h-[168px]">
-                  {/* Icon */}
-                  <div className="mb-3 sm:mb-4">
-                    <div
-                      className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl bg-gradient-to-br ${app.color} flex items-center justify-center transition-all duration-300 group-hover:scale-110`}
-                      style={{ boxShadow: `0 4px 16px ${meta.accent}40` }}
-                    >
-                      <app.icon className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-
-                  {/* Text */}
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-sm sm:text-base leading-snug mb-1" style={{ color: 'var(--curio-text)' }}>
-                      {app.name}
-                    </h3>
-                    <p className="text-xs sm:text-sm leading-relaxed line-clamp-2" style={{ color: 'var(--curio-text-muted)' }}>
-                      {app.tagline}
-                    </p>
-                  </div>
-
-                  {/* Footer: label + arrow */}
-                  <div className="mt-3 flex items-center justify-between">
-                    <span
-                      className="text-[10px] sm:text-xs font-medium tracking-wider uppercase px-1.5 py-0.5 rounded"
-                      style={{ color: meta.accent, backgroundColor: `${meta.accent}18` }}
-                    >
-                      {meta.label}
-                    </span>
-                    <ArrowUpRight
-                      className="w-3.5 h-3.5 transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-                      style={{ color: meta.accent, opacity: 0.7 }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            );
-          })}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={appOrder} strategy={rectSortingStrategy}>
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              {orderedApps.map((app, index) => {
+                const meta = APP_META[app.id] ?? { accent: '#8b5cf6', tint: 'rgba(139,92,246,0.07)', label: '' };
+                return <SortableCard key={app.id} app={app} index={index} meta={meta} onSelectApp={onSelectApp} />;
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       </main>
 
       <footer className="relative z-10 max-w-5xl mx-auto px-4 py-6 flex items-center justify-between text-xs" style={{ borderTop: '1px solid var(--curio-border-subtle)', color: 'var(--curio-text-muted)' }}>
@@ -242,24 +353,8 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
   if (!app) return null;
 
   const renderApp = () => {
-    switch (appId) {
-      case 'one-decision': return <OneDecisionApp />;
-      case 'this-career': return <ThisCareerApp />;
-      case 'parallel-you': return <ParallelYouApp />;
-      case 'life-stats': return <LifeStatsApp />;
-      case 'anti-motivational': return <AntiMotivationalApp />;
-      case 'what-youll-see': return <WhatYoullSeeApp />;
-      case 'life-calendar': return <LifeCalendarApp />;
-      case 'pick-one-delete': return <PickOneDeleteApp />;
-      case 'sound-of-your-birth': return <SoundOfYourBirthApp />;
-      case 'the-grand-dao': return <TheGrandDaoApp />;
-      case 'your-last-words': return <YourLastWordsApp />;
-      case 'hikmah': return <HikmahApp />;
-      case 'dead-app': return <DeadApp />;
-      case 'the-rewind': return <TheRewindApp />;
-      case 'the-auction': return <TheAuctionApp />;
-      default: return null;
-    }
+    const Component = APP_COMPONENTS[appId];
+    return Component ? <Component /> : null;
   };
 
   return (
@@ -298,7 +393,9 @@ function AppPage({ appId, onBack }: { appId: string; onBack: () => void }) {
           </div>
         </div>
       </header>
-      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-safe">{renderApp()}</main>
+      <main className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-8 pb-safe">
+        <ErrorBoundary>{renderApp()}</ErrorBoundary>
+      </main>
     </motion.div>
   );
 }

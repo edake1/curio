@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { openai } from '@/lib/openai';
+import { safeParseJSON } from '@/lib/validation';
 import { CAREER_TEMPLATES, CAREER_SKILLS } from '@/data/careers';
 
 async function generateWithAI() {
@@ -33,11 +34,7 @@ No explanation, just the JSON.`
     });
 
     const text = completion.choices[0]?.message?.content || '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try { return JSON.parse(jsonMatch[0]); } catch { return null; }
-    }
-    return null;
+    return safeParseJSON(text);
   } catch {
     return null;
   }

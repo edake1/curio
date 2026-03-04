@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { openai } from '@/lib/openai';
+import { safeParseJSON } from '@/lib/validation';
 import { SEED_DELETE_CHOICES } from '@/data/seed';
 
 async function generateAIDeleteChoice() {
@@ -36,11 +37,7 @@ Make both options meaningful to erase. No explanation, just the JSON.`
     });
 
     const text = completion.choices[0]?.message?.content || '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try { return JSON.parse(jsonMatch[0]); } catch { return null; }
-    }
-    return null;
+    return safeParseJSON(text);
   } catch {
     return null;
   }

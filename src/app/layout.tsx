@@ -21,7 +21,7 @@ const cormorant = Cormorant_Garamond({
 
 export const metadata: Metadata = {
   title: "Curio — Thought-Provoking Mini-Apps",
-  description: "A collection of 10 interactive micro-experiences designed to spark curiosity, debate, and self-reflection.",
+  description: "A collection of 15 interactive micro-experiences designed to spark curiosity, debate, and self-reflection.",
   keywords: ["curiosity", "mini-apps", "moral dilemma", "life stats", "interactive", "viral", "thought experiment"],
   authors: [{ name: "Curio" }],
   icons: {
@@ -29,13 +29,13 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Curio",
-    description: "10 thought-provoking mini-apps. Spark curiosity, debate, and self-reflection.",
+    description: "15 thought-provoking mini-apps. Spark curiosity, debate, and self-reflection.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     title: "Curio",
-    description: "10 thought-provoking mini-apps. Spark curiosity, debate, and self-reflection.",
+    description: "15 thought-provoking mini-apps. Spark curiosity, debate, and self-reflection.",
   },
 };
 

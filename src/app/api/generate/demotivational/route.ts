@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { openai } from '@/lib/openai';
+import { safeParseJSON } from '@/lib/validation';
 import { DEMOTIVATIONAL_QUOTES } from '@/data/demotivational';
 
 const CATEGORY_PROMPTS: Record<string, string> = {
@@ -81,11 +82,7 @@ Return ONLY valid JSON, nothing else:
     });
 
     const text = completion.choices[0]?.message?.content || '';
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (jsonMatch) {
-      try { return JSON.parse(jsonMatch[0]); } catch { return null; }
-    }
-    return null;
+    return safeParseJSON(text);
   } catch {
     return null;
   }

@@ -100,16 +100,15 @@ function hourglassWidthAt(t: number, hw: number, neck: number): number {
   return neck + (hw - neck) * spread;
 }
 
-function createDustMotes(cx: number, cy: number, glassW: number, glassH: number): DustMote[] {
-  return Array.from({ length: 25 }, (_, i) => {
-    const angle = (i / 25) * Math.PI * 2;
-    const dist = glassW * 0.45 + Math.random() * glassW * 0.5;
+function createDustMotes(cx: number, cy: number, w: number, h: number): DustMote[] {
+  // Scatter randomly across the full canvas, not in a concentrated ring
+  return Array.from({ length: 30 }, () => {
     return {
-      baseX: cx + Math.cos(angle) * dist,
-      baseY: cy + Math.sin(angle) * (glassH * 0.4) + (Math.random() - 0.5) * glassH * 0.3,
-      size: 1.2 + Math.random() * 1.8,
-      opacity: 0.3 + Math.random() * 0.35,
-      speed: 0.15 + Math.random() * 0.35,
+      baseX: cx + (Math.random() - 0.5) * w * 1.6,
+      baseY: cy + (Math.random() - 0.5) * h * 1.2,
+      size: 0.8 + Math.random() * 1.2,
+      opacity: 0.15 + Math.random() * 0.25,
+      speed: 0.1 + Math.random() * 0.3,
       phase: Math.random() * Math.PI * 2,
     };
   });
@@ -144,26 +143,25 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
     const now = Date.now();
 
     if (!dustInitRef.current) {
-      dustRef.current = createDustMotes(cx, cy, glassW, glassH);
+      dustRef.current = createDustMotes(cx, cy, w, h);
       dustInitRef.current = true;
+    }
+
+    // Pause animation when tab is hidden
+    if (document.hidden) {
+      frameRef.current = requestAnimationFrame(draw);
+      return;
     }
 
     ctx.clearRect(0, 0, w, h);
     const tSec = now * 0.001;
 
-    // ── 1. Ambient dust (behind glass) ──
+    // ── 1. Ambient dust — scattered randomly across canvas ──
     for (const d of dustRef.current) {
-      const t = now * 0.001;
-      const dx = d.baseX + Math.sin(t * d.speed + d.phase) * 20;
-      const dy = d.baseY + Math.cos(t * d.speed * 0.7 + d.phase) * 14;
-      const flicker = 0.6 + 0.4 * Math.sin(t * 0.8 + d.phase);
-      // Soft glow halo
-      ctx.globalAlpha = d.opacity * flicker * 0.3;
-      ctx.fillStyle = GRAIN_LIGHT;
-      ctx.beginPath();
-      ctx.arc(dx, dy, d.size * 3, 0, Math.PI * 2);
-      ctx.fill();
-      // Core dot
+      const t = tSec;
+      const dx = d.baseX + Math.sin(t * d.speed + d.phase) * 25;
+      const dy = d.baseY + Math.cos(t * d.speed * 0.6 + d.phase) * 18;
+      const flicker = 0.5 + 0.5 * Math.sin(t * 1.2 + d.phase);
       ctx.globalAlpha = d.opacity * flicker;
       ctx.fillStyle = ACCENT;
       ctx.beginPath();
@@ -356,35 +354,30 @@ function HourglassCanvas({ pctLived }: { pctLived: number }) {
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // ── 7. Glass reflections — bright enough to see ──
+    // ── 7. Glass reflections — soft curved highlights ──
     ctx.save();
     drawHourglassPath(ctx, cx, cy, glassW, glassH);
     ctx.clip();
-    // Left highlight streak (top bulb)
-    const hl1 = ctx.createLinearGradient(cx - hw * 0.75, cy - glassH * 0.42, cx - hw * 0.15, cy - glassH * 0.02);
-    hl1.addColorStop(0, 'rgba(255,255,255,0)');
-    hl1.addColorStop(0.2, 'rgba(255,255,255,0.14)');
-    hl1.addColorStop(0.5, 'rgba(255,255,255,0.1)');
-    hl1.addColorStop(0.8, 'rgba(255,255,255,0.06)');
+    // Soft elliptical highlight on upper-left (top bulb)
+    const hl1 = ctx.createRadialGradient(
+      cx - hw * 0.3, cy - glassH * 0.28, 0,
+      cx - hw * 0.3, cy - glassH * 0.28, hw * 0.6,
+    );
+    hl1.addColorStop(0, 'rgba(255,255,255,0.09)');
+    hl1.addColorStop(0.5, 'rgba(255,255,255,0.04)');
     hl1.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hl1;
-    ctx.fillRect(cx - hw, cy - glassH / 2, hw * 0.65, glassH * 0.5);
-    // Right highlight streak (bottom bulb)
-    const hl2 = ctx.createLinearGradient(cx + hw * 0.15, cy + glassH * 0.02, cx + hw * 0.75, cy + glassH * 0.42);
-    hl2.addColorStop(0, 'rgba(255,255,255,0)');
-    hl2.addColorStop(0.2, 'rgba(255,255,255,0.1)');
-    hl2.addColorStop(0.5, 'rgba(255,255,255,0.07)');
-    hl2.addColorStop(0.8, 'rgba(255,255,255,0.04)');
+    ctx.fillRect(cx - hw, cy - glassH / 2, hw, glassH * 0.5);
+    // Soft elliptical highlight on lower-right (bottom bulb)
+    const hl2 = ctx.createRadialGradient(
+      cx + hw * 0.25, cy + glassH * 0.28, 0,
+      cx + hw * 0.25, cy + glassH * 0.28, hw * 0.5,
+    );
+    hl2.addColorStop(0, 'rgba(255,255,255,0.06)');
+    hl2.addColorStop(0.5, 'rgba(255,255,255,0.025)');
     hl2.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = hl2;
-    ctx.fillRect(cx + hw * 0.1, cy + glassH * 0.01, hw * 0.65, glassH * 0.5);
-    // Thin bright edge along left glass curve
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(cx - hw + 3, cy - glassH * 0.35);
-    ctx.quadraticCurveTo(cx - hw + 2, cy - glassH * 0.1, cx - neck - 1, cy);
-    ctx.stroke();
+    ctx.fillRect(cx, cy + glassH * 0.02, hw, glassH * 0.48);
     ctx.restore();
 
     // ── 8. Caps ──
